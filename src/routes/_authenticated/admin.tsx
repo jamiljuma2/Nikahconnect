@@ -4,6 +4,8 @@ import { useAuth } from "@/lib/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useServerFn } from "@tanstack/react-start";
+import { listUsersForAdmin, setUserSuspended } from "@/lib/admin.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin — MingleConnect" }] }),
@@ -12,6 +14,8 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function AdminPage() {
   const { user } = useAuth();
+  const listUsers = useServerFn(listUsersForAdmin);
+  const setSuspended = useServerFn(setUserSuspended);
 
   const roleQ = useQuery({
     queryKey: ["myRoles", user?.id],
@@ -47,12 +51,8 @@ function AdminPage() {
     queryKey: ["admin-users"],
     enabled: isAdmin,
     queryFn: async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, full_name, email, location, suspended, created_at")
-        .order("created_at", { ascending: false })
-        .limit(50);
-      return data ?? [];
+      const { users } = await listUsers();
+      return users;
     },
   });
 
@@ -69,11 +69,12 @@ function AdminPage() {
   }
 
   const toggleSuspend = async (id: string, suspended: boolean) => {
-    const { error } = await supabase.from("profiles").update({ suspended: !suspended }).eq("id", id);
-    if (error) toast.error(error.message);
-    else {
+    try {
+      await setSuspended({ data: { userId: id, suspended: !suspended } });
       toast.success(!suspended ? "User suspended" : "User reinstated");
       usersQ.refetch();
+    } catch (e) {
+      toast.error((e as Error).message);
     }
   };
 

@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/discover")({
 interface Profile {
   id: string;
   full_name: string;
-  dob: string;
+  age: number;
   gender: string;
   location: string;
   bio: string;
@@ -24,9 +24,6 @@ interface Profile {
   occupation: string;
   relationship_goal: string;
 }
-
-const age = (dob: string) =>
-  Math.floor((Date.now() - new Date(dob).getTime()) / (365.25 * 24 * 3600 * 1000));
 
 function Discover() {
   const { user } = useAuth();
@@ -42,11 +39,11 @@ function Discover() {
         .select("receiver_id")
         .eq("sender_id", user!.id);
       const excludeIds = [user!.id, ...(liked ?? []).map((l) => l.receiver_id)];
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name, dob, gender, location, bio, avatar_url, interests, occupation, relationship_goal")
+      // public_profiles view exposes only safe columns (no email/phone/dob).
+      const { data, error } = await (supabase as any)
+        .from("public_profiles")
+        .select("id, full_name, age, gender, location, bio, avatar_url, interests, occupation, relationship_goal")
         .not("id", "in", `(${excludeIds.join(",")})`)
-        .eq("suspended", false)
         .limit(30);
       if (error) throw error;
       return (data ?? []) as Profile[];
@@ -128,7 +125,7 @@ function ProfileCard({ profile }: { profile: Profile }) {
         )}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-5 text-white">
           <h2 className="font-display text-3xl font-semibold">
-            {profile.full_name}, {age(profile.dob)}
+            {profile.full_name}, {profile.age}
           </h2>
           <p className="mt-1 flex items-center gap-1.5 text-sm opacity-90">
             <MapPin className="size-3.5" />

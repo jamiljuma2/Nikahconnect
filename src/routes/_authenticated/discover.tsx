@@ -125,7 +125,7 @@ function ProfileCard({ profile }: { profile: Profile }) {
         )}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-5 text-white">
           <h2 className="font-display text-3xl font-semibold">
-            {profile.full_name}, {age(profile.dob)}
+            {profile.full_name}, {profile.age}
           </h2>
           <p className="mt-1 flex items-center gap-1.5 text-sm opacity-90">
             <MapPin className="size-3.5" />

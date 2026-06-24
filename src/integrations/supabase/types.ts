@@ -218,6 +218,7 @@ export type Database = {
           amount: number
           created_at: string
           id: string
+          idempotency_key: string | null
           mpesa_phone: string | null
           plan_type: Database["public"]["Enums"]["plan_type"]
           status: Database["public"]["Enums"]["payment_status"]
@@ -229,6 +230,7 @@ export type Database = {
           amount: number
           created_at?: string
           id?: string
+          idempotency_key?: string | null
           mpesa_phone?: string | null
           plan_type: Database["public"]["Enums"]["plan_type"]
           status?: Database["public"]["Enums"]["payment_status"]
@@ -240,6 +242,7 @@ export type Database = {
           amount?: number
           created_at?: string
           id?: string
+          idempotency_key?: string | null
           mpesa_phone?: string | null
           plan_type?: Database["public"]["Enums"]["plan_type"]
           status?: Database["public"]["Enums"]["payment_status"]

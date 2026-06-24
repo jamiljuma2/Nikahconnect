@@ -52,12 +52,25 @@ export const initiatePayment = createServerFn({ method: "POST" })
       throw new Error(msg);
     }
 
-    const body = (await res.json().catch(() => ({}))) as {
+    let body: {
       transactionId?: string;
       transaction_id?: string;
       id?: string;
-    };
-    const transactionId = body.transactionId ?? body.transaction_id ?? body.id ?? null;
+      data?: { transactionId?: string; checkoutRequestID?: string; id?: string };
+    } = {};
+    try {
+      body = JSON.parse(rawBody);
+    } catch {
+      // ignore
+    }
+    const transactionId =
+      body.transactionId ??
+      body.transaction_id ??
+      body.id ??
+      body.data?.transactionId ??
+      body.data?.id ??
+      body.data?.checkoutRequestID ??
+      null;
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("payments").insert({

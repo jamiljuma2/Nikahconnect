@@ -90,7 +90,6 @@ export const initiatePayment = createServerFn({ method: "POST" })
       body.data?.checkoutRequestID ??
       null;
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("payments").insert({
       user_id: context.userId,
       transaction_id: transactionId,

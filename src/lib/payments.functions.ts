@@ -33,6 +33,24 @@ export const initiatePayment = createServerFn({ method: "POST" })
       throw new Error("Enter a valid Safaricom number, e.g. 0712345678 or 254712345678.");
     }
 
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Guard against double payments: block if a recent pending payment exists.
+    const twoMinAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+    const { data: pending } = await supabaseAdmin
+      .from("payments")
+      .select("id, created_at")
+      .eq("user_id", context.userId)
+      .eq("status", "pending")
+      .gte("created_at", twoMinAgo)
+      .limit(1)
+      .maybeSingle();
+    if (pending) {
+      throw new Error(
+        "You already have a payment in progress. Check your phone for the M-Pesa prompt, or wait a minute before trying again.",
+      );
+    }
+
     const res = await fetch("https://api.lipana.dev/v1/transactions/push-stk", {
       method: "POST",
       headers: { "x-api-key": apiKey, "content-type": "application/json" },

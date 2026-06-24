@@ -31,7 +31,7 @@ function SettingsPage() {
     if (!user) return;
     supabase
       .from("profiles")
-      .select("*")
+      .select("full_name, location, bio, occupation, relationship_goal, interests, avatar_url")
       .eq("id", user.id)
       .single()
       .then(({ data }) => {

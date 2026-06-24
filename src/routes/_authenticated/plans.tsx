@@ -104,19 +104,29 @@ function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
   const [open, setOpen] = useState(false);
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
+  const [idemKey, setIdemKey] = useState(() => crypto.randomUUID());
 
   const pay = async () => {
     setBusy(true);
     try {
-      await initiate({ data: { planId: plan.id, mpesaPhone: phone } });
-      toast.success("Check your phone — enter your M-Pesa PIN to confirm.");
+      const r = await initiate({
+        data: { planId: plan.id, mpesaPhone: phone, idempotencyKey: idemKey },
+      });
+      toast.success(
+        r.idempotent
+          ? "Payment already in progress — check your phone."
+          : "Check your phone — enter your M-Pesa PIN to confirm.",
+      );
       setOpen(false);
+      // Fresh key for the next independent attempt
+      setIdemKey(crypto.randomUUID());
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
       setBusy(false);
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

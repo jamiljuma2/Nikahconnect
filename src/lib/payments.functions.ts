@@ -10,6 +10,7 @@ const input = z.object({
     .min(10)
     .max(15)
     .regex(/^\+?[0-9]+$/, "Use digits only, optionally prefixed with +"),
+  idempotencyKey: z.string().min(8).max(100),
 });
 
 export const initiatePayment = createServerFn({ method: "POST" })
@@ -34,6 +35,21 @@ export const initiatePayment = createServerFn({ method: "POST" })
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Idempotency: if a payment with this key already exists for the user, return it.
+    const { data: existing } = await supabaseAdmin
+      .from("payments")
+      .select("transaction_id, status")
+      .eq("user_id", context.userId)
+      .eq("idempotency_key", data.idempotencyKey)
+      .maybeSingle();
+    if (existing) {
+      return {
+        transactionId: existing.transaction_id,
+        status: existing.status as "pending" | "success" | "failed",
+        idempotent: true as const,
+      };
+    }
 
     // Guard against double payments: block if a recent pending payment exists.
     const twoMinAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
@@ -97,10 +113,29 @@ export const initiatePayment = createServerFn({ method: "POST" })
       plan_type: data.planId,
       status: "pending",
       mpesa_phone: phone,
+      idempotency_key: data.idempotencyKey,
     });
-    if (error) console.error("payment insert", error);
+    if (error) {
+      // Unique violation = a concurrent request beat us with the same key. Return the existing row.
+      if ((error as { code?: string }).code === "23505") {
+        const { data: dup } = await supabaseAdmin
+          .from("payments")
+          .select("transaction_id, status")
+          .eq("user_id", context.userId)
+          .eq("idempotency_key", data.idempotencyKey)
+          .maybeSingle();
+        if (dup) {
+          return {
+            transactionId: dup.transaction_id,
+            status: dup.status as "pending" | "success" | "failed",
+            idempotent: true as const,
+          };
+        }
+      }
+      console.error("payment insert", error);
+    }
 
-    return { transactionId, status: "pending" as const };
+    return { transactionId, status: "pending" as const, idempotent: false as const };
   });
 
 export const getMyPayments = createServerFn({ method: "GET" })

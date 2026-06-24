@@ -19,8 +19,19 @@ export const initiatePayment = createServerFn({ method: "POST" })
     const plan = PLANS[data.planId as PlanId];
     const apiKey = process.env.LIPANA_SECRET_KEY;
     if (!apiKey) throw new Error("Payments are not configured.");
+    if (!/^lip_sk_(test|live)_/.test(apiKey)) {
+      throw new Error(
+        "Payments key looks wrong. Use your Lipana SECRET key (starts with lip_sk_test_ or lip_sk_live_), not the publishable key.",
+      );
+    }
 
-    const phone = data.mpesaPhone.startsWith("+") ? data.mpesaPhone : `+${data.mpesaPhone}`;
+    // Lipana expects Safaricom MSISDN format: 254XXXXXXXXX (no leading + or 0).
+    let phone = data.mpesaPhone.replace(/\D/g, "");
+    if (phone.startsWith("0")) phone = "254" + phone.slice(1);
+    if (phone.startsWith("7") || phone.startsWith("1")) phone = "254" + phone;
+    if (!/^254[17]\d{8}$/.test(phone)) {
+      throw new Error("Enter a valid Safaricom number, e.g. 0712345678 or 254712345678.");
+    }
 
     const res = await fetch("https://api.lipana.dev/v1/transactions/push-stk", {
       method: "POST",
@@ -28,18 +39,38 @@ export const initiatePayment = createServerFn({ method: "POST" })
       body: JSON.stringify({ phone, amount: plan.price }),
     });
 
+    const rawBody = await res.text();
     if (!res.ok) {
-      const txt = await res.text().catch(() => "");
-      console.error("Lipana STK push failed", res.status, txt);
-      throw new Error("Payment provider rejected the request. Please try again.");
+      console.error("Lipana STK push failed", res.status, rawBody);
+      let msg = `Payment provider error (${res.status}).`;
+      try {
+        const j = JSON.parse(rawBody) as { message?: string; error?: string };
+        if (j.message || j.error) msg = `Lipana: ${j.message ?? j.error}`;
+      } catch {
+        if (rawBody) msg += ` ${rawBody.slice(0, 200)}`;
+      }
+      throw new Error(msg);
     }
 
-    const body = (await res.json().catch(() => ({}))) as {
+    let body: {
       transactionId?: string;
       transaction_id?: string;
       id?: string;
-    };
-    const transactionId = body.transactionId ?? body.transaction_id ?? body.id ?? null;
+      data?: { transactionId?: string; checkoutRequestID?: string; id?: string };
+    } = {};
+    try {
+      body = JSON.parse(rawBody);
+    } catch {
+      // ignore
+    }
+    const transactionId =
+      body.transactionId ??
+      body.transaction_id ??
+      body.id ??
+      body.data?.transactionId ??
+      body.data?.id ??
+      body.data?.checkoutRequestID ??
+      null;
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("payments").insert({

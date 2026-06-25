@@ -143,7 +143,7 @@ function RevealButton({ profileId }: { profileId: string }) {
   return (
     <Button variant="outline" onClick={handle} disabled={busy} className="flex-1">
       <Lock className="mr-2 size-4" />
-      {busy ? "…" : "Reveal"}
+      {busy ? "…" : "Reveal number"}
     </Button>
   );
 }

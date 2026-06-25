@@ -33,7 +33,7 @@ export const revealPhone = createServerFn({ method: "POST" })
     const { data: rpc, error: rpcErr } = await supabaseAdmin.rpc("consume_reveal", {
       _viewer: viewerId,
       _owner: data.profileOwnerId,
-      _idempotency_key: data.idempotencyKey ?? null,
+      _idempotency_key: data.idempotencyKey,
     });
 
     if (rpcErr) {

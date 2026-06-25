@@ -13,6 +13,19 @@ async function assertAdmin(userId: string) {
   if (!data) throw new Error("Forbidden");
 }
 
+export const checkIsAdmin = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", context.userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    return { isAdmin: !!data };
+  });
+
 export const listUsersForAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -22,9 +35,17 @@ export const listUsersForAdmin = createServerFn({ method: "GET" })
       .from("profiles")
       .select("id, full_name, email, location, suspended, created_at")
       .order("created_at", { ascending: false })
-      .limit(50);
+      .limit(200);
     if (error) throw new Error(error.message);
-    return { users: data ?? [] };
+
+    const ids = (data ?? []).map((u) => u.id);
+    const { data: roles } = await supabaseAdmin
+      .from("user_roles")
+      .select("user_id, role")
+      .in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]);
+    const adminSet = new Set((roles ?? []).filter((r) => r.role === "admin").map((r) => r.user_id));
+    const users = (data ?? []).map((u) => ({ ...u, is_admin: adminSet.has(u.id) }));
+    return { users };
   });
 
 const suspendInput = z.object({
@@ -43,5 +64,44 @@ export const setUserSuspended = createServerFn({ method: "POST" })
       .update({ suspended: data.suspended })
       .eq("id", data.userId);
     if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+const roleInput = z.object({
+  userId: z.string().uuid(),
+  makeAdmin: z.boolean(),
+});
+
+export const setUserAdminRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => roleInput.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    if (data.userId === context.userId && !data.makeAdmin) {
+      throw new Error("You can't remove your own admin role.");
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.makeAdmin) {
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .insert({ user_id: data.userId, role: "admin" });
+      // Ignore duplicate (already admin)
+      if (error && error.code !== "23505") throw new Error(error.message);
+    } else {
+      // Safety: don't allow removing the last remaining admin
+      const { count } = await supabaseAdmin
+        .from("user_roles")
+        .select("user_id", { count: "exact", head: true })
+        .eq("role", "admin");
+      if ((count ?? 0) <= 1) {
+        throw new Error("At least one admin must remain.");
+      }
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .delete()
+        .eq("user_id", data.userId)
+        .eq("role", "admin");
+      if (error) throw new Error(error.message);
+    }
     return { ok: true as const };
   });

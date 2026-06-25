@@ -249,14 +249,12 @@ export type Database = {
           bio: string | null
           created_at: string
           dob: string
-          email: string
           full_name: string
           gender: Database["public"]["Enums"]["gender_type"]
           id: string
           interests: string[] | null
           location: string
           occupation: string | null
-          phone_number: string
           relationship_goal: string | null
           suspended: boolean
           updated_at: string
@@ -266,14 +264,12 @@ export type Database = {
           bio?: string | null
           created_at?: string
           dob: string
-          email: string
           full_name: string
           gender: Database["public"]["Enums"]["gender_type"]
           id: string
           interests?: string[] | null
           location: string
           occupation?: string | null
-          phone_number: string
           relationship_goal?: string | null
           suspended?: boolean
           updated_at?: string
@@ -283,14 +279,12 @@ export type Database = {
           bio?: string | null
           created_at?: string
           dob?: string
-          email?: string
           full_name?: string
           gender?: Database["public"]["Enums"]["gender_type"]
           id?: string
           interests?: string[] | null
           location?: string
           occupation?: string | null
-          phone_number?: string
           relationship_goal?: string | null
           suspended?: boolean
           updated_at?: string
@@ -334,6 +328,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_contacts: {
+        Row: {
+          created_at: string
+          email: string
+          phone_number: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          phone_number: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          phone_number?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

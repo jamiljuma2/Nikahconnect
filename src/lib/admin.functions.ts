@@ -33,18 +33,28 @@ export const listUsersForAdmin = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("profiles")
-      .select("id, full_name, email, location, suspended, created_at")
+      .select("id, full_name, location, suspended, created_at")
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) throw new Error(error.message);
 
     const ids = (data ?? []).map((u) => u.id);
+    const safeIds = ids.length ? ids : ["00000000-0000-0000-0000-000000000000"];
     const { data: roles } = await supabaseAdmin
       .from("user_roles")
       .select("user_id, role")
-      .in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]);
+      .in("user_id", safeIds);
+    const { data: contacts } = await supabaseAdmin
+      .from("user_contacts")
+      .select("user_id, email")
+      .in("user_id", safeIds);
     const adminSet = new Set((roles ?? []).filter((r) => r.role === "admin").map((r) => r.user_id));
-    const users = (data ?? []).map((u) => ({ ...u, is_admin: adminSet.has(u.id) }));
+    const emailMap = new Map((contacts ?? []).map((c) => [c.user_id, c.email]));
+    const users = (data ?? []).map((u) => ({
+      ...u,
+      email: emailMap.get(u.id) ?? "",
+      is_admin: adminSet.has(u.id),
+    }));
     return { users };
   });
 

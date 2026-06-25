@@ -24,13 +24,19 @@ export const revealPhone = createServerFn({ method: "POST" })
       .maybeSingle();
 
     const fetchPhone = async () => {
-      const { data: p, error } = await supabaseAdmin
+      const { data: profile, error: profErr } = await supabaseAdmin
         .from("profiles")
-        .select("phone_number, full_name")
+        .select("full_name")
         .eq("id", data.profileOwnerId)
         .single();
-      if (error) throw new Error("Profile not found");
-      return p;
+      if (profErr) throw new Error("Profile not found");
+      const { data: contact, error: contactErr } = await supabaseAdmin
+        .from("user_contacts")
+        .select("phone_number")
+        .eq("user_id", data.profileOwnerId)
+        .single();
+      if (contactErr) throw new Error("Contact info not found");
+      return { phone_number: contact.phone_number, full_name: profile.full_name };
     };
 
     if (existing) {

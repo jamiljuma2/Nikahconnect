@@ -80,6 +80,7 @@ export const Route = createFileRoute("/api/public/webhooks/lipana")({
           is_unlimited: plan.unlimited,
           start_date: start.toISOString(),
           expiry_date: expiry.toISOString(),
+          payment_id: payment.id,
         });
         if (subErr) {
           console.error("sub insert", subErr);

@@ -131,18 +131,21 @@ export type Database = {
       number_reveals: {
         Row: {
           id: string
+          idempotency_key: string | null
           profile_owner_id: string
           revealed_at: string
           viewer_id: string
         }
         Insert: {
           id?: string
+          idempotency_key?: string | null
           profile_owner_id: string
           revealed_at?: string
           viewer_id: string
         }
         Update: {
           id?: string
+          idempotency_key?: string | null
           profile_owner_id?: string
           revealed_at?: string
           viewer_id?: string
@@ -296,6 +299,7 @@ export type Database = {
           expiry_date: string | null
           id: string
           is_unlimited: boolean
+          payment_id: string | null
           plan: Database["public"]["Enums"]["plan_type"]
           remaining_reveals: number
           start_date: string
@@ -305,6 +309,7 @@ export type Database = {
           expiry_date?: string | null
           id?: string
           is_unlimited?: boolean
+          payment_id?: string | null
           plan: Database["public"]["Enums"]["plan_type"]
           remaining_reveals?: number
           start_date?: string
@@ -314,12 +319,20 @@ export type Database = {
           expiry_date?: string | null
           id?: string
           is_unlimited?: boolean
+          payment_id?: string | null
           plan?: Database["public"]["Enums"]["plan_type"]
           remaining_reveals?: number
           start_date?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "subscriptions_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "subscriptions_user_id_fkey"
             columns: ["user_id"]
@@ -395,7 +408,13 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      consume_reveal: {
+        Args: { _idempotency_key?: string; _owner: string; _viewer: string }
+        Returns: {
+          already_revealed: boolean
+          reveal_id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "user" | "admin"

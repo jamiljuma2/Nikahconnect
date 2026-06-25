@@ -117,10 +117,14 @@ function RevealButton({ profileId }: { profileId: string }) {
   const reveal = useServerFn(revealPhone);
   const [phone, setPhone] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Stable per-button idempotency key — retries return the same reveal.
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
   const handle = async () => {
     setBusy(true);
     try {
-      const r = await reveal({ data: { profileOwnerId: profileId } });
+      const r = await reveal({
+        data: { profileOwnerId: profileId, idempotencyKey },
+      });
       setPhone(r.phone);
       if (r.alreadyRevealed) toast.info("Already revealed — no charge.");
       else toast.success("Contact unlocked!");

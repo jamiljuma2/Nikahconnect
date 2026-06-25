@@ -377,23 +377,7 @@ export type Database = {
       }
     }
     Functions: {
-      get_public_profiles: {
-        Args: never
-        Returns: {
-          age: number
-          avatar_url: string
-          bio: string
-          created_at: string
-          full_name: string
-          gender: Database["public"]["Enums"]["gender_type"]
-          id: string
-          interests: string[]
-          location: string
-          occupation: string
-          relationship_goal: string
-          suspended: boolean
-        }[]
-      }
+      [_ in never]: never
     }
     Enums: {
       app_role: "user" | "admin"

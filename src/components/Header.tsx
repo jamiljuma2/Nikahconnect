@@ -28,11 +28,14 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-lg">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <Link to="/discover" className="font-display text-2xl font-semibold tracking-tight">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-3 sm:px-4">
+        <Link
+          to="/discover"
+          className="shrink-0 font-display text-lg font-semibold tracking-tight sm:text-2xl"
+        >
           Mingle<span className="text-primary">Connect</span>
         </Link>
-        <nav className="flex items-center gap-1 sm:gap-2">
+        <nav className="flex min-w-0 items-center gap-0.5 sm:gap-2">
           <NavLink to="/discover" icon={<Compass className="size-4" />} label="Discover" />
           <NavLink to="/matches" icon={<Heart className="size-4" />} label="Matches" />
           <NavLink to="/plans" icon={<Crown className="size-4" />} label="Plans" />
@@ -40,7 +43,13 @@ export function Header() {
           {isAdmin && (
             <NavLink to="/admin" icon={<Shield className="size-4" />} label="Admin" />
           )}
-          <Button variant="ghost" size="icon" onClick={signOut} aria-label="Sign out">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={signOut}
+            aria-label="Sign out"
+            className="size-9 shrink-0"
+          >
             <LogOut className="size-4" />
           </Button>
         </nav>
@@ -53,11 +62,11 @@ function NavLink({ to, icon, label }: { to: string; icon: React.ReactNode; label
   return (
     <Link
       to={to}
-      className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+      className="inline-flex shrink-0 items-center gap-2 rounded-full px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:px-3"
       activeProps={{ className: "text-primary bg-accent" }}
     >
       {icon}
-      <span className="hidden sm:inline">{label}</span>
+      <span className="hidden md:inline">{label}</span>
     </Link>
   );
 }

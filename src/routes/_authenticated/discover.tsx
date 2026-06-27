@@ -35,7 +35,7 @@ function Discover() {
   const [passed, setPassed] = useState<string[]>([]);
   const [likedLocal, setLikedLocal] = useState<string[]>([]);
 
-  const profilesQ = useInfiniteQuery({
+  const profilesQ = useInfiniteQuery<Profile[], Error, { pages: Profile[][]; pageParams: number[] }, readonly unknown[], number>({
     queryKey: ["discover", user?.id],
     enabled: !!user,
     initialPageParam: 0,

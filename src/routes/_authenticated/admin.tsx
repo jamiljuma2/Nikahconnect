@@ -111,8 +111,8 @@ function AdminPage() {
               const isSelf = u.id === user?.id;
               return (
                 <tr key={u.id} className="border-t border-border">
-                  <td className="px-4 py-3">{u.full_name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{u.email}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{u.full_name}</td>
+                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{u.email}</td>
                   <td className="px-4 py-3">
                     {u.is_admin ? (
                       <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs text-primary">

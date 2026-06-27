@@ -83,8 +83,8 @@ function AdminPage() {
 
   return (
     <div>
-      <h1 className="font-display text-4xl font-semibold">Admin dashboard</h1>
-      <div className="mt-6 grid gap-4 sm:grid-cols-4">
+      <h1 className="font-display text-3xl font-semibold sm:text-4xl">Admin dashboard</h1>
+      <div className="mt-6 grid gap-3 grid-cols-2 sm:gap-4 lg:grid-cols-4">
         <Stat label="Users" value={stats.data?.users ?? "…"} />
         <Stat label="Matches" value={stats.data?.matches ?? "…"} />
         <Stat label="Paid plans" value={stats.data?.payments ?? "…"} />
@@ -95,8 +95,8 @@ function AdminPage() {
       <p className="mt-1 text-sm text-muted-foreground">
         Grant or revoke admin access, and suspend abusive accounts.
       </p>
-      <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card">
-        <table className="w-full text-sm">
+      <div className="mt-4 overflow-x-auto rounded-2xl border border-border bg-card">
+        <table className="w-full min-w-[720px] text-sm">
           <thead className="bg-muted text-left text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
               <th className="px-4 py-3">Name</th>

@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
+import { BottomNav } from "@/components/BottomNav";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -12,9 +13,10 @@ export const Route = createFileRoute("/_authenticated")({
   component: () => (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="mx-auto max-w-6xl px-3 py-5 sm:px-4 sm:py-6">
+      <main className="mx-auto max-w-6xl px-3 py-5 pb-24 sm:px-4 sm:py-6 md:pb-6">
         <Outlet />
       </main>
+      <BottomNav />
     </div>
   ),
 });

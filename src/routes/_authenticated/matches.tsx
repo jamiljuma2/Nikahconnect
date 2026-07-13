@@ -115,11 +115,22 @@ function Avatar({ profile }: { profile: MiniProfile }) {
 
 function RevealButton({ profileId }: { profileId: string }) {
   const reveal = useServerFn(revealPhone);
+  const navigate = useNavigate();
+  const balanceQ = useQuery({ queryKey: ["balance"], queryFn: () => getMyBalance() });
   const [phone, setPhone] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   // Stable per-button idempotency key — retries return the same reveal.
   const [idempotencyKey] = useState(() => crypto.randomUUID());
+
+  const sub = balanceQ.data?.subscription;
+  const hasPlan = !!sub && (sub.is_unlimited || (sub.remaining_reveals ?? 0) > 0);
+
   const handle = async () => {
+    if (!hasPlan) {
+      toast.info("Choose a plan to unlock contact reveals.");
+      navigate({ to: "/plans" });
+      return;
+    }
     setBusy(true);
     try {
       const r = await reveal({
@@ -129,7 +140,9 @@ function RevealButton({ profileId }: { profileId: string }) {
       if (r.alreadyRevealed) toast.info("Already revealed — no charge.");
       else toast.success("Contact unlocked!");
     } catch (e) {
-      toast.error((e as Error).message);
+      const msg = (e as Error).message;
+      toast.error(msg);
+      if (/subscription|balance|plan/i.test(msg)) navigate({ to: "/plans" });
     } finally {
       setBusy(false);
     }

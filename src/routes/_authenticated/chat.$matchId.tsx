@@ -124,7 +124,7 @@ function ChatPage() {
   };
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col" style={{ height: "calc(100dvh - 4rem - 1.25rem - 4.5rem - env(safe-area-inset-bottom))" }}>
+    <div className="mx-auto flex max-w-2xl flex-col h-[calc(100dvh-4rem-1.25rem-4.5rem-env(safe-area-inset-bottom))] md:h-[calc(100dvh-4rem-3rem)]">
       <header className="flex items-center gap-3 border-b border-border pb-3">
         <Link to="/matches">
           <Button variant="ghost" size="icon">

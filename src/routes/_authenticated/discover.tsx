@@ -131,7 +131,7 @@ function Discover() {
 
   return (
     <div className="mx-auto max-w-md">
-      <div className="relative h-[68vh] min-h-[460px] max-h-[640px] select-none">
+      <div className="relative h-[60vh] min-h-[420px] max-h-[640px] select-none">
         {next && (
           <div className="absolute inset-0 scale-[0.96] opacity-70" aria-hidden>
             <ProfileCard profile={next} />

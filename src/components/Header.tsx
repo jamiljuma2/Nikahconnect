@@ -58,15 +58,28 @@ export function Header() {
   );
 }
 
-function NavLink({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) {
+function NavLink({
+  to,
+  icon,
+  label,
+  mobileHidden,
+}: {
+  to: string;
+  icon: React.ReactNode;
+  label: string;
+  mobileHidden?: boolean;
+}) {
   return (
     <Link
       to={to}
-      className="inline-flex shrink-0 items-center gap-2 rounded-full px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:px-3"
+      className={
+        "shrink-0 items-center gap-2 rounded-full px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:px-3 " +
+        (mobileHidden ? "hidden md:inline-flex" : "inline-flex")
+      }
       activeProps={{ className: "text-primary bg-accent" }}
     >
       {icon}
-      <span className="hidden md:inline">{label}</span>
+      <span className="hidden sm:inline">{label}</span>
     </Link>
   );
 }

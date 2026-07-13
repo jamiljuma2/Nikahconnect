@@ -36,8 +36,8 @@ export function Header() {
           Mingle<span className="text-primary">Connect</span>
         </Link>
         <nav className="flex min-w-0 items-center gap-0.5 sm:gap-2">
-          <NavLink to="/discover" icon={<Compass className="size-4" />} label="Discover" />
-          <NavLink to="/matches" icon={<Heart className="size-4" />} label="Matches" />
+          <NavLink to="/discover" icon={<Compass className="size-4" />} label="Discover" mobileHidden />
+          <NavLink to="/matches" icon={<Heart className="size-4" />} label="Matches" mobileHidden />
           <NavLink to="/plans" icon={<Crown className="size-4" />} label="Plans" />
           <NavLink to="/settings" icon={<Settings className="size-4" />} label="Settings" />
           {isAdmin && (

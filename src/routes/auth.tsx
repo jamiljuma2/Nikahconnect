@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
+import { AnimatePresence, motion } from "motion/react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart } from "lucide-react";
+import { Heart, Eye, EyeOff, Check, X } from "lucide-react";
 
 const search = z.object({ mode: z.enum(["login", "register"]).default("login") });
 
@@ -103,6 +104,44 @@ function ModeTab({
   );
 }
 
+function PasswordInput({
+  id,
+  value,
+  onChange,
+  placeholder,
+  autoComplete,
+}: {
+  id?: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  autoComplete?: string;
+}) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <Input
+        id={id}
+        type={show ? "text" : "password"}
+        required
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        className="pr-10"
+      />
+      <button
+        type="button"
+        onClick={() => setShow((s) => !s)}
+        aria-label={show ? "Hide password" : "Show password"}
+        className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground transition"
+      >
+        {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+      </button>
+    </div>
+  );
+}
+
 function LoginForm({ onDone }: { onDone: () => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -119,15 +158,10 @@ function LoginForm({ onDone }: { onDone: () => void }) {
   return (
     <form onSubmit={submit} className="space-y-4">
       <Field label="Email">
-        <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
       </Field>
       <Field label="Password">
-        <Input
-          type="password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <PasswordInput value={password} onChange={setPassword} autoComplete="current-password" />
       </Field>
       <Button type="submit" className="w-full gradient-romance text-primary-foreground" disabled={busy}>
         {busy ? "Signing in…" : "Sign in"}
@@ -136,21 +170,44 @@ function LoginForm({ onDone }: { onDone: () => void }) {
   );
 }
 
-const registerSchema = z.object({
-  full_name: z.string().trim().min(2).max(80),
-  email: z.string().trim().email().max(255),
-  phone_number: z.string().trim().regex(/^\+?[0-9]{9,15}$/, "Use 9–15 digits, optional + prefix"),
-  gender: z.enum(["male", "female", "other"]),
-  dob: z.string().refine((v) => {
-    const d = new Date(v);
-    if (Number.isNaN(d.getTime())) return false;
-    const age = (Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000);
-    return age >= 18 && age <= 100;
-  }, "You must be 18 or older"),
-  location: z.string().trim().min(2).max(80),
-  bio: z.string().max(500).optional(),
-  password: z.string().min(8).max(72),
-});
+const PASSWORD_RULES = [
+  { id: "len", label: "At least 8 characters", test: (p: string) => p.length >= 8 },
+  { id: "upper", label: "One uppercase letter", test: (p: string) => /[A-Z]/.test(p) },
+  { id: "lower", label: "One lowercase letter", test: (p: string) => /[a-z]/.test(p) },
+  { id: "num", label: "One number", test: (p: string) => /[0-9]/.test(p) },
+  { id: "sym", label: "One special character", test: (p: string) => /[^A-Za-z0-9]/.test(p) },
+] as const;
+
+const strongPassword = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .max(72)
+  .refine((p) => /[A-Z]/.test(p), "Password needs an uppercase letter")
+  .refine((p) => /[a-z]/.test(p), "Password needs a lowercase letter")
+  .refine((p) => /[0-9]/.test(p), "Password needs a number")
+  .refine((p) => /[^A-Za-z0-9]/.test(p), "Password needs a special character");
+
+const registerSchema = z
+  .object({
+    full_name: z.string().trim().min(2).max(80),
+    email: z.string().trim().email().max(255),
+    phone_number: z.string().trim().regex(/^\+?[0-9]{9,15}$/, "Use 9–15 digits, optional + prefix"),
+    gender: z.enum(["male", "female", "other"]),
+    dob: z.string().refine((v) => {
+      const d = new Date(v);
+      if (Number.isNaN(d.getTime())) return false;
+      const age = (Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000);
+      return age >= 18 && age <= 100;
+    }, "You must be 18 or older"),
+    location: z.string().trim().min(2).max(80),
+    bio: z.string().max(500).optional(),
+    password: strongPassword,
+    confirm_password: z.string(),
+  })
+  .refine((d) => d.password === d.confirm_password, {
+    message: "Passwords do not match",
+    path: ["confirm_password"],
+  });
 
 function RegisterForm({ onDone }: { onDone: () => void }) {
   const [form, setForm] = useState({
@@ -162,10 +219,20 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
     location: "",
     bio: "",
     password: "",
+    confirm_password: "",
   });
   const [busy, setBusy] = useState(false);
+  const [pwFocused, setPwFocused] = useState(false);
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
+
+  const ruleState = useMemo(
+    () => PASSWORD_RULES.map((r) => ({ ...r, ok: r.test(form.password) })),
+    [form.password],
+  );
+  const strength = ruleState.filter((r) => r.ok).length;
+  const confirmMismatch =
+    form.confirm_password.length > 0 && form.password !== form.confirm_password;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -207,6 +274,7 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
           value={form.email}
           onChange={(e) => set("email", e.target.value)}
           required
+          autoComplete="email"
         />
       </Field>
       <Field label="Phone number">
@@ -215,6 +283,7 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
           value={form.phone_number}
           onChange={(e) => set("phone_number", e.target.value)}
           required
+          autoComplete="tel"
         />
       </Field>
       <div className="grid grid-cols-2 gap-4">
@@ -259,12 +328,81 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
         />
       </Field>
       <Field label="Password">
-        <Input
-          type="password"
-          value={form.password}
-          onChange={(e) => set("password", e.target.value)}
-          required
+        <div onFocus={() => setPwFocused(true)}>
+          <PasswordInput
+            value={form.password}
+            onChange={(v) => set("password", v)}
+            autoComplete="new-password"
+          />
+        </div>
+        {(pwFocused || form.password.length > 0) && (
+          <div className="mt-2 space-y-2">
+            <div className="flex gap-1">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className={
+                    "h-1 flex-1 rounded-full transition-colors " +
+                    (i < strength
+                      ? strength <= 2
+                        ? "bg-destructive"
+                        : strength <= 4
+                          ? "bg-yellow-500"
+                          : "bg-emerald-500"
+                      : "bg-muted")
+                  }
+                />
+              ))}
+            </div>
+            <ul className="space-y-1 text-xs">
+              <AnimatePresence initial={false}>
+                {ruleState.map((r) => (
+                  <motion.li
+                    key={r.id}
+                    initial={{ opacity: 0, x: -4 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className={
+                      "flex items-center gap-1.5 " +
+                      (r.ok ? "text-emerald-600" : "text-muted-foreground")
+                    }
+                  >
+                    {r.ok ? <Check className="size-3.5" /> : <X className="size-3.5" />}
+                    {r.label}
+                  </motion.li>
+                ))}
+              </AnimatePresence>
+            </ul>
+          </div>
+        )}
+      </Field>
+      <Field label="Confirm password">
+        <PasswordInput
+          value={form.confirm_password}
+          onChange={(v) => set("confirm_password", v)}
+          autoComplete="new-password"
         />
+        <AnimatePresence>
+          {confirmMismatch && (
+            <motion.p
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="mt-1 text-xs text-destructive"
+            >
+              Passwords do not match
+            </motion.p>
+          )}
+          {!confirmMismatch && form.confirm_password.length > 0 && form.password.length > 0 && (
+            <motion.p
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="mt-1 flex items-center gap-1 text-xs text-emerald-600"
+            >
+              <Check className="size-3.5" /> Passwords match
+            </motion.p>
+          )}
+        </AnimatePresence>
       </Field>
       <Button type="submit" className="w-full gradient-romance text-primary-foreground" disabled={busy}>
         {busy ? "Creating account…" : "Create account"}

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Phone, Lock } from "lucide-react";
@@ -114,18 +114,45 @@ function Avatar({ profile }: { profile: MiniProfile }) {
 }
 
 function RevealButton({ profileId }: { profileId: string }) {
+  const { user } = useAuth();
+  const qc = useQueryClient();
   const reveal = useServerFn(revealPhone);
   const navigate = useNavigate();
   const balanceQ = useQuery({ queryKey: ["balance"], queryFn: () => getMyBalance() });
+
+  // Load any prior reveal for this profile so the number persists and re-clicks are blocked client-side.
+  const priorQ = useQuery({
+    queryKey: ["reveal", user?.id, profileId],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("number_reveals")
+        .select("id")
+        .eq("viewer_id", user!.id)
+        .eq("profile_owner_id", profileId)
+        .maybeSingle();
+      if (!data) return { phone: null as string | null };
+      const { data: c } = await supabase
+        .from("user_contacts")
+        .select("phone_number")
+        .eq("user_id", profileId)
+        .maybeSingle();
+      return { phone: c?.phone_number ?? null };
+    },
+  });
+
   const [phone, setPhone] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  // Stable per-button idempotency key — retries return the same reveal.
   const [idempotencyKey] = useState(() => crypto.randomUUID());
 
+  const revealedPhone = phone ?? priorQ.data?.phone ?? null;
   const sub = balanceQ.data?.subscription;
-  const hasPlan = !!sub && (sub.is_unlimited || (sub.remaining_reveals ?? 0) > 0);
+  const isUnlimited = !!sub?.is_unlimited;
+  const remaining = sub?.remaining_reveals ?? 0;
+  const hasPlan = !!sub && (isUnlimited || remaining > 0);
 
   const handle = async () => {
+    if (revealedPhone || busy) return; // guard against duplicate reveals
     if (!hasPlan) {
       toast.info("Choose a plan to unlock contact reveals.");
       navigate({ to: "/plans" });
@@ -139,6 +166,8 @@ function RevealButton({ profileId }: { profileId: string }) {
       setPhone(r.phone);
       if (r.alreadyRevealed) toast.info("Already revealed — no charge.");
       else toast.success("Contact unlocked!");
+      qc.invalidateQueries({ queryKey: ["balance"] });
+      qc.invalidateQueries({ queryKey: ["reveal", user?.id, profileId] });
     } catch (e) {
       const msg = (e as Error).message;
       toast.error(msg);
@@ -147,20 +176,39 @@ function RevealButton({ profileId }: { profileId: string }) {
       setBusy(false);
     }
   };
-  if (phone) {
+
+  if (revealedPhone) {
     return (
-      <a href={`tel:${phone}`} className="inline-flex flex-1">
+      <a href={`tel:${revealedPhone}`} className="inline-flex flex-1">
         <Button variant="outline" className="w-full">
           <Phone className="mr-2 size-4" />
-          {phone}
+          {revealedPhone}
         </Button>
       </a>
     );
   }
+
+  const outOfReveals = !!sub && !isUnlimited && remaining <= 0;
+  const disabled = busy || priorQ.isLoading || balanceQ.isLoading;
+
   return (
-    <Button variant="outline" onClick={handle} disabled={busy} className="flex-1">
+    <Button
+      variant="outline"
+      onClick={handle}
+      disabled={disabled}
+      className="flex-1"
+      title={outOfReveals ? "No reveals left on your plan" : undefined}
+    >
       <Lock className="mr-2 size-4" />
-      {busy ? "…" : "Reveal number"}
+      {busy
+        ? "…"
+        : outOfReveals
+          ? "Upgrade to reveal"
+          : isUnlimited
+            ? "Reveal number"
+            : sub
+              ? `Reveal (${remaining} left)`
+              : "Reveal number"}
     </Button>
   );
 }

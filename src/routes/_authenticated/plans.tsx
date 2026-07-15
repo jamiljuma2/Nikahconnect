@@ -151,10 +151,59 @@ function PlanCard({ plan }: { plan: (typeof PLANS)[PlanId] }) {
 
 function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
   const initiate = useServerFn(initiatePayment);
+  const verify = useServerFn(verifyAndActivatePayment);
+  const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
+  const [waiting, setWaiting] = useState(false);
   const [idemKey, setIdemKey] = useState(() => crypto.randomUUID());
+  const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const stopPolling = () => {
+    if (pollRef.current) {
+      clearTimeout(pollRef.current);
+      pollRef.current = null;
+    }
+  };
+
+  const pollActivation = (transactionId: string) => {
+    setWaiting(true);
+    const started = Date.now();
+    const tick = async () => {
+      try {
+        const r = await verify({ data: { transactionId } });
+        if (r.status === "success" && r.activated) {
+          stopPolling();
+          setWaiting(false);
+          setOpen(false);
+          setIdemKey(crypto.randomUUID());
+          qc.invalidateQueries({ queryKey: ["balance"] });
+          toast.success(`${plan.name} activated — your reveals are ready.`);
+          return;
+        }
+        if (r.status === "failed") {
+          stopPolling();
+          setWaiting(false);
+          toast.error("Payment was cancelled or failed. Please try again.");
+          return;
+        }
+      } catch (e) {
+        console.error("verify poll", e);
+      }
+      // Give up after ~2 minutes so users aren't stuck.
+      if (Date.now() - started > 120_000) {
+        stopPolling();
+        setWaiting(false);
+        toast.info(
+          "Still waiting for M-Pesa confirmation. If you paid, refresh this page in a moment.",
+        );
+        return;
+      }
+      pollRef.current = setTimeout(tick, 3000);
+    };
+    pollRef.current = setTimeout(tick, 3000);
+  };
 
   const pay = async () => {
     setBusy(true);
@@ -167,8 +216,12 @@ function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
           ? "Payment already in progress — check your phone."
           : "Check your phone — enter your M-Pesa PIN to confirm.",
       );
-      setOpen(false);
-      setIdemKey(crypto.randomUUID());
+      if (r.transactionId) {
+        pollActivation(r.transactionId);
+      } else {
+        setOpen(false);
+        setIdemKey(crypto.randomUUID());
+      }
     } catch (e) {
       toast.error((e as Error).message);
     } finally {

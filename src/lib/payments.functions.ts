@@ -150,3 +150,109 @@ export const getMyPayments = createServerFn({ method: "GET" })
       .limit(50);
     return { payments: data ?? [] };
   });
+
+const verifyInput = z.object({ transactionId: z.string().min(4) });
+
+/**
+ * Verifies a pending payment directly with Lipana and activates the
+ * subscription when the payment has succeeded. Safe to call repeatedly
+ * (idempotent — one subscription per payment). This makes activation
+ * automatic even when the Lipana webhook does not reach us.
+ */
+export const verifyAndActivatePayment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => verifyInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: payment, error: payErr } = await supabaseAdmin
+      .from("payments")
+      .select("*")
+      .eq("user_id", context.userId)
+      .eq("transaction_id", data.transactionId)
+      .maybeSingle();
+    if (payErr || !payment) throw new Error("Payment not found.");
+
+    const ensureSubscription = async () => {
+      const { data: existingSub } = await supabaseAdmin
+        .from("subscriptions")
+        .select("id, plan, remaining_reveals, is_unlimited")
+        .eq("payment_id", payment.id)
+        .maybeSingle();
+      if (existingSub) return existingSub;
+
+      const planId = payment.plan_type as PlanId;
+      const plan = PLANS[planId];
+      if (!plan) throw new Error("Unknown plan on payment.");
+      const start = new Date();
+      const expiry = new Date(start.getTime() + 1000 * 60 * 60 * 24 * 30);
+      const { data: inserted, error: subErr } = await supabaseAdmin
+        .from("subscriptions")
+        .insert({
+          user_id: payment.user_id,
+          plan: planId,
+          remaining_reveals: plan.unlimited ? 0 : plan.reveals,
+          is_unlimited: plan.unlimited,
+          start_date: start.toISOString(),
+          expiry_date: expiry.toISOString(),
+          payment_id: payment.id,
+        })
+        .select("id, plan, remaining_reveals, is_unlimited")
+        .single();
+      if (subErr) throw new Error(subErr.message);
+      return inserted;
+    };
+
+    if (payment.status === "success") {
+      const sub = await ensureSubscription();
+      return { status: "success" as const, activated: true, subscription: sub };
+    }
+    if (payment.status === "failed") {
+      return { status: "failed" as const, activated: false };
+    }
+
+    const apiKey = process.env.LIPANA_SECRET_KEY;
+    if (!apiKey) throw new Error("Payments are not configured.");
+    if (!payment.transaction_id) return { status: "pending" as const, activated: false };
+
+    let providerStatus: string | null = null;
+    try {
+      const res = await fetch(
+        `https://api.lipana.dev/v1/transactions/${encodeURIComponent(payment.transaction_id)}`,
+        { headers: { "x-api-key": apiKey } },
+      );
+      if (res.ok) {
+        const body = (await res.json()) as {
+          status?: string;
+          data?: { status?: string };
+        };
+        providerStatus = (body.status ?? body.data?.status ?? "").toLowerCase() || null;
+      } else if (res.status !== 404) {
+        console.error("Lipana verify failed", res.status, await res.text());
+      }
+    } catch (e) {
+      console.error("Lipana verify error", e);
+    }
+
+    const ok = ["success", "completed", "paid"].includes(providerStatus ?? "");
+    const bad = ["failed", "cancelled", "canceled", "expired"].includes(providerStatus ?? "");
+
+    if (ok) {
+      await supabaseAdmin
+        .from("payments")
+        .update({ status: "success" })
+        .eq("id", payment.id)
+        .neq("status", "success");
+      const sub = await ensureSubscription();
+      return { status: "success" as const, activated: true, subscription: sub };
+    }
+    if (bad) {
+      await supabaseAdmin
+        .from("payments")
+        .update({ status: "failed" })
+        .eq("id", payment.id)
+        .eq("status", "pending");
+      return { status: "failed" as const, activated: false };
+    }
+    return { status: "pending" as const, activated: false };
+  });

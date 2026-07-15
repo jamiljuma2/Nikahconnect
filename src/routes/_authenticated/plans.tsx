@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Check, Infinity as InfIcon, Sparkles, Loader2, ShieldCheck, Smartphone } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -17,7 +17,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PLANS, type PlanId } from "@/lib/plans";
-import { initiatePayment } from "@/lib/payments.functions";
+import { initiatePayment, verifyAndActivatePayment } from "@/lib/payments.functions";
 import { getMyBalance } from "@/lib/dating.functions";
 
 export const Route = createFileRoute("/_authenticated/plans")({

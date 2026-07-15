@@ -290,7 +290,7 @@ function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
             />
             <Button
               onClick={pay}
-              disabled={busy || phone.length < 10}
+              disabled={busy || waiting || phone.length < 10}
               className="h-11 w-full gradient-romance text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.99]"
             >
               <AnimatePresence mode="wait" initial={false}>
@@ -304,6 +304,16 @@ function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
                   >
                     <Loader2 className="size-4 animate-spin" /> Sending prompt…
                   </motion.span>
+                ) : waiting ? (
+                  <motion.span
+                    key="waiting"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="inline-flex items-center gap-2"
+                  >
+                    <Loader2 className="size-4 animate-spin" /> Waiting for M-Pesa confirmation…
+                  </motion.span>
                 ) : (
                   <motion.span
                     key="idle"
@@ -316,6 +326,11 @@ function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
                 )}
               </AnimatePresence>
             </Button>
+            {waiting && (
+              <p className="text-center text-xs text-muted-foreground">
+                Approve the M-Pesa prompt on your phone. Your plan activates automatically.
+              </p>
+            )}
             <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
               <ShieldCheck className="size-3.5" /> Secured by M-Pesa • No card required
             </p>

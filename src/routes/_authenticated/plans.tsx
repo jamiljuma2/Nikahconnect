@@ -230,7 +230,16 @@ function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        setOpen(v);
+        if (!v) {
+          stopPolling();
+          setWaiting(false);
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <Button className="relative mt-6 w-full gradient-romance text-primary-foreground transition-transform hover:scale-[1.02] active:scale-[0.98]">
           Choose {plan.name}

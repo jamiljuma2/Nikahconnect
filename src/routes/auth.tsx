@@ -17,7 +17,17 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Heart, Eye, EyeOff, Check, X } from "lucide-react";
 
-const search = z.object({ mode: z.enum(["login", "register"]).default("login") });
+const search = z.object({
+  mode: z.enum(["login", "register"]).default("login"),
+  next: z.string().optional(),
+});
+
+function safeNext(next: string | undefined): string | null {
+  if (!next) return null;
+  // Same-origin relative path only.
+  if (!next.startsWith("/") || next.startsWith("//")) return null;
+  return next;
+}
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s) => search.parse(s),
@@ -31,8 +41,16 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { mode } = Route.useSearch();
+  const { mode, next } = Route.useSearch();
   const router = useRouter();
+  const nextPath = safeNext(next);
+  const goNext = () => {
+    if (nextPath) {
+      window.location.assign(nextPath);
+    } else {
+      router.navigate({ to: "/discover" });
+    }
+  };
 
   return (
     <div className="grid min-h-screen md:grid-cols-2">
@@ -69,9 +87,9 @@ function AuthPage() {
 
           <div className="mt-6">
             {mode === "register" ? (
-              <RegisterForm onDone={() => router.navigate({ to: "/auth" })} />
+              <RegisterForm nextPath={nextPath} onDone={() => router.navigate({ to: "/auth", search: nextPath ? { mode: "login", next: nextPath } : { mode: "login" } })} />
             ) : (
-              <LoginForm onDone={() => router.navigate({ to: "/discover" })} />
+              <LoginForm onDone={goNext} />
             )}
           </div>
         </div>
@@ -209,7 +227,7 @@ const registerSchema = z
     path: ["confirm_password"],
   });
 
-function RegisterForm({ onDone }: { onDone: () => void }) {
+function RegisterForm({ onDone, nextPath }: { onDone: () => void; nextPath: string | null }) {
   const [form, setForm] = useState({
     full_name: "",
     email: "",
@@ -246,7 +264,7 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
       email: parsed.data.email,
       password: parsed.data.password,
       options: {
-        emailRedirectTo: `${window.location.origin}/discover`,
+        emailRedirectTo: `${window.location.origin}${nextPath ?? "/discover"}`,
         data: {
           full_name: parsed.data.full_name,
           phone_number: parsed.data.phone_number,

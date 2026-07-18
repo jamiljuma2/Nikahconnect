@@ -41,8 +41,16 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { mode } = Route.useSearch();
+  const { mode, next } = Route.useSearch();
   const router = useRouter();
+  const nextPath = safeNext(next);
+  const goNext = () => {
+    if (nextPath) {
+      window.location.assign(nextPath);
+    } else {
+      router.navigate({ to: "/discover" });
+    }
+  };
 
   return (
     <div className="grid min-h-screen md:grid-cols-2">
@@ -79,9 +87,9 @@ function AuthPage() {
 
           <div className="mt-6">
             {mode === "register" ? (
-              <RegisterForm onDone={() => router.navigate({ to: "/auth" })} />
+              <RegisterForm nextPath={nextPath} onDone={() => router.navigate({ to: "/auth", search: nextPath ? { mode: "login", next: nextPath } : { mode: "login" } })} />
             ) : (
-              <LoginForm onDone={() => router.navigate({ to: "/discover" })} />
+              <LoginForm onDone={goNext} />
             )}
           </div>
         </div>

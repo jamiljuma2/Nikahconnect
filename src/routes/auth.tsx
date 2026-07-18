@@ -227,7 +227,7 @@ const registerSchema = z
     path: ["confirm_password"],
   });
 
-function RegisterForm({ onDone }: { onDone: () => void }) {
+function RegisterForm({ onDone, nextPath }: { onDone: () => void; nextPath: string | null }) {
   const [form, setForm] = useState({
     full_name: "",
     email: "",
@@ -264,7 +264,7 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
       email: parsed.data.email,
       password: parsed.data.password,
       options: {
-        emailRedirectTo: `${window.location.origin}/discover`,
+        emailRedirectTo: `${window.location.origin}${nextPath ?? "/discover"}`,
         data: {
           full_name: parsed.data.full_name,
           phone_number: parsed.data.phone_number,

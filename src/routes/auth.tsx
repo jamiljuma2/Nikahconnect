@@ -17,7 +17,17 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Heart, Eye, EyeOff, Check, X } from "lucide-react";
 
-const search = z.object({ mode: z.enum(["login", "register"]).default("login") });
+const search = z.object({
+  mode: z.enum(["login", "register"]).default("login"),
+  next: z.string().optional(),
+});
+
+function safeNext(next: string | undefined): string | null {
+  if (!next) return null;
+  // Same-origin relative path only.
+  if (!next.startsWith("/") || next.startsWith("//")) return null;
+  return next;
+}
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (s) => search.parse(s),

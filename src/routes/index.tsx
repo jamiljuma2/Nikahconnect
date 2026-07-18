@@ -30,7 +30,7 @@ function Landing() {
           Mingle<span className="text-primary">Connect</span>
         </Link>
         <div className="flex items-center gap-2">
-          <Link to="/auth">
+          <Link to="/auth" search={{ mode: "login" } as never}>
             <Button variant="ghost">Sign in</Button>
           </Link>
           <Link to="/auth" search={{ mode: "register" } as never}>
@@ -60,7 +60,7 @@ function Landing() {
                   Create your profile
                 </Button>
               </Link>
-              <Link to="/auth">
+              <Link to="/auth" search={{ mode: "login" } as never}>
                 <Button size="lg" variant="outline">
                   I have an account
                 </Button>

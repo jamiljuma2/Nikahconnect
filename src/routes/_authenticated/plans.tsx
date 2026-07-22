@@ -241,7 +241,7 @@ function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
         );
         return;
       }
-      void tick();
+      pollRef.current = setTimeout(tick, 3000);
     };
     void tick();
   };

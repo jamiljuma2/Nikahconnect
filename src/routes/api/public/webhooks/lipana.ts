@@ -47,7 +47,13 @@ export const Route = createFileRoute("/api/public/webhooks/lipana")({
         }
 
         const d = payload.data ?? {};
-        const transactionId = d.transactionId ?? d.transaction_id ?? d.id;
+        const transactionId =
+          d.transactionId ??
+          d.transaction_id ??
+          d.id ??
+          d.checkoutRequestID ??
+          d.checkoutRequestId ??
+          d.CheckoutRequestID;
         const amount = Number(d.amount);
         if (!transactionId || !amount) return new Response("missing fields", { status: 400 });
 

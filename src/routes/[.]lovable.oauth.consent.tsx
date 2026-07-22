@@ -22,6 +22,22 @@ const oauth = (supabase.auth as unknown as { oauth: OAuthApi }).oauth;
 
 export const Route = createFileRoute("/.lovable/oauth/consent")({
   ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Authorize Access — MingleConnect" },
+      {
+        name: "description",
+        content: "Review and approve secure assistant access to your MingleConnect account.",
+      },
+      { property: "og:title", content: "Authorize Access — MingleConnect" },
+      {
+        property: "og:description",
+        content: "Review and approve secure assistant access to your MingleConnect account.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   validateSearch: (s: Record<string, unknown>) => ({
     authorization_id: typeof s.authorization_id === "string" ? s.authorization_id : "",
   }),

@@ -13,7 +13,16 @@ import {
 import { useAuth } from "@/lib/use-auth";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({ meta: [{ title: "Admin — MingleConnect" }] }),
+  head: () => ({
+    meta: [
+      { title: "Admin — MingleConnect" },
+      { name: "description", content: "Manage MingleConnect users, activity, and platform safety." },
+      { property: "og:title", content: "Admin — MingleConnect" },
+      { property: "og:description", content: "Manage MingleConnect users, activity, and platform safety." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   beforeLoad: async () => {
     try {
       const { isAdmin } = await checkIsAdmin();

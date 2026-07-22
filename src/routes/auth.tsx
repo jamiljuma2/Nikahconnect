@@ -35,6 +35,10 @@ export const Route = createFileRoute("/auth")({
     meta: [
       { title: "Sign in — MingleConnect" },
       { name: "description", content: "Sign in or create your MingleConnect account." },
+      { property: "og:title", content: "Sign in — MingleConnect" },
+      { property: "og:description", content: "Sign in or create your MingleConnect account." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: AuthPage,

@@ -10,7 +10,16 @@ import { useServerFn } from "@tanstack/react-start";
 import { revealPhone, getMyBalance } from "@/lib/dating.functions";
 
 export const Route = createFileRoute("/_authenticated/matches")({
-  head: () => ({ meta: [{ title: "Matches — MingleConnect" }] }),
+  head: () => ({
+    meta: [
+      { title: "Matches — MingleConnect" },
+      { name: "description", content: "View your MingleConnect matches and unlock contact reveals when ready." },
+      { property: "og:title", content: "Matches — MingleConnect" },
+      { property: "og:description", content: "View your MingleConnect matches and unlock contact reveals when ready." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: MatchesPage,
 });
 

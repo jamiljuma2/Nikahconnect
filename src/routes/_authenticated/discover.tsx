@@ -9,7 +9,16 @@ import { useAuth } from "@/lib/use-auth";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/discover")({
-  head: () => ({ meta: [{ title: "Discover — MingleConnect" }] }),
+  head: () => ({
+    meta: [
+      { title: "Discover — MingleConnect" },
+      { name: "description", content: "Swipe through MingleConnect profiles and find meaningful matches nearby." },
+      { property: "og:title", content: "Discover — MingleConnect" },
+      { property: "og:description", content: "Swipe through MingleConnect profiles and find meaningful matches nearby." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: Discover,
 });
 

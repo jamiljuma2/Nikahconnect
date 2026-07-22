@@ -9,7 +9,16 @@ import { Input } from "@/components/ui/input";
 import { CHAT_DIGIT_ERROR, containsDigit } from "@/lib/digit-filter";
 
 export const Route = createFileRoute("/_authenticated/chat/$matchId")({
-  head: () => ({ meta: [{ title: "Chat — MingleConnect" }] }),
+  head: () => ({
+    meta: [
+      { title: "Chat — MingleConnect" },
+      { name: "description", content: "Continue a private MingleConnect conversation with your match." },
+      { property: "og:title", content: "Chat — MingleConnect" },
+      { property: "og:description", content: "Continue a private MingleConnect conversation with your match." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: ChatPage,
 });
 

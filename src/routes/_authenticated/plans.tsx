@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Check, Infinity as InfIcon, Sparkles, Loader2, ShieldCheck, Smartphone } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -17,17 +17,58 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { PLANS, type PlanId } from "@/lib/plans";
-import { initiatePayment, verifyAndActivatePayment } from "@/lib/payments.functions";
+import { getMyPayments, initiatePayment, verifyAndActivatePayment } from "@/lib/payments.functions";
 import { getMyBalance } from "@/lib/dating.functions";
 
 export const Route = createFileRoute("/_authenticated/plans")({
-  head: () => ({ meta: [{ title: "Plans — MingleConnect" }] }),
+  head: () => ({
+    meta: [
+      { title: "Reveal Plans — MingleConnect" },
+      {
+        name: "description",
+        content: "Choose a MingleConnect reveal plan and activate phone number reveals with M-Pesa.",
+      },
+      { property: "og:title", content: "Reveal Plans — MingleConnect" },
+      {
+        property: "og:description",
+        content: "Choose a MingleConnect reveal plan and activate phone number reveals with M-Pesa.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: PlansPage,
 });
 
 function PlansPage() {
+  const verify = useServerFn(verifyAndActivatePayment);
+  const qc = useQueryClient();
+  const checkedPendingRef = useRef(false);
   const balanceQ = useQuery({ queryKey: ["balance"], queryFn: () => getMyBalance() });
+  const paymentsQ = useQuery({ queryKey: ["payments"], queryFn: () => getMyPayments() });
   const sub = balanceQ.data?.subscription;
+
+  useEffect(() => {
+    if (checkedPendingRef.current || sub || !paymentsQ.data?.payments?.length) return;
+
+    const pending = paymentsQ.data.payments.find((p) => p.status === "pending" && p.transaction_id);
+    if (!pending?.transaction_id) return;
+
+    checkedPendingRef.current = true;
+    void verify({ data: { transactionId: pending.transaction_id } })
+      .then((r) => {
+        if (r.status === "success" && r.activated) {
+          qc.invalidateQueries({ queryKey: ["balance"] });
+          qc.invalidateQueries({ queryKey: ["payments"] });
+          toast.success("Your paid plan is active — number reveals are ready.");
+        }
+      })
+      .catch((e) => {
+        checkedPendingRef.current = false;
+        console.error("pending payment recovery", e);
+      });
+  }, [paymentsQ.data?.payments, qc, sub, verify]);
+
   return (
     <div className="pb-12">
       <motion.div
@@ -202,7 +243,7 @@ function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
       }
       pollRef.current = setTimeout(tick, 3000);
     };
-    pollRef.current = setTimeout(tick, 3000);
+    void tick();
   };
 
   const pay = async () => {

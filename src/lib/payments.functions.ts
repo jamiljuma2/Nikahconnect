@@ -69,7 +69,11 @@ export const initiatePayment = createServerFn({ method: "POST" })
 
     const res = await fetch("https://api.lipana.dev/v1/transactions/push-stk", {
       method: "POST",
-      headers: { "x-api-key": apiKey, "content-type": "application/json" },
+      headers: {
+        "x-api-key": apiKey,
+        "content-type": "application/json",
+        "Idempotency-Key": data.idempotencyKey,
+      },
       body: JSON.stringify({ phone, amount: plan.price }),
     });
 
@@ -90,7 +94,19 @@ export const initiatePayment = createServerFn({ method: "POST" })
       transactionId?: string;
       transaction_id?: string;
       id?: string;
-      data?: { transactionId?: string; checkoutRequestID?: string; id?: string };
+      checkoutRequestID?: string;
+      checkoutRequestId?: string;
+      CheckoutRequestID?: string;
+      checkout_request_id?: string;
+      data?: {
+        transactionId?: string;
+        transaction_id?: string;
+        id?: string;
+        checkoutRequestID?: string;
+        checkoutRequestId?: string;
+        CheckoutRequestID?: string;
+        checkout_request_id?: string;
+      };
     } = {};
     try {
       body = JSON.parse(rawBody);
@@ -102,8 +118,16 @@ export const initiatePayment = createServerFn({ method: "POST" })
       body.transaction_id ??
       body.id ??
       body.data?.transactionId ??
+      body.data?.transaction_id ??
       body.data?.id ??
+      body.checkoutRequestID ??
+      body.checkoutRequestId ??
+      body.CheckoutRequestID ??
+      body.checkout_request_id ??
       body.data?.checkoutRequestID ??
+      body.data?.checkoutRequestId ??
+      body.data?.CheckoutRequestID ??
+      body.data?.checkout_request_id ??
       null;
 
     const { error } = await supabaseAdmin.from("payments").insert({
@@ -213,20 +237,62 @@ export const verifyAndActivatePayment = createServerFn({ method: "POST" })
 
     const apiKey = process.env.LIPANA_SECRET_KEY;
     if (!apiKey) throw new Error("Payments are not configured.");
-    if (!payment.transaction_id) return { status: "pending" as const, activated: false };
+    const transactionId = payment.transaction_id;
+    if (!transactionId) return { status: "pending" as const, activated: false };
 
     let providerStatus: string | null = null;
+    const normalizeStatus = (status: unknown) => String(status ?? "").trim().toLowerCase();
+    const getStatus = (value: unknown): string | null => {
+      if (!value || typeof value !== "object") return null;
+      const row = value as Record<string, unknown>;
+      return (
+        normalizeStatus(row.status) ||
+        normalizeStatus(row.paymentStatus) ||
+        normalizeStatus(row.transactionStatus) ||
+        normalizeStatus(row.data && typeof row.data === "object" ? (row.data as Record<string, unknown>).status : null) ||
+        null
+      );
+    };
+    const matchesTransaction = (value: unknown) => {
+      if (!value || typeof value !== "object") return false;
+      const row = value as Record<string, unknown>;
+      const ids = [
+        row.id,
+        row._id,
+        row.transactionId,
+        row.transaction_id,
+        row.checkoutRequestID,
+        row.checkoutRequestId,
+        row.CheckoutRequestID,
+        row.checkout_request_id,
+      ].map((v) => String(v ?? ""));
+      return ids.includes(transactionId);
+    };
+    const findMatchingTransaction = (body: unknown): unknown => {
+      if (Array.isArray(body)) return body.find(matchesTransaction) ?? null;
+      if (!body || typeof body !== "object") return null;
+      const row = body as Record<string, unknown>;
+      if (matchesTransaction(row)) return row;
+      if (Array.isArray(row.data)) return row.data.find(matchesTransaction) ?? null;
+      if (row.data && typeof row.data === "object") {
+        const dataRow = row.data as Record<string, unknown>;
+        if (matchesTransaction(dataRow)) return dataRow;
+        if (Array.isArray(dataRow.transactions)) {
+          return dataRow.transactions.find(matchesTransaction) ?? null;
+        }
+      }
+      if (Array.isArray(row.transactions)) return row.transactions.find(matchesTransaction) ?? null;
+      return null;
+    };
+
     try {
       const res = await fetch(
-        `https://api.lipana.dev/v1/transactions/${encodeURIComponent(payment.transaction_id)}`,
+        `https://api.lipana.dev/v1/transactions/${encodeURIComponent(transactionId)}`,
         { headers: { "x-api-key": apiKey } },
       );
       if (res.ok) {
-        const body = (await res.json()) as {
-          status?: string;
-          data?: { status?: string };
-        };
-        providerStatus = (body.status ?? body.data?.status ?? "").toLowerCase() || null;
+        const body = (await res.json()) as unknown;
+        providerStatus = getStatus(body);
       } else if (res.status !== 404) {
         console.error("Lipana verify failed", res.status, await res.text());
       }
@@ -234,8 +300,29 @@ export const verifyAndActivatePayment = createServerFn({ method: "POST" })
       console.error("Lipana verify error", e);
     }
 
-    const ok = ["success", "completed", "paid"].includes(providerStatus ?? "");
-    const bad = ["failed", "cancelled", "canceled", "expired"].includes(providerStatus ?? "");
+    if (!providerStatus) {
+      try {
+        const res = await fetch("https://api.lipana.dev/v1/transactions?limit=100", {
+          headers: { "x-api-key": apiKey },
+        });
+        if (res.ok) {
+          const body = (await res.json()) as unknown;
+          const match = findMatchingTransaction(body);
+          providerStatus = getStatus(match);
+        } else {
+          console.error("Lipana transaction list failed", res.status, await res.text());
+        }
+      } catch (e) {
+        console.error("Lipana transaction list error", e);
+      }
+    }
+
+    const ok = ["success", "successful", "completed", "complete", "paid"].includes(
+      providerStatus ?? "",
+    );
+    const bad = ["failed", "cancelled", "canceled", "expired", "timeout", "rejected"].includes(
+      providerStatus ?? "",
+    );
 
     if (ok) {
       await supabaseAdmin

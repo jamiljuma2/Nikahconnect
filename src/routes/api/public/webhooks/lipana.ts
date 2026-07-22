@@ -9,7 +9,10 @@ export const Route = createFileRoute("/api/public/webhooks/lipana")({
         const secret = process.env.LIPANA_WEBHOOK_SECRET;
         if (!secret) return new Response("not configured", { status: 500 });
 
-        const sigHeader = request.headers.get("x-lipana-signature") ?? "";
+        const sigHeader = (request.headers.get("x-lipana-signature") ?? "").replace(
+          /^sha256=/i,
+          "",
+        );
         const raw = await request.text();
 
         const expected = createHmac("sha256", secret).update(raw).digest("hex");
@@ -28,6 +31,9 @@ export const Route = createFileRoute("/api/public/webhooks/lipana")({
             amount?: number;
             phone?: string;
             status?: string;
+            checkoutRequestID?: string;
+            checkoutRequestId?: string;
+            CheckoutRequestID?: string;
           };
         };
         try {
@@ -36,7 +42,7 @@ export const Route = createFileRoute("/api/public/webhooks/lipana")({
           return new Response("bad json", { status: 400 });
         }
 
-        if (payload.event !== "payment.success") {
+        if (!["payment.success", "transaction.success"].includes(payload.event ?? "")) {
           return new Response("ignored", { status: 200 });
         }
 
@@ -59,8 +65,39 @@ export const Route = createFileRoute("/api/public/webhooks/lipana")({
 
         if (!payment) return new Response("payment not found", { status: 404 });
 
-        // Idempotency: skip if already success.
-        if (payment.status === "success") return new Response("ok", { status: 200 });
+        const ensureSubscription = async () => {
+          const { data: existingSub } = await supabaseAdmin
+            .from("subscriptions")
+            .select("id")
+            .eq("payment_id", payment.id)
+            .maybeSingle();
+          if (existingSub) return null;
+
+          const plan = PLANS[planId];
+          const start = new Date();
+          const expiry = new Date(start.getTime() + 1000 * 60 * 60 * 24 * 30); // 30 days
+
+          const { error: subErr } = await supabaseAdmin.from("subscriptions").insert({
+            user_id: payment.user_id,
+            plan: planId,
+            remaining_reveals: plan.unlimited ? 0 : plan.reveals,
+            is_unlimited: plan.unlimited,
+            start_date: start.toISOString(),
+            expiry_date: expiry.toISOString(),
+            payment_id: payment.id,
+          });
+          return subErr;
+        };
+
+        // Idempotency: if already marked paid, still ensure the reveal plan exists.
+        if (payment.status === "success") {
+          const subErr = await ensureSubscription();
+          if (subErr) {
+            console.error("sub insert", subErr);
+            return new Response("sub failed", { status: 500 });
+          }
+          return new Response("ok", { status: 200 });
+        }
 
         const { error: updErr } = await supabaseAdmin
           .from("payments")
@@ -69,19 +106,7 @@ export const Route = createFileRoute("/api/public/webhooks/lipana")({
           .neq("status", "success");
         if (updErr) return new Response("update failed", { status: 500 });
 
-        const plan = PLANS[planId];
-        const start = new Date();
-        const expiry = new Date(start.getTime() + 1000 * 60 * 60 * 24 * 30); // 30 days
-
-        const { error: subErr } = await supabaseAdmin.from("subscriptions").insert({
-          user_id: payment.user_id,
-          plan: planId,
-          remaining_reveals: plan.unlimited ? 0 : plan.reveals,
-          is_unlimited: plan.unlimited,
-          start_date: start.toISOString(),
-          expiry_date: expiry.toISOString(),
-          payment_id: payment.id,
-        });
+        const subErr = await ensureSubscription();
         if (subErr) {
           console.error("sub insert", subErr);
           return new Response("sub failed", { status: 500 });

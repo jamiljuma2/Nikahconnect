@@ -237,7 +237,8 @@ export const verifyAndActivatePayment = createServerFn({ method: "POST" })
 
     const apiKey = process.env.LIPANA_SECRET_KEY;
     if (!apiKey) throw new Error("Payments are not configured.");
-    if (!payment.transaction_id) return { status: "pending" as const, activated: false };
+    const transactionId = payment.transaction_id;
+    if (!transactionId) return { status: "pending" as const, activated: false };
 
     let providerStatus: string | null = null;
     const normalizeStatus = (status: unknown) => String(status ?? "").trim().toLowerCase();
@@ -265,7 +266,7 @@ export const verifyAndActivatePayment = createServerFn({ method: "POST" })
         row.CheckoutRequestID,
         row.checkout_request_id,
       ].map((v) => String(v ?? ""));
-      return ids.includes(payment.transaction_id);
+      return ids.includes(transactionId);
     };
     const findMatchingTransaction = (body: unknown): unknown => {
       if (Array.isArray(body)) return body.find(matchesTransaction) ?? null;
@@ -286,7 +287,7 @@ export const verifyAndActivatePayment = createServerFn({ method: "POST" })
 
     try {
       const res = await fetch(
-        `https://api.lipana.dev/v1/transactions/${encodeURIComponent(payment.transaction_id)}`,
+        `https://api.lipana.dev/v1/transactions/${encodeURIComponent(transactionId)}`,
         { headers: { "x-api-key": apiKey } },
       );
       if (res.ok) {

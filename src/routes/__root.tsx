@@ -17,7 +17,6 @@ import "@fontsource/inter/500.css";
 import "@fontsource/inter/600.css";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -44,7 +43,7 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: import("@tanstack/react-router").ErrorComponentProps) {
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    console.error("Root route error", error);
   }, [error]);
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -89,8 +88,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Spark Connect is a mobile-first dating platform for users to create profiles, find matches, and chat." },
       { property: "og:description", content: "Spark Connect is a mobile-first dating platform for users to create profiles, find matches, and chat." },
       { name: "twitter:description", content: "Spark Connect is a mobile-first dating platform for users to create profiles, find matches, and chat." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8f30e642-8a9f-4286-929b-cf97e61c0126/id-preview-839a669a--592b8093-36ec-4384-aeff-afcebaabac40.lovable.app-1782135731298.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8f30e642-8a9f-4286-929b-cf97e61c0126/id-preview-839a669a--592b8093-36ec-4384-aeff-afcebaabac40.lovable.app-1782135731298.png" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),

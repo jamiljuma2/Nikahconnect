@@ -1,7 +1,9 @@
 import { PLANS, type PlanId } from "@/lib/plans";
 
 const BASE = "https://backend.payhero.co.ke/api/v2";
-export const PAYHERO_CALLBACK_URL = "https://mingleconect.lovable.app/api/public/webhooks/payhero";
+export const PAYHERO_CALLBACK_URL =
+  process.env.PAYHERO_CALLBACK_URL ||
+  `${process.env.SUPABASE_URL ?? ""}/functions/v1/payhero-webhook`;
 
 export async function payheroAuth() {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -19,7 +21,8 @@ export async function payheroAuth() {
 }
 
 export async function payheroStkPush(opts: { phone: string; amount: number; externalRef: string; name?: string }) {
-  const { header, channelId } = payheroAuth();
+  const { header, channelId } = await payheroAuth();
+  if (!PAYHERO_CALLBACK_URL) throw new Error("Payments are not configured: set PAYHERO_CALLBACK_URL.");
   const res = await fetch(`${BASE}/payments`, {
     method: "POST",
     headers: { Authorization: header, "content-type": "application/json" },
@@ -49,7 +52,7 @@ export async function payheroStkPush(opts: { phone: string; amount: number; exte
 
 /** Returns "success" | "failed" | "pending" */
 export async function payheroStatus(reference: string): Promise<"success" | "failed" | "pending"> {
-  const { header } = payheroAuth();
+  const { header } = await payheroAuth();
   try {
     const res = await fetch(`${BASE}/transaction-status?reference=${encodeURIComponent(reference)}`, {
       headers: { Authorization: header },

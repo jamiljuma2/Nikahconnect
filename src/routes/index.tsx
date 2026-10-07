@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Heart, Sparkles, Shield, MessageCircleHeart } from "lucide-react";
+import { Heart, ShieldCheck, MessageCircleHeart } from "lucide-react";
 import heroImg from "@/assets/hero.jpg";
-import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,100 +25,75 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   return (
-    <div className="min-h-screen bg-background">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5">
-        <Link to="/" className="font-display text-2xl font-semibold">
-          Mingle<span className="text-primary">Connect</span>
+    <div className="landing-page">
+      <img
+        src={heroImg}
+        alt="Two people facing each other in warm sunset light"
+        className="landing-hero-image"
+        aria-hidden="true"
+      />
+      <div className="landing-image-wash" aria-hidden="true" />
+
+      <nav className="landing-nav" aria-label="Main navigation">
+        <Link to="/" className="landing-brand" aria-label="MingleConnect home">
+          <span className="landing-brand-mark"><Heart className="size-4" fill="currentColor" /></span>
+          <span>Mingle<span className="landing-brand-accent">Connect</span></span>
         </Link>
-        <div className="flex items-center gap-2">
-          <Link to="/auth" search={{ mode: "login" } as never}>
-            <Button variant="ghost">Sign in</Button>
-          </Link>
-          <Link to="/auth" search={{ mode: "register" } as never}>
-            <Button className="gradient-romance shadow-romance text-primary-foreground">
-              Join free
-            </Button>
-          </Link>
+        <div className="landing-nav-copy">
+          <span>Real people.</span>
+          <span>Real connections.</span>
+          <span className="landing-nav-accent">Real love.</span>
         </div>
+        <Link to="/auth" search={{ mode: "login" } as never} className="landing-sign-in">
+          Sign in
+        </Link>
       </nav>
 
-      <section className="relative overflow-hidden">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-12 md:grid-cols-2 md:py-20">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
-              <Sparkles className="size-3.5" /> Built for real connection
-            </span>
-            <h1 className="mt-5 font-display text-5xl font-semibold leading-[1.05] sm:text-6xl md:text-7xl">
-              Find someone who feels like <span className="text-primary">home</span>.
-            </h1>
-            <p className="mt-6 max-w-md text-lg text-muted-foreground">
-              Swipe with intention. Chat without games. Reveal contacts only when the spark is mutual —
-              powered by secure M-Pesa unlocks.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/auth" search={{ mode: "register" } as never}>
-                <Button size="lg" className="gradient-romance shadow-romance text-primary-foreground">
-                  Create your profile
-                </Button>
-              </Link>
-              <Link to="/auth" search={{ mode: "login" } as never}>
-                <Button size="lg" variant="outline">
-                  I have an account
-                </Button>
-              </Link>
-            </div>
-          </div>
-          <div className="relative">
-            <div className="absolute -inset-4 -z-10 rounded-[2rem] gradient-romance opacity-30 blur-3xl" />
-            <img
-              src={heroImg}
-              alt="A couple silhouetted against a warm sunset"
-              width={1600}
-              height={1200}
-              className="aspect-[4/5] w-full rounded-[2rem] object-cover shadow-romance"
-            />
-          </div>
-        </div>
-      </section>
+      <main className="landing-content">
+        <p className="landing-eyebrow">MingleConnect / Dating with intention</p>
+        <h1>
+          <span>Two hearts.</span>
+          <strong>One connection.</strong>
+        </h1>
+        <p className="landing-subtitle">
+          Find someone who<br />
+          truly understands you.
+        </p>
 
-      <section className="mx-auto max-w-6xl px-4 py-16">
-        <div className="grid gap-6 md:grid-cols-3">
-          <Feature
-            icon={<Heart className="size-5" />}
-            title="Mutual matches only"
-            body="You both have to like each other before you can chat. No cold DMs, no spam."
-          />
-          <Feature
-            icon={<MessageCircleHeart className="size-5" />}
-            title="No-digit chat zone"
-            body="Numbers are blocked in messages so contacts stay private until you both agree."
-          />
-          <Feature
-            icon={<Shield className="size-5" />}
-            title="Pay only to reveal"
-            body="Unlock a real phone number via M-Pesa, only after a match feels right."
-          />
+        <div className="landing-benefits" aria-label="MingleConnect benefits">
+          <LandingBenefit icon={<Heart />} lineOne="Meaningful" lineTwo="Matches" />
+          <LandingBenefit icon={<ShieldCheck />} lineOne="Safe &" lineTwo="Secure" />
+          <LandingBenefit icon={<MessageCircleHeart />} lineOne="Real" lineTwo="Conversations" />
         </div>
-      </section>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm text-muted-foreground sm:flex-row">
-          <span>© {new Date().getFullYear()} MingleConnect</span>
-          <span>Made with love in Nairobi.</span>
-        </div>
-      </footer>
+        <Link to="/auth" search={{ mode: "register" } as never} className="landing-cta">
+          Join free today
+        </Link>
+        <p className="landing-microcopy">It only takes a minute <span aria-hidden="true">♥</span></p>
+      </main>
+
+      <aside className="landing-callout" aria-label="Your love story starts here">
+        <span className="landing-callout-heart"><Heart fill="currentColor" /></span>
+        <p>Your love story<br />starts here</p>
+        <span className="landing-callout-rule" aria-hidden="true"><i /></span>
+      </aside>
     </div>
   );
 }
 
-function Feature({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+function LandingBenefit({
+  icon,
+  lineOne,
+  lineTwo,
+}: {
+  icon: React.ReactNode;
+  lineOne: string;
+  lineTwo: string;
+}) {
   return (
-    <div className="rounded-3xl border border-border gradient-card p-6 shadow-card">
-      <div className="inline-flex size-10 items-center justify-center rounded-full bg-accent text-primary">
-        {icon}
-      </div>
-      <h3 className="mt-4 font-display text-2xl font-semibold">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p>
+    <div className="landing-benefit">
+      <span className="landing-benefit-icon">{icon}</span>
+      <span>{lineOne}<br />{lineTwo}</span>
     </div>
   );
 }

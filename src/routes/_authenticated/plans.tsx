@@ -70,21 +70,18 @@ function PlansPage() {
   }, [paymentsQ.data?.payments, qc, sub, verify]);
 
   return (
-    <div className="pb-12">
+    <div className="plans-page">
       <motion.div
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
+        className="plans-heading"
       >
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
-          <Sparkles className="size-3.5" /> Choose your plan
+        <span className="plans-kicker">
+          <Sparkles className="size-3.5" /> MingleConnect membership
         </span>
-        <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight md:text-5xl">
-          Reveal plans
-        </h1>
-        <p className="mt-2 max-w-xl text-muted-foreground">
-          Unlock real phone numbers when you both feel ready. Pay securely with M-Pesa.
-        </p>
+        <h1>Simple, transparent pricing</h1>
+        <p>Choose the reveal plan that fits your pace. Every plan includes secure M-Pesa checkout.</p>
       </motion.div>
 
       <AnimatePresence>
@@ -94,13 +91,13 @@ function PlansPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ delay: 0.1 }}
-            className="mt-6 rounded-2xl border border-border gradient-card p-5 shadow-card"
+            className="plans-current-plan"
           >
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              Current plan
-            </p>
-            <p className="mt-1 font-display text-2xl font-semibold capitalize">{sub.plan}</p>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <div>
+              <p className="plans-current-label">Current plan</p>
+              <p className="plans-current-name">{sub.plan}</p>
+            </div>
+            <p className="plans-current-balance">
               {sub.is_unlimited
                 ? "Unlimited reveals"
                 : `${sub.remaining_reveals} reveal${sub.remaining_reveals === 1 ? "" : "s"} remaining`}
@@ -109,7 +106,7 @@ function PlansPage() {
         )}
       </AnimatePresence>
 
-      <div className="mt-8 grid gap-5 md:grid-cols-3">
+      <div className="plans-grid">
         {(Object.values(PLANS) as (typeof PLANS)[PlanId][]).map((p, i) => (
           <motion.div
             key={p.id}
@@ -131,45 +128,42 @@ function PlanCard({ plan }: { plan: (typeof PLANS)[PlanId] }) {
     <motion.article
       whileHover={{ y: -6, transition: { duration: 0.25 } }}
       className={
-        "group relative flex h-full flex-col overflow-hidden rounded-3xl border p-6 shadow-card transition-shadow hover:shadow-romance " +
-        (popular
-          ? "border-primary/60 gradient-card shadow-romance"
-          : "border-border bg-card")
+        "plans-card group relative flex h-full flex-col " +
+        (popular ? "plans-card-popular" : "")
       }
     >
       {popular && (
         <>
           <motion.div
             aria-hidden
-            className="pointer-events-none absolute -top-24 -right-24 size-64 rounded-full bg-primary/20 blur-3xl"
+            className="plans-card-glow pointer-events-none absolute"
             animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           />
-          <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full gradient-romance px-3 py-1 text-xs font-medium text-primary-foreground shadow-romance">
-            Most popular
+          <span className="plans-popular-badge">
+            Most popular · Best value
           </span>
         </>
       )}
-      <div className="relative">
-        <p className="text-xs font-medium uppercase tracking-wider text-primary">
-          {plan.tagline}
-        </p>
-        <h3 className="mt-2 font-display text-3xl font-semibold">{plan.name}</h3>
-        <div className="mt-4 flex items-baseline gap-1.5">
-          <span className="text-sm font-medium text-muted-foreground">KES</span>
-          <span className="font-display text-5xl font-semibold tracking-tight">{plan.price}</span>
+      <div className="plans-card-top relative">
+        <p className="plans-card-tagline">{plan.tagline}</p>
+        <h3>{plan.name}</h3>
+        <div className="plans-price">
+          <span>KES</span>
+          <strong>{plan.price.toLocaleString("en-KE")}</strong>
         </div>
-        <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-2.5 py-1 text-xs font-medium">
+        <p className="plans-duration">30-day access · {plan.unlimited ? "Unlimited reveals" : `${plan.reveals} reveals`}</p>
+        <p className="plans-condition">
           {plan.unlimited ? (
             <>
-              <InfIcon className="size-3.5" /> Unlimited reveals
+              <InfIcon className="size-4" /> No reveal limit
             </>
           ) : (
-            <>{plan.reveals} reveals included</>
+            <><Check className="size-4" /> {plan.reveals} contact reveals included</>
           )}
         </p>
       </div>
-      <ul className="relative mt-6 flex-1 space-y-3 text-sm">
+      <ul className="plans-features relative flex-1">
         {plan.features.map((f, i) => (
           <motion.li
             key={f}
@@ -178,10 +172,10 @@ function PlanCard({ plan }: { plan: (typeof PLANS)[PlanId] }) {
             transition={{ delay: 0.2 + i * 0.05 }}
             className="flex items-start gap-2.5"
           >
-            <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Check className="size-3" strokeWidth={3} />
+            <span className="plans-feature-check">
+              <Check className="size-3.5" strokeWidth={3} />
             </span>
-            <span className="text-foreground/90">{f}</span>
+            <span>{f}</span>
           </motion.li>
         ))}
       </ul>

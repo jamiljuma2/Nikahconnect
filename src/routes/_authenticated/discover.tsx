@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Heart, X, MapPin, Briefcase, Sparkles } from "lucide-react";
-import { motion, useMotionValue, useTransform, type PanInfo } from "motion/react";
+import { Heart, MapPin, Search, Sparkles } from "lucide-react";
+import { motion } from "motion/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,8 @@ function Discover() {
   const qc = useQueryClient();
   const [passed, setPassed] = useState<string[]>([]);
   const [likedLocal, setLikedLocal] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [genderFilter, setGenderFilter] = useState<"all" | "female" | "male" | "other">("all");
 
   const profilesQ = useInfiniteQuery<Profile[], Error, { pages: Profile[][]; pageParams: number[] }, readonly unknown[], number>({
     queryKey: ["discover", user?.id],
@@ -82,27 +84,38 @@ function Discover() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const profiles = useMemo(() => {
+  const allProfiles = useMemo(() => {
     const all = (profilesQ.data?.pages ?? []).flat();
-    const skip = new Set([...passed, ...likedLocal]);
+    const skip = new Set(passed);
     return all.filter((p) => !skip.has(p.id));
-  }, [profilesQ.data, passed, likedLocal]);
+  }, [profilesQ.data, passed]);
 
-  const current = profiles[0];
-  const next = profiles[1];
+  const profiles = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    return allProfiles.filter((profile) => {
+      const matchesGender = genderFilter === "all" || profile.gender === genderFilter;
+      const matchesSearch = !term || [profile.full_name, profile.location, ...(profile.interests ?? [])]
+        .join(" ")
+        .toLowerCase()
+        .includes(term);
+      return matchesGender && matchesSearch;
+    });
+  }, [allProfiles, genderFilter, searchTerm]);
 
   // Prefetch next card image
   useEffect(() => {
-    if (next?.avatar_url) {
-      const img = new Image();
-      img.src = next.avatar_url;
-    }
-  }, [next?.avatar_url]);
+    allProfiles.slice(0, 6).forEach((profile) => {
+      if (profile.avatar_url) {
+        const img = new Image();
+        img.src = profile.avatar_url;
+      }
+    });
+  }, [allProfiles]);
 
   // Load more before running out
   useEffect(() => {
     if (
-      profiles.length <= PREFETCH_THRESHOLD &&
+      allProfiles.length <= PREFETCH_THRESHOLD &&
       profilesQ.hasNextPage &&
       !profilesQ.isFetchingNextPage
     ) {
@@ -110,8 +123,8 @@ function Discover() {
     }
   }, [profiles.length, profilesQ]);
 
-  const handlePass = (id: string) => setPassed((p) => [...p, id]);
   const handleLike = async (p: Profile) => {
+    if (likedLocal.includes(p.id) || likeM.isPending) return;
     setLikedLocal((l) => [...l, p.id]);
     try {
       await likeM.mutateAsync(p.id);
@@ -123,171 +136,146 @@ function Discover() {
 
   if (profilesQ.isLoading) return <Loader>Finding people near you…</Loader>;
 
-  if (!current) {
+  if (!allProfiles.length && !profilesQ.hasNextPage) {
     return (
-      <div className="mx-auto mt-16 max-w-md text-center">
-        <Sparkles className="mx-auto size-10 text-primary" />
-        <h2 className="mt-4 font-display text-3xl font-semibold">You're all caught up</h2>
-        <p className="mt-2 text-muted-foreground">
-          New profiles join every day. Check back soon — or peek at your matches.
-        </p>
-        <Link to="/matches">
-          <Button className="mt-6 gradient-romance text-primary-foreground">View matches</Button>
-        </Link>
+      <div className="discover-empty">
+        <Sparkles className="mx-auto size-9" />
+        <h2>You're all caught up</h2>
+        <p>New profiles join every day. Check back soon or explore your matches.</p>
+        <Link to="/matches" className="discover-empty-action">View matches</Link>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-md">
-      <div className="relative h-[60vh] min-h-[420px] max-h-[640px] select-none">
-        {next && (
-          <div className="absolute inset-0 scale-[0.96] opacity-70" aria-hidden>
-            <ProfileCard profile={next} />
-          </div>
-        )}
-        <SwipeCard
-          key={current.id}
-          profile={current}
-          onPass={() => handlePass(current.id)}
-          onLike={() => handleLike(current)}
+    <div className="discover-page">
+      <label className="discover-search">
+        <Search className="size-4" />
+        <input
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          placeholder="Search your match"
+          aria-label="Search your match"
         />
+      </label>
+
+      <div className="discover-story-row" aria-label="Profile categories">
+        {allProfiles.slice(0, 8).map((profile) => (
+          <button key={profile.id} type="button" className="discover-story" onClick={() => setSearchTerm(profile.full_name)}>
+            <span className="discover-story-image">
+              <ProfileAvatar profile={profile} />
+            </span>
+            <span>{profile.full_name.split(" ")[0]}</span>
+          </button>
+        ))}
       </div>
-      <div className="mt-6 flex justify-center gap-6">
-        <button
-          onClick={() => handlePass(current.id)}
-          className="flex size-16 items-center justify-center rounded-full border border-border bg-card shadow-card transition hover:scale-105"
-          aria-label="Pass"
-        >
-          <X className="size-7 text-muted-foreground" />
-        </button>
-        <button
-          onClick={() => handleLike(current)}
-          className="flex size-20 items-center justify-center rounded-full gradient-romance shadow-romance transition hover:scale-105"
-          aria-label="Like"
-        >
-          <Heart className="size-9 text-primary-foreground" fill="currentColor" />
-        </button>
+
+      <div className="discover-filter-row" aria-label="Profile filters">
+        {(["all", "female", "male", "other"] as const).map((filter) => (
+          <button
+            key={filter}
+            type="button"
+            onClick={() => setGenderFilter(filter)}
+            className={genderFilter === filter ? "discover-filter active" : "discover-filter"}
+          >
+            {filter === "all" ? "All profiles" : filter === "female" ? "Women" : filter === "male" ? "Men" : "Other"}
+          </button>
+        ))}
       </div>
+
+      <div className="discover-section-heading">
+        <div>
+          <p className="discover-section-kicker">Find your kind of connection</p>
+          <h1>Featured Profiles</h1>
+        </div>
+        <span>{profiles.length} nearby</span>
+      </div>
+
+      {!profiles.length ? (
+        <div className="discover-filter-empty">No profiles match that search yet.</div>
+      ) : (
+        <div className="discover-grid">
+          {profiles.map((profile, index) => (
+            <motion.div
+              key={profile.id}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: Math.min(index, 8) * 0.04, duration: 0.3 }}
+            >
+              <ProfileGridCard
+                profile={profile}
+                liked={likedLocal.includes(profile.id)}
+                onLike={() => void handleLike(profile)}
+              />
+            </motion.div>
+          ))}
+        </div>
+      )}
+      {profilesQ.isFetchingNextPage && <p className="discover-loading-more">Finding more people…</p>}
     </div>
   );
 }
 
-function SwipeCard({
+function ProfileGridCard({
   profile,
-  onPass,
+  liked,
   onLike,
 }: {
   profile: Profile;
-  onPass: () => void;
+  liked: boolean;
   onLike: () => void;
 }) {
-  const x = useMotionValue(0);
-  const rotate = useTransform(x, [-300, 0, 300], [-18, 0, 18]);
-  const likeOpacity = useTransform(x, [40, 160], [0, 1]);
-  const passOpacity = useTransform(x, [-160, -40], [1, 0]);
-
-  const handleEnd = (_: unknown, info: PanInfo) => {
-    const threshold = 140;
-    if (info.offset.x > threshold || info.velocity.x > 600) onLike();
-    else if (info.offset.x < -threshold || info.velocity.x < -600) onPass();
-  };
-
   return (
-    <motion.div
-      drag="x"
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.7}
-      onDragEnd={handleEnd}
-      style={{ x, rotate }}
-      whileTap={{ cursor: "grabbing" }}
-      className="absolute inset-0 cursor-grab touch-none"
-    >
-      <ProfileCard profile={profile}>
-        <motion.div
-          style={{ opacity: likeOpacity }}
-          className="pointer-events-none absolute left-5 top-5 rounded-lg border-4 border-emerald-400 px-3 py-1 text-2xl font-bold uppercase tracking-wider text-emerald-400 -rotate-12"
-        >
-          Like
-        </motion.div>
-        <motion.div
-          style={{ opacity: passOpacity }}
-          className="pointer-events-none absolute right-5 top-5 rounded-lg border-4 border-rose-500 px-3 py-1 text-2xl font-bold uppercase tracking-wider text-rose-500 rotate-12"
-        >
-          Nope
-        </motion.div>
-      </ProfileCard>
-    </motion.div>
-  );
-}
-
-function ProfileCard({
-  profile,
-  children,
-}: {
-  profile: Profile;
-  children?: React.ReactNode;
-}) {
-  return (
-    <article className="relative h-full overflow-hidden rounded-3xl border border-border bg-card shadow-card">
-      <div className="relative aspect-[3/4] w-full bg-muted">
-        {profile.avatar_url ? (
-          <img
-            src={profile.avatar_url}
-            alt={profile.full_name}
-            loading="lazy"
-            decoding="async"
-            draggable={false}
-            className="size-full object-cover"
-          />
-        ) : (
-          <div className="flex size-full items-center justify-center gradient-romance">
-            <span className="font-display text-6xl text-primary-foreground">
-              {profile.full_name.charAt(0)}
-            </span>
-          </div>
-        )}
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-5 text-white">
-          <h2 className="font-display text-3xl font-semibold">
-            {profile.full_name}, {profile.age}
-          </h2>
-          <p className="mt-1 flex items-center gap-1.5 text-sm opacity-90">
-            <MapPin className="size-3.5" />
-            {profile.location}
-          </p>
-        </div>
-        {children}
+    <article className="discover-profile-card">
+      <div className="discover-profile-image">
+        <ProfileAvatar profile={profile} />
       </div>
-      <div className="space-y-3 p-5">
-        {profile.bio && <p className="text-sm text-foreground">{profile.bio}</p>}
-        {profile.occupation && (
-          <p className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Briefcase className="size-4" />
-            {profile.occupation}
-          </p>
-        )}
-        {profile.relationship_goal && (
-          <p className="text-sm text-muted-foreground">
-            <span className="text-foreground">Looking for:</span> {profile.relationship_goal}
-          </p>
-        )}
-        {profile.interests?.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {profile.interests.map((i) => (
-              <span
-                key={i}
-                className="rounded-full bg-accent px-2.5 py-1 text-xs text-accent-foreground"
-              >
-                {i}
-              </span>
-            ))}
-          </div>
-        )}
+      <div className="discover-profile-meta">
+        <div className="min-w-0">
+          <h2>{profile.full_name}</h2>
+          <p><span>{profile.age} yrs</span><span className="discover-meta-dot">·</span><MapPin className="size-3" />{profile.location}</p>
+        </div>
+        <button
+          type="button"
+          onClick={onLike}
+          className={liked ? "discover-like liked" : "discover-like"}
+          aria-label={liked ? `Liked ${profile.full_name}` : `Like ${profile.full_name}`}
+          aria-pressed={liked}
+        >
+          <Heart className="size-5" fill={liked ? "currentColor" : "none"} />
+        </button>
       </div>
     </article>
   );
 }
 
+function ProfileAvatar({ profile }: { profile: Profile }) {
+  return profile.avatar_url ? (
+    <img
+      src={profile.avatar_url}
+      alt={profile.full_name}
+      loading="lazy"
+      decoding="async"
+      draggable={false}
+    />
+  ) : (
+    <div className="discover-avatar-fallback" aria-label={`${profile.full_name} profile placeholder`}>
+      {profile.full_name.charAt(0)}
+    </div>
+  );
+}
+
 function Loader({ children }: { children: React.ReactNode }) {
-  return <div className="mt-16 text-center text-muted-foreground">{children}</div>;
+  return (
+    <div className="discover-page">
+      <div className="discover-skeleton-search" />
+      <div className="discover-skeleton-stories">
+        {Array.from({ length: 6 }, (_, index) => <span key={index} />)}
+      </div>
+      <p className="discover-loading-label">{children}</p>
+      <div className="discover-grid discover-skeleton-grid">
+        {Array.from({ length: 6 }, (_, index) => <div key={index} className="discover-skeleton-card" />)}
+      </div>
+    </div>
+  );
 }

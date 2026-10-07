@@ -279,9 +279,9 @@ Users may purchase another plan anytime.
 
 New purchase resets according to purchased package.
 
-Payment Integration (Lipana)
+Payment Integration (PayHero)
 
-Use Lipana STK Push.
+Use PayHero M-Pesa STK Push.
 
 Create payment flow:
 
@@ -305,41 +305,35 @@ KES 500 → Premium
 
 Environment Variables:
 
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_URL=
+SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+VITE_SUPABASE_URL=
+VITE_SUPABASE_PUBLISHABLE_KEY=
+VITE_SUPABASE_PROJECT_ID=
 
-LIPANA_SECRET_KEY=
-LIPANA_WEBHOOK_SECRET=
+PAYHERO_API_USERNAME=
+PAYHERO_API_PASSWORD=
+PAYHERO_CHANNEL_ID=
+PAYHERO_CALLBACK_URL=https://<project-ref>.supabase.co/functions/v1/payhero-webhook
 
-Lipana STK Push Endpoint
+PayHero credentials can also be configured and verified at `/admin/payments`.
 
-POST
+Deploy the payment webhook with:
 
-https://api.lipana.dev/v1/transactions/push-stk
+```sh
+supabase functions deploy payhero-webhook --no-verify-jwt
+```
 
-Headers:
-
-x-api-key: LIPANA_SECRET_KEY
-
-Body:
-
-{
-"phone": "+254712345678",
-"amount": 150
-}
-
-Supported amounts:
-
-150
-250
-500
+The Edge Function reads `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and the
+PayHero credentials from the Supabase project secrets. Set `PAYHERO_CALLBACK_URL`
+only when the default Supabase function URL is not the desired callback.
 
 Webhook Handling
 
 Create:
 
-/api/webhooks/lipana
+/api/public/webhooks/payhero
 
 Verify:
 
@@ -570,18 +564,6 @@ Prevent duplicate payments
 Prevent duplicate number reveals
 
 Generate complete production-ready code, database schema, Supabase migrations, API routes, authentication flows, payment integration, webhook handlers, and responsive UI screens.
-
-This project was built with [Lovable](https://lovable.dev).
-
-**Live app**: https://mingleconect.lovable.app
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/592b8093-36ec-4384-aeff-afcebaabac40).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 

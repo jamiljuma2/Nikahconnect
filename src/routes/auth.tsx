@@ -57,46 +57,59 @@ function AuthPage() {
   };
 
   return (
-    <div className="grid min-h-screen md:grid-cols-2">
-      <aside className="relative hidden gradient-romance md:flex">
-        <div className="m-auto max-w-sm p-12 text-primary-foreground">
-          <Heart className="size-10" />
-          <h2 className="mt-6 font-display text-4xl font-semibold leading-tight">
-            Real people. Real sparks. Real numbers — only when you both decide.
-          </h2>
-          <p className="mt-4 text-sm opacity-90">
-            Welcome to MingleConnect. Join thousands finding meaningful connections near you.
-          </p>
-        </div>
-      </aside>
+    <div className="auth-page">
+      <div className="auth-orbit auth-orbit-one" aria-hidden="true" />
+      <div className="auth-orbit auth-orbit-two" aria-hidden="true" />
+      <div className="auth-band auth-band-one" aria-hidden="true" />
+      <div className="auth-band auth-band-two" aria-hidden="true" />
+      <div className="auth-outline auth-outline-one" aria-hidden="true" />
+      <div className="auth-outline auth-outline-two" aria-hidden="true" />
 
-      <main className="flex flex-col justify-center px-6 py-12 md:px-12">
-        <div className="mx-auto w-full max-w-md">
-          <Link to="/" className="font-display text-2xl font-semibold">
-            Mingle<span className="text-primary">Connect</span>
+      <main className="auth-frame">
+        <section className="auth-intro">
+          <Link to="/" className="auth-brand" aria-label="MingleConnect home">
+            <span className="auth-brand-mark"><Heart className="size-4" fill="currentColor" /></span>
+            <span>Mingle<span className="auth-brand-accent">Connect</span></span>
           </Link>
-          <h1 className="mt-8 font-display text-4xl font-semibold">
-            {mode === "register" ? "Create your account" : "Welcome back"}
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {mode === "register"
-              ? "It only takes a minute. Email verification is required."
-              : "Sign in to continue your story."}
-          </p>
-
-          <div className="mt-6 flex gap-2 rounded-full bg-muted p-1">
-            <ModeTab to="login" current={mode}>Sign in</ModeTab>
-            <ModeTab to="register" current={mode}>Register</ModeTab>
+          <div className="auth-intro-copy">
+            <p className="auth-kicker">Your next chapter starts here</p>
+            <h1>Welcome!</h1>
+            <span className="auth-rule" aria-hidden="true" />
+            <p className="auth-message">
+              Meet someone who matches your energy, your interests, and your story.
+            </p>
+            <Link to="/" className="auth-discover">Discover More</Link>
           </div>
+          <p className="auth-footer-note">Meaningful connections, made at your pace.</p>
+        </section>
 
-          <div className="mt-6">
-            {mode === "register" ? (
-              <RegisterForm nextPath={nextPath} onDone={() => router.navigate({ to: "/auth", search: nextPath ? { mode: "login", next: nextPath } : { mode: "login" } })} />
-            ) : (
-              <LoginForm onDone={goNext} />
-            )}
+        <section className="auth-form-shell" aria-labelledby="auth-title">
+          <div className="auth-form-panel">
+            <div className="auth-form-heading">
+              <span className="auth-form-eyebrow">MingleConnect</span>
+              <h2 id="auth-title">{mode === "register" ? "Create account" : "Sign in"}</h2>
+              <span className="auth-rule auth-rule-center" aria-hidden="true" />
+              <p>
+                {mode === "register"
+                  ? "It only takes a minute to begin."
+                  : "Welcome back. Your story is waiting."}
+              </p>
+            </div>
+
+            <div className="auth-mode-tabs" aria-label="Authentication mode">
+              <ModeTab to="login" current={mode}>Sign in</ModeTab>
+              <ModeTab to="register" current={mode}>Register</ModeTab>
+            </div>
+
+            <div className="auth-form-content">
+              {mode === "register" ? (
+                <RegisterForm nextPath={nextPath} onDone={() => router.navigate({ to: "/auth", search: nextPath ? { mode: "login", next: nextPath } : { mode: "login" } })} />
+              ) : (
+                <LoginForm onDone={goNext} />
+              )}
+            </div>
           </div>
-        </div>
+        </section>
       </main>
     </div>
   );
@@ -117,8 +130,8 @@ function ModeTab({
       to="/auth"
       search={{ mode: to }}
       className={
-        "flex-1 rounded-full px-4 py-2 text-center text-sm font-medium transition " +
-        (active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground")
+        "auth-mode-tab flex-1 px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.16em] transition " +
+        (active ? "auth-mode-tab-active" : "")
       }
     >
       {children}
@@ -150,13 +163,13 @@ function PasswordInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         autoComplete={autoComplete}
-        className="pr-10"
+        className="auth-input pr-10"
       />
       <button
         type="button"
         onClick={() => setShow((s) => !s)}
         aria-label={show ? "Hide password" : "Show password"}
-        className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground transition"
+        className="auth-password-toggle absolute inset-y-0 right-0 flex items-center px-3 transition"
       >
         {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
       </button>
@@ -178,14 +191,14 @@ function LoginForm({ onDone }: { onDone: () => void }) {
     onDone();
   };
   return (
-    <form onSubmit={submit} className="space-y-4">
-      <Field label="Email">
-        <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+    <form onSubmit={submit} className="auth-fields">
+      <Field label="Email or Username">
+        <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" className="auth-input" />
       </Field>
       <Field label="Password">
         <PasswordInput value={password} onChange={setPassword} autoComplete="current-password" />
       </Field>
-      <Button type="submit" className="w-full gradient-romance text-primary-foreground" disabled={busy}>
+      <Button type="submit" className="auth-submit w-full" disabled={busy}>
         {busy ? "Signing in…" : "Sign in"}
       </Button>
     </form>

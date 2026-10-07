@@ -76,7 +76,10 @@ function NavLink({
         "shrink-0 items-center gap-2 rounded-full px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:px-3 " +
         (mobileHidden ? "hidden md:inline-flex" : "inline-flex")
       }
-      activeProps={{ className: "text-primary bg-accent" }}
+      activeProps={{
+        className:
+          "inline-flex shrink-0 items-center gap-2 rounded-full bg-accent px-2.5 py-2 text-sm font-medium text-primary transition-colors sm:px-3",
+      }}
     >
       {icon}
       <span className="hidden sm:inline">{label}</span>

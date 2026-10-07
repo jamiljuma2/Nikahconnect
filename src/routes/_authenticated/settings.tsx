@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Camera, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { Button } from "@/components/ui/button";
@@ -103,69 +104,102 @@ function SettingsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <h1 className="font-display text-4xl font-semibold">Your profile</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Keep it honest. Keep it you.</p>
+    <div className="profile-page">
+      <div className="profile-heading">
+        <p className="profile-kicker">Your MingleConnect profile</p>
+        <h1>Your profile</h1>
+        <p>Keep it honest. Keep it you.</p>
+      </div>
 
-      <form onSubmit={save} className="mt-6 space-y-5">
-        <div className="flex items-center gap-4">
+      <form onSubmit={save} className="profile-form">
+        <section className="profile-photo-section" aria-labelledby="photo-heading">
+          <div className="profile-photo-copy">
+            <p id="photo-heading" className="profile-section-label">Profile photo</p>
+            <p className="profile-section-hint">A warm first impression goes a long way.</p>
+          </div>
+          <div className="profile-photo-control">
           {form.avatar_url ? (
-            <img src={form.avatar_url} alt="" className="size-20 rounded-full object-cover ring-2 ring-primary/30" />
+            <img src={form.avatar_url} alt="Your profile" className="profile-avatar" />
           ) : (
-            <div className="flex size-20 items-center justify-center rounded-full gradient-romance text-2xl text-primary-foreground">
+            <div className="profile-avatar profile-avatar-fallback">
               {form.full_name.charAt(0) || "?"}
             </div>
           )}
-          <Label className="cursor-pointer">
+          <Label className="profile-upload cursor-pointer">
             <input type="file" accept="image/*" className="hidden" onChange={onUpload} />
-            <span className="inline-flex items-center justify-center rounded-full border border-border bg-card px-4 py-2 text-sm hover:bg-accent">
+            <span>
+              {uploading ? <Loader2 className="size-4 animate-spin" /> : <Camera className="size-4" />}
               {uploading ? "Uploading…" : "Upload photo"}
             </span>
           </Label>
-        </div>
+          </div>
+        </section>
 
-        <Field label="Full name">
-          <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
-        </Field>
-        <Field label="Location">
-          <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
-        </Field>
-        <Field label="Occupation">
-          <Input value={form.occupation} onChange={(e) => setForm({ ...form, occupation: e.target.value })} />
-        </Field>
-        <Field label="Relationship goal">
-          <Input
-            placeholder="Long-term partner, friendship, dating…"
-            value={form.relationship_goal}
-            onChange={(e) => setForm({ ...form, relationship_goal: e.target.value })}
-          />
-        </Field>
-        <Field label="Interests (comma-separated)">
-          <Input
-            placeholder="hiking, jazz, cooking"
-            value={form.interests}
-            onChange={(e) => setForm({ ...form, interests: e.target.value })}
-          />
-        </Field>
-        <Field label="Bio">
-          <Textarea
-            rows={4}
-            value={form.bio}
-            onChange={(e) => setForm({ ...form, bio: e.target.value })}
-          />
-        </Field>
-        <Button type="submit" className="gradient-romance text-primary-foreground" disabled={busy}>
-          {busy ? "Saving…" : "Save profile"}
-        </Button>
+        <section className="profile-section" aria-labelledby="basic-info-heading">
+          <div className="profile-section-heading">
+            <p id="basic-info-heading" className="profile-section-label">Profile</p>
+            <p className="profile-section-hint">The basics people notice first.</p>
+          </div>
+          <div className="profile-fields profile-fields-three">
+            <Field label="Full name" id="full-name">
+              <Input id="full-name" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+            </Field>
+            <Field label="Location" id="location">
+              <Input id="location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
+            </Field>
+            <Field label="Occupation" id="occupation">
+              <Input id="occupation" value={form.occupation} onChange={(e) => setForm({ ...form, occupation: e.target.value })} />
+            </Field>
+          </div>
+        </section>
+
+        <section className="profile-section" aria-labelledby="about-heading">
+          <div className="profile-section-heading">
+            <p id="about-heading" className="profile-section-label">About you</p>
+            <p className="profile-section-hint">Share the details that make you, you.</p>
+          </div>
+          <div className="profile-fields">
+            <Field label="Relationship goal" id="relationship-goal">
+              <Input
+                id="relationship-goal"
+                placeholder="Long-term partner, friendship, dating…"
+                value={form.relationship_goal}
+                onChange={(e) => setForm({ ...form, relationship_goal: e.target.value })}
+              />
+            </Field>
+            <Field label="Interests (comma-separated)" id="interests">
+              <Input
+                id="interests"
+                placeholder="hiking, jazz, cooking"
+                value={form.interests}
+                onChange={(e) => setForm({ ...form, interests: e.target.value })}
+              />
+            </Field>
+            <Field label="Bio" id="bio">
+              <Textarea
+                id="bio"
+                rows={4}
+                value={form.bio}
+                onChange={(e) => setForm({ ...form, bio: e.target.value })}
+              />
+            </Field>
+          </div>
+        </section>
+
+        <div className="profile-actions">
+          <Button type="submit" className="profile-save" disabled={busy}>
+            {busy ? <><Loader2 className="size-4 animate-spin" /> Saving…</> : <><Check className="size-4" /> Save profile</>}
+          </Button>
+        </div>
       </form>
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, id, children }: { label: string; id: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-1.5">
-      <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</Label>
+    <div className="profile-field">
+      <Label htmlFor={id}>{label}</Label>
       {children}
     </div>
   );

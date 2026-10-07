@@ -167,6 +167,36 @@ export type Database = {
           },
         ]
       }
+      payment_settings: {
+        Row: {
+          api_password: string
+          api_username: string
+          channel_id: string
+          provider: string
+          updated_at: string
+          updated_by: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          api_password: string
+          api_username: string
+          channel_id: string
+          provider: string
+          updated_at?: string
+          updated_by?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          api_password?: string
+          api_username?: string
+          channel_id?: string
+          provider?: string
+          updated_at?: string
+          updated_by?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number

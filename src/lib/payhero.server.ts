@@ -3,10 +3,17 @@ import { PLANS, type PlanId } from "@/lib/plans";
 const BASE = "https://backend.payhero.co.ke/api/v2";
 export const PAYHERO_CALLBACK_URL = "https://mingleconect.lovable.app/api/public/webhooks/payhero";
 
-export function payheroAuth() {
-  const user = process.env.PAYHERO_API_USERNAME;
-  const pass = process.env.PAYHERO_API_PASSWORD;
-  const channel = process.env.PAYHERO_CHANNEL_ID;
+export async function payheroAuth() {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("payment_settings" as never)
+    .select("api_username, api_password, channel_id")
+    .eq("provider", "payhero")
+    .maybeSingle();
+  const row = data as null | { api_username: string; api_password: string; channel_id: string };
+  const user = row?.api_username ?? process.env.PAYHERO_API_USERNAME;
+  const pass = row?.api_password ?? process.env.PAYHERO_API_PASSWORD;
+  const channel = row?.channel_id ?? process.env.PAYHERO_CHANNEL_ID;
   if (!user || !pass || !channel) throw new Error("Payments are not configured.");
   return { header: "Basic " + btoa(`${user}:${pass}`), channelId: Number(channel) };
 }

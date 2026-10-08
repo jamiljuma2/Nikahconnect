@@ -65,7 +65,7 @@ const suspendInput = z.object({
 
 export const setUserSuspended = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => suspendInput.parse(d))
+  .validator((d) => suspendInput.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -84,7 +84,7 @@ const roleInput = z.object({
 
 export const setUserAdminRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => roleInput.parse(d))
+  .validator((d) => roleInput.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
     if (data.userId === context.userId && !data.makeAdmin) {

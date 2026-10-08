@@ -46,7 +46,7 @@ const input = z.object({
 /** Tests credentials against PayHero; saves them only if PayHero accepts them. */
 export const savePayheroSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => input.parse(d))
+  .validator((d) => input.parse(d))
   .handler(async ({ data, context }) => {
     const admin = await assertAdmin(context.userId);
     const auth = "Basic " + btoa(`${data.apiUsername}:${data.apiPassword}`);

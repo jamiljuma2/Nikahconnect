@@ -5,6 +5,16 @@ import tailwindcss from "@tailwindcss/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
+  server: {
+    warmup: {
+      ssrFiles: [
+        "./src/lib/admin.functions.ts",
+        "./src/lib/dating.functions.ts",
+        "./src/lib/payments.functions.ts",
+        "./src/lib/payhero-settings.functions.ts",
+      ],
+    },
+  },
   plugins: [
     tsconfigPaths(),
     tailwindcss(),

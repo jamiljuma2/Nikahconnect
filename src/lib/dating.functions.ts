@@ -20,7 +20,7 @@ const REVEAL_ERROR_MESSAGES: Record<string, string> = {
 
 export const revealPhone = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => revealInput.parse(d))
+  .validator((d) => revealInput.parse(d))
   .handler(async ({ data, context }) => {
     const viewerId = context.userId;
     if (viewerId === data.profileOwnerId) {

@@ -15,7 +15,7 @@ const input = z.object({
 
 export const initiatePayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => input.parse(d))
+  .validator((d) => input.parse(d))
   .handler(async ({ data, context }) => {
     const plan = PLANS[data.planId as PlanId];
     const { payheroStkPush } = await import("@/lib/payhero.server");
@@ -97,7 +97,7 @@ const verifyInput = z.object({ transactionId: z.string().min(4) });
 /** Confirms a payment with PayHero and activates the plan. Safe to call repeatedly. */
 export const verifyAndActivatePayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => verifyInput.parse(d))
+  .validator((d) => verifyInput.parse(d))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { payheroStatus, ensureSubscription } = await import("@/lib/payhero.server");

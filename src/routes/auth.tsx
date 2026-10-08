@@ -103,7 +103,7 @@ function AuthPage() {
 
             <div className="auth-form-content">
               {mode === "register" ? (
-                <RegisterForm nextPath={nextPath} onDone={() => router.navigate({ to: "/auth", search: nextPath ? { mode: "login", next: nextPath } : { mode: "login" } })} />
+                <RegisterForm onDone={() => router.navigate({ to: "/auth", search: { mode: "login", next: "/settings?setup=1" } })} />
               ) : (
                 <LoginForm onDone={goNext} />
               )}
@@ -244,7 +244,7 @@ const registerSchema = z
     path: ["confirm_password"],
   });
 
-function RegisterForm({ onDone, nextPath }: { onDone: () => void; nextPath: string | null }) {
+function RegisterForm({ onDone }: { onDone: () => void }) {
   const [form, setForm] = useState({
     full_name: "",
     email: "",
@@ -277,11 +277,10 @@ function RegisterForm({ onDone, nextPath }: { onDone: () => void; nextPath: stri
       return toast.error(first?.message ?? "Please check your inputs");
     }
     setBusy(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
       options: {
-        emailRedirectTo: `${window.location.origin}${nextPath ?? "/discover"}`,
         data: {
           full_name: parsed.data.full_name,
           phone_number: parsed.data.phone_number,
@@ -292,9 +291,18 @@ function RegisterForm({ onDone, nextPath }: { onDone: () => void; nextPath: stri
         },
       },
     });
+    if (error) {
+      setBusy(false);
+      return toast.error(error.message);
+    }
+    if (!data.session) {
+      setBusy(false);
+      return toast.error("Email verification is enabled. Disable Confirm Email in Supabase Auth settings before new users can sign in.");
+    }
+    const { error: signOutError } = await supabase.auth.signOut();
     setBusy(false);
-    if (error) return toast.error(error.message);
-    toast.success("Check your email to verify your account.");
+    if (signOutError) return toast.error(`Account created, but signing out failed: ${signOutError.message}`);
+    toast.success("Account created. Sign in to complete your profile.");
     onDone();
   };
 

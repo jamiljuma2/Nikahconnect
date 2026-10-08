@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
 import { Camera, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
@@ -10,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_authenticated/settings")({
+  validateSearch: (search) => z.object({ setup: z.enum(["1"]).optional() }).parse(search),
   head: () => ({
     meta: [
       { title: "Settings — MingleConnect" },
@@ -24,6 +26,9 @@ export const Route = createFileRoute("/_authenticated/settings")({
 });
 
 function SettingsPage() {
+  const { setup } = Route.useSearch();
+  const isSetup = setup === "1";
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [form, setForm] = useState({
     full_name: "",
@@ -61,6 +66,17 @@ function SettingsPage() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (
+      isSetup &&
+      (!form.full_name.trim() ||
+        !form.location.trim() ||
+        !form.occupation.trim() ||
+        !form.relationship_goal.trim() ||
+        !form.interests.trim())
+    ) {
+      toast.error("Complete the required profile details before continuing.");
+      return;
+    }
     setBusy(true);
     const { error } = await supabase
       .from("profiles")
@@ -76,7 +92,10 @@ function SettingsPage() {
       .eq("id", user.id);
     setBusy(false);
     if (error) toast.error(error.message);
-    else toast.success("Profile saved");
+    else if (isSetup) {
+      toast.success("Profile complete. Welcome to MingleConnect!");
+      navigate({ to: "/discover" });
+    } else toast.success("Profile saved");
   };
 
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,9 +125,9 @@ function SettingsPage() {
   return (
     <div className="profile-page">
       <div className="profile-heading">
-        <p className="profile-kicker">Your MingleConnect profile</p>
-        <h1>Your profile</h1>
-        <p>Keep it honest. Keep it you.</p>
+        <p className="profile-kicker">{isSetup ? "Welcome to MingleConnect" : "Your MingleConnect profile"}</p>
+        <h1>{isSetup ? "Complete your profile" : "Your profile"}</h1>
+        <p>{isSetup ? "Add a few details so people can get to know you." : "Keep it honest. Keep it you."}</p>
       </div>
 
       <form onSubmit={save} className="profile-form">
@@ -142,13 +161,13 @@ function SettingsPage() {
           </div>
           <div className="profile-fields profile-fields-three">
             <Field label="Full name" id="full-name">
-              <Input id="full-name" value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+              <Input id="full-name" required={isSetup} value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
             </Field>
             <Field label="Location" id="location">
-              <Input id="location" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
+              <Input id="location" required={isSetup} value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
             </Field>
             <Field label="Occupation" id="occupation">
-              <Input id="occupation" value={form.occupation} onChange={(e) => setForm({ ...form, occupation: e.target.value })} />
+              <Input id="occupation" required={isSetup} value={form.occupation} onChange={(e) => setForm({ ...form, occupation: e.target.value })} />
             </Field>
           </div>
         </section>
@@ -162,6 +181,7 @@ function SettingsPage() {
             <Field label="Relationship goal" id="relationship-goal">
               <Input
                 id="relationship-goal"
+                required={isSetup}
                 placeholder="Long-term partner, friendship, dating…"
                 value={form.relationship_goal}
                 onChange={(e) => setForm({ ...form, relationship_goal: e.target.value })}
@@ -170,6 +190,7 @@ function SettingsPage() {
             <Field label="Interests (comma-separated)" id="interests">
               <Input
                 id="interests"
+                required={isSetup}
                 placeholder="hiking, jazz, cooking"
                 value={form.interests}
                 onChange={(e) => setForm({ ...form, interests: e.target.value })}
@@ -188,7 +209,7 @@ function SettingsPage() {
 
         <div className="profile-actions">
           <Button type="submit" className="profile-save" disabled={busy}>
-            {busy ? <><Loader2 className="size-4 animate-spin" /> Saving…</> : <><Check className="size-4" /> Save profile</>}
+            {busy ? <><Loader2 className="size-4 animate-spin" /> Saving…</> : <><Check className="size-4" /> {isSetup ? "Complete setup" : "Save profile"}</>}
           </Button>
         </div>
       </form>

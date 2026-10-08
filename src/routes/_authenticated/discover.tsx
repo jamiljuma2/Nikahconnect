@@ -1,15 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Heart, Loader2, MapPin, MessageCircle, Phone, Search } from "lucide-react";
+import { Heart, Loader2, LockKeyhole, MapPin, MessageCircle, Phone, Search } from "lucide-react";
 import { motion } from "motion/react";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { Button } from "@/components/ui/button";
-import { revealPhone } from "@/lib/dating.functions";
+import { getMyBalance, revealPhone } from "@/lib/dating.functions";
 
 export const Route = createFileRoute("/_authenticated/discover")({
   head: () => ({
@@ -44,6 +44,13 @@ const PREFETCH_THRESHOLD = 5; // load next page when this many remain
 function Discover() {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const balanceQ = useQuery({
+    queryKey: ["balance"],
+    queryFn: () => getMyBalance(),
+    enabled: !!user,
+  });
+  const subscription = balanceQ.data?.subscription;
+  const canRevealNumbers = !!subscription && (subscription.is_unlimited || subscription.remaining_reveals > 0);
   const [passed, setPassed] = useState<string[]>([]);
   const [likedLocal, setLikedLocal] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -207,6 +214,8 @@ function Discover() {
               <ProfileGridCard
                 profile={profile}
                 liked={likedLocal.includes(profile.id)}
+                canRevealNumbers={canRevealNumbers}
+                checkingRevealAccess={balanceQ.isLoading}
                 onLike={() => void handleLike(profile)}
               />
             </motion.div>
@@ -221,17 +230,25 @@ function Discover() {
 function ProfileGridCard({
   profile,
   liked,
+  canRevealNumbers,
+  checkingRevealAccess,
   onLike,
 }: {
   profile: Profile;
   liked: boolean;
+  canRevealNumbers: boolean;
+  checkingRevealAccess: boolean;
   onLike: () => void;
 }) {
   return (
     <article className="discover-profile-card">
       <div className="discover-profile-image">
         <ProfileAvatar profile={profile} />
-        <DiscoverRevealButton profileId={profile.id} />
+        <DiscoverRevealButton
+          profileId={profile.id}
+          canRevealNumbers={canRevealNumbers}
+          checkingRevealAccess={checkingRevealAccess}
+        />
       </div>
       <div className="discover-profile-meta">
         <div className="min-w-0">
@@ -252,7 +269,15 @@ function ProfileGridCard({
   );
 }
 
-function DiscoverRevealButton({ profileId }: { profileId: string }) {
+function DiscoverRevealButton({
+  profileId,
+  canRevealNumbers,
+  checkingRevealAccess,
+}: {
+  profileId: string;
+  canRevealNumbers: boolean;
+  checkingRevealAccess: boolean;
+}) {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const reveal = useServerFn(revealPhone);
@@ -292,6 +317,29 @@ function DiscoverRevealButton({ profileId }: { profileId: string }) {
         <WhatsAppMark />
         <span>{phone}</span>
       </a>
+    );
+  }
+
+  if (!canRevealNumbers) {
+    return (
+      <button
+        type="button"
+        className="discover-reveal-indicator is-locked"
+        aria-label={checkingRevealAccess ? "Checking reveal access" : "Unlock number with a paid plan"}
+        title={checkingRevealAccess ? "Checking your plan" : "A successful payment is required to reveal numbers"}
+        disabled={checkingRevealAccess}
+        onClick={(event) => {
+          event.stopPropagation();
+          navigate({ to: "/plans" });
+        }}
+      >
+        {checkingRevealAccess ? (
+          <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+        ) : (
+          <LockKeyhole className="size-3.5" aria-hidden="true" />
+        )}
+        <span>{checkingRevealAccess ? "Checking plan…" : "Unlock number"}</span>
+      </button>
     );
   }
 

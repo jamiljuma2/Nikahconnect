@@ -74,12 +74,32 @@ export const getMyBalance = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: sub } = await supabaseAdmin
+    const { data: subscriptions, error: subscriptionError } = await supabaseAdmin
       .from("subscriptions")
       .select("*")
       .eq("user_id", context.userId)
       .order("start_date", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    return { subscription: sub };
+      .limit(100);
+    if (subscriptionError) throw new Error(subscriptionError.message);
+    const activeSubscriptions = (subscriptions ?? []).filter(
+      (sub) => sub.payment_id && (!sub.expiry_date || new Date(sub.expiry_date) > new Date()),
+    );
+    const paymentIds = activeSubscriptions.map((sub) => sub.payment_id!);
+    if (!paymentIds.length) return { subscription: null };
+
+    const { data: payments, error: paymentError } = await supabaseAdmin
+      .from("payments")
+      .select("id")
+      .in("id", paymentIds)
+      .eq("user_id", context.userId)
+      .eq("status", "success");
+    if (paymentError) throw new Error(paymentError.message);
+
+    const successfulPayments = new Set((payments ?? []).map((payment) => payment.id));
+    const subscription = activeSubscriptions.find(
+      (sub) =>
+        successfulPayments.has(sub.payment_id!) &&
+        (sub.is_unlimited || sub.remaining_reveals > 0),
+    );
+    return { subscription: subscription ?? null };
   });

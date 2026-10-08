@@ -190,7 +190,7 @@ function LoginForm({ onDone }: { onDone: (isAdmin: boolean) => void }) {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
-    const { data: signInData, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data: signInData, error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Welcome back!");

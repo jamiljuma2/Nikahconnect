@@ -29,7 +29,10 @@ export const Route = createFileRoute("/api/public/webhooks/payhero")({
           payment.status === "success" ? "success" : await payheroStatus(payment.transaction_id);
         if (status === "success") {
           await supabaseAdmin.from("payments").update({ status: "success" }).eq("id", payment.id);
-          await ensureSubscription(supabaseAdmin, payment);
+          const paymentUserId = payment.user_id;
+          if (paymentUserId) {
+            await ensureSubscription(supabaseAdmin, { ...payment, user_id: paymentUserId });
+          }
         } else if (status === "failed") {
           await supabaseAdmin
             .from("payments")

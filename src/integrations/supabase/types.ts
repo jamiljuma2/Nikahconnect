@@ -208,7 +208,7 @@ export type Database = {
           status: Database["public"]["Enums"]["payment_status"]
           transaction_id: string | null
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           amount: number
@@ -220,7 +220,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["payment_status"]
           transaction_id?: string | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           amount?: number
@@ -232,7 +232,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["payment_status"]
           transaction_id?: string | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -281,6 +281,7 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          deactivated_at: string | null
           dob: string
           full_name: string
           gender: Database["public"]["Enums"]["gender_type"]
@@ -296,6 +297,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          deactivated_at?: string | null
           dob: string
           full_name: string
           gender: Database["public"]["Enums"]["gender_type"]
@@ -311,6 +313,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          deactivated_at?: string | null
           dob?: string
           full_name?: string
           gender?: Database["public"]["Enums"]["gender_type"]

@@ -8,6 +8,7 @@ export default defineConfig({
   server: {
     warmup: {
       ssrFiles: [
+        "./src/lib/account.functions.ts",
         "./src/lib/admin.functions.ts",
         "./src/lib/dating.functions.ts",
         "./src/lib/payments.functions.ts",

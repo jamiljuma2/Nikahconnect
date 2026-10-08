@@ -109,6 +109,8 @@ export const verifyAndActivatePayment = createServerFn({ method: "POST" })
       .eq("transaction_id", data.transactionId)
       .maybeSingle();
     if (!payment) throw new Error("Payment not found.");
+    const paymentUserId = payment.user_id;
+    if (paymentUserId !== context.userId) throw new Error("Payment not found.");
 
     if (payment.status === "failed") return { status: "failed" as const, activated: false };
 
@@ -117,7 +119,7 @@ export const verifyAndActivatePayment = createServerFn({ method: "POST" })
 
     if (status === "success") {
       await supabaseAdmin.from("payments").update({ status: "success" }).eq("id", payment.id);
-      const sub = await ensureSubscription(supabaseAdmin, payment);
+      const sub = await ensureSubscription(supabaseAdmin, { ...payment, user_id: paymentUserId });
       return { status: "success" as const, activated: true, subscription: sub };
     }
     if (status === "failed") {

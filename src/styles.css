@@ -206,6 +206,20 @@
   animation: auth-frame-in 700ms cubic-bezier(.2, .8, .2, 1) both;
 }
 
+.auth-frame-login {
+  display: block;
+  width: min(100%, 430px);
+  min-height: 0;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.auth-frame-login .auth-form-shell { padding: 0; background: transparent; }
+.auth-frame-login .auth-form-panel { width: 100%; min-height: 0; padding: 38px 36px 34px; border: 1px solid rgb(255 237 255 / 16%); border-radius: 20px; background: linear-gradient(145deg, rgb(111 44 125 / 47%), rgb(42 13 67 / 58%)); }
+
 .auth-intro {
   position: relative;
   display: flex;
@@ -412,6 +426,8 @@
 @media (max-width: 760px) {
   .auth-page { padding: 18px 14px; }
   .auth-frame { display: block; min-height: 0; width: min(100%, 520px); }
+  .auth-frame-login { width: min(100%, 430px); }
+  .auth-frame-login .auth-form-panel { padding: 32px 24px 28px; }
   .auth-intro { min-height: 295px; padding: 30px 27px 27px; }
   .auth-intro-copy { margin: 45px 0 28px; }
   .auth-intro h1 { margin-top: 9px; font-size: 52px; }

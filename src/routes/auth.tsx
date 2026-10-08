@@ -66,22 +66,24 @@ function AuthPage() {
       <div className="auth-outline auth-outline-one" aria-hidden="true" />
       <div className="auth-outline auth-outline-two" aria-hidden="true" />
 
-      <main className="auth-frame">
-        <section className="auth-intro">
-          <Link to="/" className="auth-brand" aria-label="MingleConnect home">
-            <BrandLogo className="auth-brand-logo" />
-          </Link>
-          <div className="auth-intro-copy">
-            <p className="auth-kicker">Your next chapter starts here</p>
-            <h1>Welcome!</h1>
-            <span className="auth-rule" aria-hidden="true" />
-            <p className="auth-message">
-              Meet someone who matches your energy, your interests, and your story.
-            </p>
-            <Link to="/" className="auth-discover">Discover More</Link>
-          </div>
-          <p className="auth-footer-note">Meaningful connections, made at your pace.</p>
-        </section>
+      <main className={`auth-frame${mode === "login" ? " auth-frame-login" : ""}`}>
+        {mode === "register" && (
+          <section className="auth-intro">
+            <Link to="/" className="auth-brand" aria-label="MingleConnect home">
+              <BrandLogo className="auth-brand-logo" />
+            </Link>
+            <div className="auth-intro-copy">
+              <p className="auth-kicker">Your next chapter starts here</p>
+              <h1>Welcome!</h1>
+              <span className="auth-rule" aria-hidden="true" />
+              <p className="auth-message">
+                Meet someone who matches your energy, your interests, and your story.
+              </p>
+              <Link to="/" className="auth-discover">Discover More</Link>
+            </div>
+            <p className="auth-footer-note">Meaningful connections, made at your pace.</p>
+          </section>
+        )}
 
         <section className="auth-form-shell" aria-labelledby="auth-title">
           <div className="auth-form-panel">

@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
 import { AdminLayout } from "@/components/AdminLayout";
+import { useAppNotifications } from "@/hooks/use-app-notifications";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -21,13 +22,18 @@ function AuthenticatedLayout() {
 
   if (isAdminPath) return <AdminLayout><Outlet /></AdminLayout>;
 
+  return <MemberLayout />;
+}
+
+function MemberLayout() {
+  const notifications = useAppNotifications();
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header likesCount={notifications.likes} unreadMessagesCount={notifications.unreadMessages} />
       <main className="mx-auto max-w-6xl px-3 py-5 pb-24 sm:px-4 sm:py-6 md:pb-6">
         <Outlet />
       </main>
-      <BottomNav />
+      <BottomNav likesCount={notifications.likes} unreadMessagesCount={notifications.unreadMessages} />
     </div>
   );
 }

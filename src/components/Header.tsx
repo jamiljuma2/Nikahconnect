@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/BrandLogo";
 import { useAuth } from "@/lib/use-auth";
 
-export function Header() {
+export function Header({ likesCount, unreadMessagesCount }: { likesCount: number; unreadMessagesCount: number }) {
   const router = useRouter();
   const { user } = useAuth();
   const signOut = async () => {
@@ -39,7 +39,8 @@ export function Header() {
         </Link>
         <nav className="flex min-w-0 items-center gap-0.5 sm:gap-2">
           <NavLink to="/discover" icon={<Compass className="size-4" />} label="Discover" mobileHidden />
-          <NavLink to="/matches" icon={<Heart className="size-4" />} label="Matches" mobileHidden />
+          <NavLink to="/likes" icon={<Heart className="size-4" />} label="Likes" notificationCount={likesCount} />
+          <NavLink to="/matches" icon={<MessageCircle className="size-4" />} label="Messages" notificationCount={unreadMessagesCount} />
           <NavLink to="/plans" icon={<Crown className="size-4" />} label="Plans" />
           <NavLink to="/settings" icon={<Settings className="size-4" />} label="Settings" />
           {isAdmin && (
@@ -65,15 +66,18 @@ function NavLink({
   icon,
   label,
   mobileHidden,
+  notificationCount = 0,
 }: {
   to: string;
   icon: React.ReactNode;
   label: string;
   mobileHidden?: boolean;
+  notificationCount?: number;
 }) {
   return (
     <Link
       to={to}
+      aria-label={notificationCount > 0 ? `${label}, ${notificationCount} notifications` : label}
       className={
         "shrink-0 items-center gap-2 rounded-full px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground sm:px-3 " +
         (mobileHidden ? "hidden md:inline-flex" : "inline-flex")
@@ -83,7 +87,14 @@ function NavLink({
           "inline-flex shrink-0 items-center gap-2 rounded-full bg-accent px-2.5 py-2 text-sm font-medium text-primary transition-colors sm:px-3",
       }}
     >
-      {icon}
+      <span className="app-nav-icon">
+        {icon}
+        {notificationCount > 0 && (
+          <span className="app-nav-badge" aria-hidden="true">
+            {notificationCount > 99 ? "99+" : notificationCount}
+          </span>
+        )}
+      </span>
       <span className="hidden sm:inline">{label}</span>
     </Link>
   );

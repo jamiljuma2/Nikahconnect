@@ -381,6 +381,60 @@
 .admin-row-actions button:hover { border-color: #b4ccbc; background: #f3f8f4; color: var(--admin-green); }
 .admin-row-actions button:disabled { opacity: .45; }
 .admin-table-message { margin: 0; padding: 25px 20px; color: var(--admin-muted); font-size: 12px; text-align: center; }
+
+.app-nav-icon { position: relative; display: inline-flex; flex: 0 0 auto; }
+.app-nav-badge { position: absolute; top: -7px; right: -10px; display: grid; min-width: 17px; height: 17px; place-items: center; border: 2px solid var(--background); border-radius: 999px; padding: 0 3px; background: #ed315a; color: #fff; font-size: 9px; font-weight: 750; line-height: 1; }
+.fixed .app-nav-badge { border-color: #101011; }
+
+.likes-page { max-width: 1150px; margin: 0 auto; padding: 5px 0 32px; }
+.likes-heading { display: flex; align-items: center; gap: 14px; margin: 8px 0 24px; }
+.likes-heading-mark { display: grid; width: 48px; height: 48px; flex: 0 0 auto; place-items: center; border-radius: 16px; background: color-mix(in oklab, var(--color-primary) 13%, white); color: var(--color-primary); }
+.likes-heading h1 { margin: 2px 0 0; color: var(--color-foreground); font-family: var(--font-sans); font-size: 26px; font-weight: 700; letter-spacing: -.04em; }
+.likes-kicker { margin: 0; color: var(--color-primary); font-size: 9px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+.likes-description { margin: 4px 0 0; color: var(--color-muted-foreground); font-size: 12px; }
+.likes-total { display: grid; min-width: 32px; height: 32px; place-items: center; margin-left: auto; border-radius: 999px; padding: 0 9px; background: var(--color-primary); color: var(--color-primary-foreground); font-size: 12px; font-weight: 700; }
+.likes-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.likes-card { overflow: hidden; border: 1px solid color-mix(in oklab, var(--color-border) 75%, white); border-radius: 20px; background: var(--color-card); box-shadow: 0 12px 28px rgb(61 34 44 / 6%); transition: transform 180ms ease, box-shadow 180ms ease; }
+.likes-card:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgb(61 34 44 / 10%); }
+.likes-card-photo { position: relative; aspect-ratio: 1.25; overflow: hidden; background: var(--color-muted); }
+.likes-card-photo img { width: 100%; height: 100%; object-fit: cover; }
+.likes-avatar-fallback { display: grid; width: 100%; height: 100%; place-items: center; background: linear-gradient(140deg, #f4dce1, #eee8f1); color: #945667; font-family: var(--font-display); font-size: 54px; }
+.likes-heart-badge { position: absolute; right: 12px; bottom: 12px; display: grid; width: 34px; height: 34px; place-items: center; border: 2px solid white; border-radius: 50%; background: var(--color-primary); color: white; box-shadow: 0 4px 14px rgb(0 0 0 / 15%); }
+.likes-card-content { padding: 15px; }
+.likes-card-content h2 { overflow: hidden; margin: 0; color: var(--color-foreground); font-family: var(--font-sans); font-size: 17px; font-weight: 650; letter-spacing: -.025em; text-overflow: ellipsis; white-space: nowrap; }
+.likes-card-content h2 span { color: var(--color-muted-foreground); font-weight: 500; }
+.likes-location { display: flex; align-items: center; gap: 4px; margin: 6px 0 0; color: var(--color-muted-foreground); font-size: 11px; }
+.likes-bio { display: -webkit-box; overflow: hidden; min-height: 36px; margin: 10px 0 0; color: var(--color-foreground); font-size: 11px; line-height: 1.55; opacity: .78; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.likes-interests { display: flex; overflow: hidden; gap: 5px; margin-top: 9px; }
+.likes-interests span { overflow: hidden; border-radius: 999px; padding: 4px 8px; background: var(--color-muted); color: var(--color-muted-foreground); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.likes-action, .likes-message-action { display: flex; width: 100%; min-height: 39px; align-items: center; justify-content: center; gap: 7px; margin-top: 14px; border-radius: 12px; font-size: 11px; font-weight: 600; text-decoration: none; }
+.likes-action { background: var(--color-primary); color: var(--color-primary-foreground); }
+.likes-action:hover { opacity: .92; }
+.likes-message-action { border: 1px solid var(--color-border); background: var(--color-card); color: var(--color-foreground); transition: background 160ms ease, color 160ms ease; }
+.likes-message-action:hover { background: var(--color-secondary); color: var(--color-primary); }
+.likes-empty-state, .likes-loading { display: flex; min-height: 280px; flex-direction: column; align-items: center; justify-content: center; gap: 11px; border: 1px dashed var(--color-border); border-radius: 22px; padding: 28px; background: color-mix(in oklab, var(--color-card) 76%, transparent); color: var(--color-muted-foreground); text-align: center; }
+.likes-empty-state > span { display: grid; width: 48px; height: 48px; place-items: center; border-radius: 50%; background: var(--color-secondary); color: var(--color-primary); }
+.likes-empty-state h2 { max-width: 330px; margin: 0; color: var(--color-foreground); font-family: var(--font-display); font-size: 24px; line-height: 1.15; }
+.likes-empty-state p { margin: 0; font-size: 12px; }
+.likes-empty-state > a { display: inline-flex; min-height: 38px; align-items: center; margin-top: 6px; border-radius: 999px; padding: 0 15px; background: var(--color-primary); color: var(--color-primary-foreground); font-size: 11px; font-weight: 600; text-decoration: none; }
+.likes-loading { min-height: 210px; flex-direction: row; border-style: solid; }
+@media (max-width: 900px) { .likes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) {
+  .likes-page { padding-top: 0; }
+  .likes-heading { gap: 10px; margin-bottom: 16px; }
+  .likes-heading-mark { width: 40px; height: 40px; border-radius: 13px; }
+  .likes-heading h1 { font-size: 23px; }
+  .likes-description { max-width: 260px; font-size: 10px; }
+  .likes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .likes-card { border-radius: 15px; }
+  .likes-card-photo { aspect-ratio: .9; }
+  .likes-card-content { padding: 10px; }
+  .likes-card-content h2 { font-size: 14px; }
+  .likes-location { font-size: 9px; }
+  .likes-bio { min-height: 31px; font-size: 10px; }
+  .likes-interests span { max-width: 90px; font-size: 8px; }
+  .likes-action, .likes-message-action { min-height: 36px; margin-top: 10px; font-size: 10px; }
+}
 @media (max-width: 1050px) {
   .admin-shell { grid-template-columns: 218px minmax(0, 1fr); }
   .admin-overview-grid { grid-template-columns: minmax(0, 1fr) minmax(225px, .6fr); }

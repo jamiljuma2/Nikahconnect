@@ -87,7 +87,15 @@ function ChatPage() {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
         (payload) => {
-          setMessages((m) => [...m, payload.new as Message]);
+          const message = payload.new as Message;
+          setMessages((current) => current.some((item) => item.id === message.id) ? current : [...current, message]);
+          if (message.sender_id !== user.id && !message.read_at) {
+            void supabase
+              .from("messages")
+              .update({ read_at: new Date().toISOString() })
+              .eq("id", message.id)
+              .is("read_at", null);
+          }
         },
       )
       .on(

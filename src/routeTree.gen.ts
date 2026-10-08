@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDiscoverRouteImport } from './routes/_authenticated/discover'
+import { Route as AuthenticatedLikesRouteImport } from './routes/_authenticated/likes'
 import { Route as AuthenticatedMatchesRouteImport } from './routes/_authenticated/matches'
 import { Route as AuthenticatedPlansRouteImport } from './routes/_authenticated/plans'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -43,6 +44,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 const AuthenticatedDiscoverRoute = AuthenticatedDiscoverRouteImport.update({
   id: '/discover',
   path: '/discover',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLikesRoute = AuthenticatedLikesRouteImport.update({
+  id: '/likes',
+  path: '/likes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMatchesRoute = AuthenticatedMatchesRouteImport.update({
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/discover': typeof AuthenticatedDiscoverRoute
+  '/likes': typeof AuthenticatedLikesRoute
   '/matches': typeof AuthenticatedMatchesRoute
   '/plans': typeof AuthenticatedPlansRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/discover': typeof AuthenticatedDiscoverRoute
+  '/likes': typeof AuthenticatedLikesRoute
   '/matches': typeof AuthenticatedMatchesRoute
   '/plans': typeof AuthenticatedPlansRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -110,6 +118,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/discover': typeof AuthenticatedDiscoverRoute
+  '/_authenticated/likes': typeof AuthenticatedLikesRoute
   '/_authenticated/matches': typeof AuthenticatedMatchesRoute
   '/_authenticated/plans': typeof AuthenticatedPlansRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin'
     | '/discover'
+    | '/likes'
     | '/matches'
     | '/plans'
     | '/settings'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin'
     | '/discover'
+    | '/likes'
     | '/matches'
     | '/plans'
     | '/settings'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/admin'
     | '/_authenticated/discover'
+    | '/_authenticated/likes'
     | '/_authenticated/matches'
     | '/_authenticated/plans'
     | '/_authenticated/settings'
@@ -199,6 +211,13 @@ declare module '@tanstack/react-router' {
       path: '/discover'
       fullPath: '/discover'
       preLoaderRoute: typeof AuthenticatedDiscoverRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/likes': {
+      id: '/_authenticated/likes'
+      path: '/likes'
+      fullPath: '/likes'
+      preLoaderRoute: typeof AuthenticatedLikesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/matches': {
@@ -260,6 +279,7 @@ const AuthenticatedAdminRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedDiscoverRoute: typeof AuthenticatedDiscoverRoute
+  AuthenticatedLikesRoute: typeof AuthenticatedLikesRoute
   AuthenticatedMatchesRoute: typeof AuthenticatedMatchesRoute
   AuthenticatedPlansRoute: typeof AuthenticatedPlansRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -269,6 +289,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedDiscoverRoute: AuthenticatedDiscoverRoute,
+  AuthenticatedLikesRoute: AuthenticatedLikesRoute,
   AuthenticatedMatchesRoute: AuthenticatedMatchesRoute,
   AuthenticatedPlansRoute: AuthenticatedPlansRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,

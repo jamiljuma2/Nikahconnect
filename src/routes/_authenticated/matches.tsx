@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Phone, Lock } from "lucide-react";
+import { Phone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { Button } from "@/components/ui/button";
@@ -208,7 +208,7 @@ function RevealButton({ profileId }: { profileId: string }) {
       className="flex-1"
       title={outOfReveals ? "No reveals left on your plan" : undefined}
     >
-      <Lock className="mr-2 size-4" />
+      <Phone className="mr-2 size-4" aria-hidden="true" />
       {busy
         ? "…"
         : outOfReveals

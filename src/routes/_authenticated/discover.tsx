@@ -2,11 +2,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Heart, MapPin, Search, Sparkles } from "lucide-react";
+import { Heart, Loader2, MapPin, Phone, Search, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
+import { useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { Button } from "@/components/ui/button";
+import { revealPhone } from "@/lib/dating.functions";
 
 export const Route = createFileRoute("/_authenticated/discover")({
   head: () => ({
@@ -229,6 +232,7 @@ function ProfileGridCard({
     <article className="discover-profile-card">
       <div className="discover-profile-image">
         <ProfileAvatar profile={profile} />
+        <DiscoverRevealButton profileId={profile.id} />
       </div>
       <div className="discover-profile-meta">
         <div className="min-w-0">
@@ -246,6 +250,67 @@ function ProfileGridCard({
         </button>
       </div>
     </article>
+  );
+}
+
+function DiscoverRevealButton({ profileId }: { profileId: string }) {
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const reveal = useServerFn(revealPhone);
+  const [phone, setPhone] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
+
+  const handleReveal = async () => {
+    if (busy || phone) return;
+    setBusy(true);
+    try {
+      const result = await reveal({ data: { profileOwnerId: profileId, idempotencyKey } });
+      setPhone(result.phone);
+      toast.success(result.alreadyRevealed ? "Number already revealed." : "Contact unlocked!");
+      await qc.invalidateQueries({ queryKey: ["balance"] });
+    } catch (error) {
+      const message = (error as Error).message;
+      toast.error(message);
+      if (/subscription|balance|plan/i.test(message)) navigate({ to: "/plans" });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (phone) {
+    const whatsappPhone = phone.replace(/\D/g, "");
+    return (
+      <a
+        className="discover-reveal-indicator"
+        href={`https://wa.me/${whatsappPhone}`}
+        target="_blank"
+        rel="noreferrer"
+        aria-label={`Open WhatsApp chat with ${phone}`}
+        title={`Open WhatsApp: ${phone}`}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <Phone className="size-3.5" aria-hidden="true" />
+        <span>{phone}</span>
+      </a>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className="discover-reveal-indicator"
+      aria-label="Reveal number and open WhatsApp"
+      title="Reveal number"
+      disabled={busy}
+      onClick={(event) => {
+        event.stopPropagation();
+        void handleReveal();
+      }}
+    >
+      {busy ? <Loader2 className="size-3.5 animate-spin" aria-hidden="true" /> : <Phone className="size-3.5" aria-hidden="true" />}
+      <span>{busy ? "Revealing…" : "Reveal"}</span>
+    </button>
   );
 }
 

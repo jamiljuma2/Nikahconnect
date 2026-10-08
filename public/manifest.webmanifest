@@ -1,0 +1,33 @@
+{
+  "id": "/",
+  "name": "MingleConnect",
+  "short_name": "MingleConnect",
+  "description": "Discover, match, and chat with singles near you on MingleConnect.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#fffafb",
+  "theme_color": "#fffafb",
+  "categories": ["social", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icons/mingleconnect-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/mingleconnect-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/mingleconnect-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

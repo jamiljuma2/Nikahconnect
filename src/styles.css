@@ -152,6 +152,110 @@
   background: var(--gradient-card);
 }
 
+.install-app-banner {
+  position: fixed;
+  z-index: 80;
+  right: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  display: flex;
+  width: min(460px, calc(100vw - 32px));
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px 12px 14px;
+  border: 1px solid color-mix(in oklab, var(--color-border) 85%, white);
+  border-radius: 18px;
+  background: var(--color-card);
+  box-shadow: 0 12px 40px rgb(55 25 38 / 16%);
+  animation: install-banner-in 220ms ease-out both;
+}
+
+.install-app-icon,
+.install-help-icon {
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.install-app-copy { min-width: 0; flex: 1; }
+.install-app-title { margin: 0; color: var(--color-foreground); font-size: 14px; font-weight: 600; }
+.install-app-subtitle { margin: 2px 0 0; color: var(--color-muted-foreground); font-size: 12px; line-height: 1.4; }
+.install-app-action,
+.install-help-done {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 16px;
+  background: var(--color-primary);
+  color: var(--color-primary-foreground);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: filter 180ms ease, transform 180ms ease;
+}
+.install-app-action:hover,
+.install-help-done:hover { filter: brightness(1.05); transform: translateY(-1px); }
+.install-app-dismiss,
+.install-help-close {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-muted-foreground);
+  cursor: pointer;
+}
+.install-app-dismiss:hover,
+.install-help-close:hover { background: var(--color-muted); color: var(--color-foreground); }
+.install-help-backdrop {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(30 16 24 / 48%);
+}
+.install-help-dialog {
+  position: relative;
+  width: min(100%, 380px);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  padding: 30px;
+  background: var(--color-card);
+  box-shadow: 0 24px 80px rgb(30 16 24 / 22%);
+  text-align: center;
+}
+.install-help-close { position: absolute; top: 12px; right: 12px; }
+.install-help-icon { width: 60px; height: 60px; }
+.install-help-dialog h2 { margin: 14px 0 8px; color: var(--color-foreground); font-size: 23px; font-weight: 600; }
+.install-help-dialog p { margin: 0; color: var(--color-muted-foreground); font-size: 14px; line-height: 1.6; }
+.install-help-done { min-width: 116px; margin-top: 22px; }
+@keyframes install-banner-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 640px) {
+  .install-app-banner {
+    right: 12px;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    width: calc(100vw - 24px);
+    gap: 9px;
+    padding: 10px;
+  }
+  .install-app-icon { width: 36px; height: 36px; }
+  .install-app-title { font-size: 13px; }
+  .install-app-subtitle { font-size: 11px; }
+  .install-app-action { min-height: 40px; padding: 0 12px; }
+  .install-app-dismiss { width: 28px; height: 32px; }
+}
+
 /* Auth page */
 .auth-page {
   --auth-ink: #fff8ff;

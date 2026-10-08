@@ -19,6 +19,7 @@ import "@fontsource/inter/600.css";
 import appCss from "../styles.css?url";
 import appIcon from "../assets/mingleconnect-icon.png";
 import { Toaster } from "@/components/ui/sonner";
+import { InstallAppBanner } from "@/components/InstallAppBanner";
 import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
@@ -73,6 +74,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "MingleConnect — Meaningful Dating in Kenya" },
+      { name: "theme-color", content: "#fffafb" },
+      { name: "mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "MingleConnect" },
       {
         name: "description",
         content:
@@ -90,6 +95,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/png", href: appIcon },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -126,9 +133,17 @@ function RootComponent() {
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
 
+  useEffect(() => {
+    if (!("serviceWorker" in navigator)) return;
+    navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch((error) => {
+      console.error("Service worker registration failed", error);
+    });
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
+      <InstallAppBanner />
       <Toaster richColors position="top-center" />
     </QueryClientProvider>
   );

@@ -57,21 +57,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           </nav>
         </div>
 
-        <div className="admin-sidebar-spacer" />
-        <div className="admin-sidebar-note">
-          <span className="admin-note-mark" aria-hidden="true">M</span>
-          <p>Manage your community with care.</p>
-        </div>
-        <div className="admin-sidebar-user">
-          <span className="admin-avatar" aria-hidden="true">{initials || "A"}</span>
-          <div className="admin-user-copy">
-            <span className="admin-user-name">{name}</span>
-            <span className="admin-user-role">Administrator</span>
-          </div>
-          <Button variant="ghost" size="icon" className="admin-sign-out" onClick={signOut} aria-label="Sign out">
-            <LogOut size={17} />
-          </Button>
-        </div>
       </aside>
 
       <div className="admin-main">

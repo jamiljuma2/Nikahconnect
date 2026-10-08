@@ -74,6 +74,11 @@ function PaymentSettingsPage() {
       <div className="mt-6 rounded-2xl border border-border bg-card p-4">
         {q.isLoading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
+        ) : q.isError ? (
+          <div className="admin-payment-error" role="alert">
+            <p>Payment settings couldn’t load.</p>
+            <Button type="button" variant="outline" size="sm" onClick={() => void q.refetch()}>Try again</Button>
+          </div>
         ) : s?.configured ? (
           <div className="flex items-start gap-3">
             <ShieldCheck className="mt-0.5 size-5 text-primary" />

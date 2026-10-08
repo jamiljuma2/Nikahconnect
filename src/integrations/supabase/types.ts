@@ -454,6 +454,20 @@ export type Database = {
       }
     }
     Functions: {
+      admin_search_members: {
+        Args: { page_offset: number; page_size: number; search_term: string }
+        Returns: {
+          created_at: string
+          deactivated_at: string | null
+          email: string
+          full_name: string
+          id: string
+          is_admin: boolean
+          location: string
+          suspended: boolean
+          total_count: number
+        }[]
+      }
       admin_collected_revenue: {
         Args: Record<PropertyKey, never>
         Returns: number

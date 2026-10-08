@@ -26,7 +26,12 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export const Route = createFileRoute("/_authenticated/settings")({
-  validateSearch: (search) => z.object({ setup: z.enum(["1"]).optional() }).parse(search),
+  validateSearch: (search) =>
+    z
+      .object({
+        setup: z.preprocess((value) => (value === 1 ? "1" : value), z.enum(["1"]).optional()),
+      })
+      .parse(search),
   head: () => ({
     meta: [
       { title: "Settings — MingleConnect" },

@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Heart, MessageCircle, Search, UsersRound } from "lucide-react";
+import { ArrowUpRight, Heart, LockKeyhole, MessageCircleHeart, ShieldCheck } from "lucide-react";
 import heroImg from "@/assets/landing-couple.png";
 import { BrandLogo } from "@/components/BrandLogo";
 
@@ -31,37 +31,52 @@ function Landing() {
         <Link to="/" className="landing-brand" aria-label="MingleConnect home">
           <BrandLogo className="landing-brand-logo" />
         </Link>
+        <nav className="landing-nav-links" aria-label="Main navigation">
+          <a href="#why-mingle">Why MingleConnect</a>
+          <a href="#our-promise">Our promise</a>
+        </nav>
         <Link to="/auth" search={{ mode: "login" } as never} className="landing-sign-in">
-          Sign in
+          Sign in <ArrowUpRight aria-hidden="true" />
         </Link>
       </header>
 
-      <main className="landing-main">
+      <main>
         <section className="landing-hero" aria-labelledby="landing-title">
-          <img src={heroImg} alt="" className="landing-hero-image" />
           <div className="landing-copy">
-            <p className="landing-eyebrow">REAL PEOPLE <i /> REAL CONNECTIONS <i /> DATING WITH INTENTION</p>
-            <h1 id="landing-title">Meet <em>New</em><br />People<span className="landing-title-heart">♥</span></h1>
+            <p className="landing-eyebrow"><span /> DATING WITH INTENTION</p>
+            <h1 id="landing-title">A real connection<br />starts with <em>you.</em></h1>
             <p className="landing-subtitle">
-              New people. New conversations.<br />Maybe something <em>more...</em>
+              Meet genuine people who are ready for something meaningful. Your next great conversation could be closer than you think.
             </p>
             <div className="landing-actions">
               <Link to="/auth" search={{ mode: "register" } as never} className="landing-cta">
-                Join Now <ArrowRight aria-hidden="true" />
+                Join MingleConnect <ArrowUpRight aria-hidden="true" />
               </Link>
+              <span className="landing-join-note">Free to join · Made for meaningful connections</span>
             </div>
           </div>
 
-          <div className="landing-values" aria-label="How MingleConnect works">
-            <LandingValue icon={<UsersRound />} title="Create Your Profile" detail="Show who you are" />
-            <LandingValue icon={<Search />} title="Explore Matches" detail="Find your vibe" />
-            <LandingValue icon={<MessageCircle />} title="Start Chatting" detail="It's easy and safe" />
-            <LandingValue icon={<Heart />} title="Meet Real People" detail="Local and worldwide" />
+          <div className="landing-visual">
+            <div className="landing-photo-frame">
+              <img src={heroImg} alt="A couple sharing a warm moment together" className="landing-hero-image" />
+            </div>
+            <span className="landing-photo-heart" aria-hidden="true"><Heart fill="currentColor" /></span>
           </div>
-          <p className="landing-signature">Real Connections<br />Start Here <span>♡</span></p>
-          <div className="landing-wave" aria-hidden="true" />
+        </section>
+
+        <section className="landing-values" id="why-mingle" aria-label="What makes MingleConnect special">
+          <LandingValue icon={<ShieldCheck />} title="People first" detail="Genuine profiles" />
+          <LandingValue icon={<MessageCircleHeart />} title="Talk naturally" detail="Meaningful conversations" />
+          <LandingValue icon={<Heart />} title="Date with purpose" detail="Connections that matter" />
+          <LandingValue icon={<LockKeyhole />} title="Your choice" detail="Share contacts on your terms" />
+        </section>
+
+        <section className="landing-invitation" id="our-promise">
+          <div><p className="landing-invitation-kicker">YOUR STORY, YOUR PACE</p><h2>Good things start with hello.</h2></div>
+          <Link to="/auth" search={{ mode: "register" } as never} className="landing-bottom-cta">Find your connection <ArrowUpRight aria-hidden="true" /></Link>
         </section>
       </main>
+      <footer className="landing-footer"><span>© {new Date().getFullYear()} MingleConnect</span><span>Made for real connections <Heart className="size-3" fill="currentColor" aria-hidden="true" /></span></footer>
     </div>
   );
 }

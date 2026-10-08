@@ -4,9 +4,8 @@ import { ArrowLeft, Send } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { CHAT_DIGIT_ERROR, containsDigit } from "@/lib/digit-filter";
+import { MessagesInbox } from "@/components/MessagesInbox";
 
 export const Route = createFileRoute("/_authenticated/chat/$matchId")({
   head: () => ({
@@ -133,74 +132,68 @@ function ChatPage() {
   };
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col h-[calc(100dvh-4rem-1.25rem-4.5rem-env(safe-area-inset-bottom))] md:h-[calc(100dvh-4rem-3rem)]">
-      <header className="flex items-center gap-3 border-b border-border pb-3">
-        <Link to="/matches">
-          <Button variant="ghost" size="icon">
+    <section className="messages-layout messages-chat-layout has-active-chat" aria-label="Messages">
+      <MessagesInbox selectedMatchId={matchId} />
+      <div className="messages-chat-panel">
+        <header className="messages-chat-header">
+          <Link to="/matches" className="messages-back" aria-label="Back to messages">
             <ArrowLeft className="size-5" />
-          </Button>
-        </Link>
-        {other && (
-          <>
-            {other.avatar_url ? (
-              <img src={other.avatar_url} alt="" className="size-10 rounded-full object-cover" />
-            ) : (
-              <div className="flex size-10 items-center justify-center rounded-full gradient-romance text-primary-foreground">
-                {other.full_name.charAt(0)}
-              </div>
-            )}
-            <h1 className="font-display text-xl font-semibold">{other.full_name}</h1>
-          </>
-        )}
-      </header>
+          </Link>
+          {other ? (
+            <>
+              {other.avatar_url ? <img src={other.avatar_url} alt="" className="messages-header-avatar" /> : <span className="messages-header-fallback">{other.full_name.charAt(0)}</span>}
+              <div className="min-w-0"><h1>{other.full_name}</h1><p>Your match</p></div>
+            </>
+          ) : <div className="messages-header-skeleton" />}
+        </header>
 
-      <div ref={scrollRef} className="flex-1 space-y-2 overflow-y-auto py-4">
-        {messages.length === 0 ? (
-          <p className="mt-12 text-center text-sm text-muted-foreground">
-            Say hello! Just remember — no numbers allowed in chat.
-          </p>
-        ) : (
-          messages.map((m) => {
-            const mine = m.sender_id === user?.id;
-            return (
-              <div key={m.id} className={"flex " + (mine ? "justify-end" : "justify-start")}>
-                <div
-                  className={
-                    "max-w-[75%] rounded-2xl px-4 py-2 text-sm shadow-sm " +
-                    (mine
-                      ? "gradient-romance text-primary-foreground"
-                      : "bg-card text-card-foreground border border-border")
-                  }
-                >
-                  {m.content}
-                  {mine && (
-                    <div className="mt-1 text-right text-[10px] opacity-70">
-                      {m.read_at ? "Read" : "Sent"}
+        <div ref={scrollRef} className="messages-thread">
+          {messages.length === 0 ? (
+            <div className="messages-first-note"><span>✦</span><p>Say hello and see where the conversation goes.</p><small>Just remember — no numbers allowed in chat.</small></div>
+          ) : (
+            messages.map((message, index) => {
+              const mine = message.sender_id === user?.id;
+              const currentDay = new Date(message.created_at).toDateString();
+              const previousDay = index > 0 ? new Date(messages[index - 1].created_at).toDateString() : null;
+              return (
+                <div key={message.id}>
+                  {currentDay !== previousDay && <div className="messages-day-divider"><span>{new Date(message.created_at).toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}</span></div>}
+                  <div className={`messages-bubble-row${mine ? " mine" : ""}`}>
+                    <div className={`messages-bubble${mine ? " sent" : " received"}`}>
+                      <p>{message.content}</p>
+                      <div className="messages-bubble-meta">
+                        <time>{new Date(message.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</time>
+                        {mine && <span>{message.read_at ? "Read" : "Sent"}</span>}
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
-            );
-          })
-        )}
-      </div>
+              );
+            })
+          )}
+        </div>
 
-      <form onSubmit={send} className="flex items-center gap-2 border-t border-border pt-3">
-        <Input
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Type a message (no numbers)"
-          maxLength={1000}
-        />
-        <Button
-          type="submit"
-          size="icon"
-          disabled={sending || !text.trim()}
-          className="gradient-romance text-primary-foreground"
-        >
-          <Send className="size-4" />
-        </Button>
-      </form>
-    </div>
+        <form onSubmit={send} className="messages-composer">
+          <textarea
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                event.currentTarget.form?.requestSubmit();
+              }
+            }}
+            placeholder="Write a message…"
+            aria-label="Write a message"
+            maxLength={1000}
+            rows={1}
+          />
+          <button type="submit" aria-label="Send message" disabled={sending || !text.trim()}>
+            <Send className="size-4" />
+          </button>
+        </form>
+        <p className="messages-composer-hint">Press Enter to send · No numbers in chat</p>
+      </div>
+    </section>
   );
 }

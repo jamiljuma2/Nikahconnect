@@ -194,6 +194,10 @@ function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
   const [waiting, setWaiting] = useState(false);
   const [idemKey, setIdemKey] = useState(() => crypto.randomUUID());
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  let normalizedPhone = phone.replace(/\D/g, "");
+  if (normalizedPhone.startsWith("0")) normalizedPhone = `254${normalizedPhone.slice(1)}`;
+  else if (normalizedPhone.startsWith("7") || normalizedPhone.startsWith("1")) normalizedPhone = `254${normalizedPhone}`;
+  const invalidPhone = phone.length >= 10 && !/^254[17]\d{8}$/.test(normalizedPhone);
 
   const stopPolling = () => {
     if (pollRef.current) {
@@ -280,24 +284,25 @@ function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
           Choose {plan.name}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="mpesa-dialog-content" overlayClassName="mpesa-dialog-overlay">
         <motion.div
+          className="mpesa-dialog-inner"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25 }}
         >
-          <DialogHeader>
-            <div className="mx-auto mb-2 flex size-12 items-center justify-center rounded-2xl gradient-romance text-primary-foreground shadow-romance">
+          <DialogHeader className="mpesa-dialog-header">
+            <div className="mpesa-payment-icon">
               <Smartphone className="size-6" />
             </div>
-            <DialogTitle className="text-center font-display text-2xl">
+            <DialogTitle className="mpesa-dialog-title">
               Pay KES {plan.price} via M-Pesa
             </DialogTitle>
-            <DialogDescription className="text-center">
+            <DialogDescription className="mpesa-dialog-description">
               We'll send an STK prompt to your phone. Enter your M-Pesa PIN to complete.
             </DialogDescription>
           </DialogHeader>
-          <div className="mt-4 rounded-2xl border border-border bg-muted/40 p-4">
+          <div className="mpesa-plan-summary">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Plan</span>
               <span className="font-medium">{plan.name}</span>
@@ -308,25 +313,29 @@ function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
                 {plan.unlimited ? "Unlimited" : plan.reveals}
               </span>
             </div>
-            <div className="mt-2 flex items-center justify-between border-t border-border pt-2 text-sm">
+            <div className="mpesa-total-row">
               <span className="text-muted-foreground">Total</span>
-              <span className="font-display text-lg font-semibold">KES {plan.price}</span>
+              <span>KES {plan.price}</span>
             </div>
           </div>
-          <div className="mt-4 space-y-3">
-            <Label htmlFor="phone">M-Pesa phone number</Label>
+          <div className="mpesa-payment-form">
+            <Label htmlFor="phone" className="mpesa-phone-label">M-Pesa phone number</Label>
             <Input
               id="phone"
-              placeholder="+254712345678"
+              placeholder="+254 712 345 678"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               inputMode="tel"
-              className="h-11"
+              autoComplete="tel"
+              aria-invalid={invalidPhone}
+              aria-describedby={invalidPhone ? "mpesa-phone-error" : undefined}
+              className={`mpesa-phone-input${invalidPhone ? " invalid" : ""}`}
             />
+            {invalidPhone && <p id="mpesa-phone-error" className="mpesa-phone-error" role="alert">Enter a valid Safaricom number, such as 0712345678.</p>}
             <Button
               onClick={pay}
               disabled={busy || waiting || phone.length < 10}
-              className="h-11 w-full gradient-romance text-primary-foreground transition-transform hover:scale-[1.01] active:scale-[0.99]"
+              className="mpesa-pay-button"
             >
               <AnimatePresence mode="wait" initial={false}>
                 {busy ? (
@@ -337,7 +346,7 @@ function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
                     exit={{ opacity: 0 }}
                     className="inline-flex items-center gap-2"
                   >
-                    <Loader2 className="size-4 animate-spin" /> Sending prompt…
+                    <Loader2 className="size-4 animate-spin" /> Processing…
                   </motion.span>
                 ) : waiting ? (
                   <motion.span
@@ -347,7 +356,7 @@ function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
                     exit={{ opacity: 0 }}
                     className="inline-flex items-center gap-2"
                   >
-                    <Loader2 className="size-4 animate-spin" /> Waiting for M-Pesa confirmation…
+                    <Loader2 className="size-4 animate-spin" /> Waiting for M-Pesa…
                   </motion.span>
                 ) : (
                   <motion.span
@@ -362,12 +371,12 @@ function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
               </AnimatePresence>
             </Button>
             {waiting && (
-              <p className="text-center text-xs text-muted-foreground">
+              <p className="mpesa-waiting-note" role="status" aria-live="polite">
                 Approve the M-Pesa prompt on your phone. Your plan activates automatically.
               </p>
             )}
-            <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
-              <ShieldCheck className="size-3.5" /> Secured by M-Pesa • No card required
+            <p className="mpesa-security-note">
+              <ShieldCheck className="size-3.5" aria-hidden="true" /> Secured by M-Pesa • No card required
             </p>
           </div>
         </motion.div>

@@ -438,6 +438,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_collected_revenue: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       consume_reveal: {
         Args: { _idempotency_key?: string; _owner: string; _viewer: string }
         Returns: {

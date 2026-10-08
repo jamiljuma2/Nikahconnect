@@ -1,5 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function AdminPage() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const listUsers = useServerFn(listUsersForAdmin);
   const setSuspended = useServerFn(setUserSuspended);
   const setRole = useServerFn(setUserAdminRole);
@@ -44,7 +46,7 @@ function AdminPage() {
   const stats = useQuery({
     queryKey: ["admin-stats"],
     queryFn: async () => {
-      const [users, matches, payments, reveals] = await Promise.all([
+      const [users, matches, payments, reveals, revenue] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("matches").select("id", { count: "exact", head: true }),
         supabase
@@ -52,15 +54,33 @@ function AdminPage() {
           .select("id", { count: "exact", head: true })
           .eq("status", "success"),
         supabase.from("number_reveals").select("id", { count: "exact", head: true }),
+        supabase.rpc("admin_collected_revenue"),
       ]);
+      const queryError = [users, matches, payments, reveals, revenue].find((result) => result.error)?.error;
+      if (queryError) throw new Error(queryError.message);
       return {
         users: users.count ?? 0,
         matches: matches.count ?? 0,
         payments: payments.count ?? 0,
         reveals: reveals.count ?? 0,
+        revenue: Number(revenue.data ?? 0),
       };
     },
   });
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`admin-revenue-${user?.id ?? "dashboard"}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "payments" },
+        () => void queryClient.invalidateQueries({ queryKey: ["admin-stats"] }),
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [queryClient, user?.id]);
 
   const usersQ = useQuery({
     queryKey: ["admin-users"],
@@ -93,10 +113,22 @@ function AdminPage() {
   return (
     <div>
       <h1 className="font-display text-3xl font-semibold sm:text-4xl">Admin dashboard</h1>
-      <div className="mt-6 grid gap-3 grid-cols-2 sm:gap-4 lg:grid-cols-4">
+      <div className="mt-6 grid gap-3 grid-cols-2 sm:grid-cols-3 sm:gap-4 2xl:grid-cols-5">
         <Stat label="Users" value={stats.data?.users ?? "…"} />
         <Stat label="Matches" value={stats.data?.matches ?? "…"} />
         <Stat label="Paid plans" value={stats.data?.payments ?? "…"} />
+        <Stat
+          label="Revenue collected"
+          value={
+            stats.data
+              ? new Intl.NumberFormat("en-KE", {
+                  style: "currency",
+                  currency: "KES",
+                  maximumFractionDigits: 0,
+                }).format(stats.data.revenue)
+              : "…"
+          }
+        />
         <Stat label="Reveals" value={stats.data?.reveals ?? "…"} />
       </div>
 

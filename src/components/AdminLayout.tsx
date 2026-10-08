@@ -1,7 +1,8 @@
 import { Link, useRouter } from "@tanstack/react-router";
-import { CreditCard, LayoutDashboard, LogOut, UsersRound } from "lucide-react";
+import { CreditCard, LayoutDashboard, LogOut, Menu, UsersRound } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 
@@ -61,9 +62,35 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
       <div className="admin-main">
         <header className="admin-topbar">
-          <div className="admin-mobile-brand">
-            <BrandLogo className="admin-brand-logo" />
-          </div>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="icon" className="admin-mobile-menu-toggle" aria-label="Open admin navigation">
+                <Menu size={19} />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="admin-mobile-sheet">
+              <SheetHeader className="admin-mobile-sheet-heading">
+                <BrandLogo className="admin-brand-logo" />
+                <SheetTitle>Admin menu</SheetTitle>
+                <SheetDescription>Dashboard, members, and payment settings.</SheetDescription>
+              </SheetHeader>
+              <nav className="admin-mobile-sheet-nav" aria-label="Admin navigation">
+                <div className="admin-nav-group">
+                  <p className="admin-nav-label">Workspace</p>
+                  <div className="admin-nav">
+                    <SheetClose asChild><Link to="/admin" activeOptions={{ exact: true }} className="admin-nav-link" activeProps={{ className: "admin-nav-link is-active" }}><LayoutDashboard size={18} aria-hidden="true" /><span>Dashboard</span></Link></SheetClose>
+                    <SheetClose asChild><Link to="/admin" hash="members" className="admin-nav-link"><UsersRound size={18} aria-hidden="true" /><span>Members & roles</span></Link></SheetClose>
+                  </div>
+                </div>
+                <div className="admin-nav-group">
+                  <p className="admin-nav-label">Payments</p>
+                  <div className="admin-nav">
+                    <SheetClose asChild><Link to="/admin/payments" className="admin-nav-link" activeProps={{ className: "admin-nav-link is-active" }}><CreditCard size={18} aria-hidden="true" /><span>Payment settings</span></Link></SheetClose>
+                  </div>
+                </div>
+              </nav>
+            </SheetContent>
+          </Sheet>
           <div className="admin-page-heading">
             <span className="admin-eyebrow">MingleConnect · Admin</span>
             <p>{date}</p>

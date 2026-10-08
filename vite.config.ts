@@ -11,6 +11,7 @@ export default defineConfig({
         "./src/lib/account.functions.ts",
         "./src/lib/admin.functions.ts",
         "./src/lib/dating.functions.ts",
+        "./src/lib/messaging.functions.ts",
         "./src/lib/payments.functions.ts",
         "./src/lib/payhero-settings.functions.ts",
       ],

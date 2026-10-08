@@ -90,25 +90,31 @@ export type Database = {
         Row: {
           content: string
           created_at: string
+          deleted_at: string | null
           id: string
           match_id: string
           read_at: string | null
+          reply_to_message_id: string | null
           sender_id: string
         }
         Insert: {
           content: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           match_id: string
           read_at?: string | null
+          reply_to_message_id?: string | null
           sender_id: string
         }
         Update: {
           content?: string
           created_at?: string
+          deleted_at?: string | null
           id?: string
           match_id?: string
           read_at?: string | null
+          reply_to_message_id?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -124,6 +130,13 @@ export type Database = {
             columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_reply_to_message_id_fkey"
+            columns: ["reply_to_message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
         ]

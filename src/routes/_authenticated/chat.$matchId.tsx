@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Send } from "lucide-react";
+import { ArrowLeft, Reply, Send, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { CHAT_DIGIT_ERROR, containsDigit } from "@/lib/digit-filter";
 import { MessagesInbox } from "@/components/MessagesInbox";
+import { deleteMessage } from "@/lib/messaging.functions";
 
 export const Route = createFileRoute("/_authenticated/chat/$matchId")({
   head: () => ({
@@ -28,6 +30,16 @@ interface Message {
   content: string;
   created_at: string;
   read_at: string | null;
+  reply_to_message_id: string | null;
+  deleted_at: string | null;
+  reply?: ReplyPreview | null;
+}
+
+interface ReplyPreview {
+  id: string;
+  sender_id: string;
+  content: string;
+  deleted_at: string | null;
 }
 
 interface MiniProfile {
@@ -43,6 +55,9 @@ function ChatPage() {
   const [other, setOther] = useState<MiniProfile | null>(null);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [replyTarget, setReplyTarget] = useState<Message | null>(null);
+  const deleteMessageFn = useServerFn(deleteMessage);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Load match + messages + subscribe
@@ -70,7 +85,7 @@ function ChatPage() {
         .select("*")
         .eq("match_id", matchId)
         .order("created_at", { ascending: true });
-      if (alive) setMessages((msgs ?? []) as Message[]);
+      if (alive) setMessages(await attachReplyPreviews((msgs ?? []) as Message[]));
 
       // Mark unread messages from other as read
       await supabase
@@ -86,9 +101,11 @@ function ChatPage() {
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
-        (payload) => {
+        async (payload) => {
           const message = payload.new as Message;
-          setMessages((current) => current.some((item) => item.id === message.id) ? current : [...current, message]);
+          const [withReply] = await attachReplyPreviews([message]);
+          if (!alive) return;
+          setMessages((current) => current.some((item) => item.id === message.id) ? current : [...current, withReply]);
           if (message.sender_id !== user.id && !message.read_at) {
             void supabase
               .from("messages")
@@ -101,8 +118,15 @@ function ChatPage() {
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
-        (payload) => {
-          setMessages((m) => m.map((x) => (x.id === (payload.new as Message).id ? (payload.new as Message) : x)));
+        async (payload) => {
+          const updated = payload.new as Message;
+          const [withReply] = await attachReplyPreviews([updated]);
+          setMessages((current) => current.map((item) => item.id === updated.id
+            ? { ...withReply, reply: item.reply }
+            : item.reply_to_message_id === updated.id
+              ? { ...item, reply: { id: updated.id, sender_id: updated.sender_id, content: updated.content, deleted_at: updated.deleted_at } }
+              : item));
+          setReplyTarget((current) => current?.id === updated.id ? { ...current, ...updated } : current);
         },
       )
       .subscribe();
@@ -112,6 +136,14 @@ function ChatPage() {
       supabase.removeChannel(channel);
     };
   }, [matchId, user]);
+
+  async function attachReplyPreviews(rows: Message[]): Promise<Message[]> {
+    const ids = [...new Set(rows.map((message) => message.reply_to_message_id).filter((id): id is string => !!id))];
+    if (!ids.length) return rows.map((message) => ({ ...message, reply: null }));
+    const { data } = await supabase.from("messages").select("id, sender_id, content, deleted_at").in("id", ids);
+    const previews = new Map((data ?? []).map((item) => [item.id, item as ReplyPreview]));
+    return rows.map((message) => ({ ...message, reply: previews.get(message.reply_to_message_id!) ?? null }));
+  }
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -128,7 +160,7 @@ function ChatPage() {
     setSending(true);
     const { error } = await supabase
       .from("messages")
-      .insert({ match_id: matchId, sender_id: user.id, content });
+      .insert({ match_id: matchId, sender_id: user.id, content, reply_to_message_id: replyTarget?.id ?? null });
     setSending(false);
     if (error) {
       if (error.message.toLowerCase().includes("messages_no_digits"))
@@ -137,6 +169,26 @@ function ChatPage() {
       return;
     }
     setText("");
+    setReplyTarget(null);
+  };
+
+  const removeMessage = async (message: Message) => {
+    if (message.deleted_at || deletingId) return;
+    if (!window.confirm("Delete this message for everyone? The conversation will show that it was deleted.")) return;
+    setDeletingId(message.id);
+    try {
+      await deleteMessageFn({ data: { messageId: message.id } });
+      setMessages((current) => current.map((item) => item.id === message.id
+        ? { ...item, content: "[Message deleted]", deleted_at: new Date().toISOString() }
+        : item.reply_to_message_id === message.id
+          ? { ...item, reply: { id: message.id, sender_id: message.sender_id, content: "[Message deleted]", deleted_at: new Date().toISOString() } }
+          : item));
+      setReplyTarget((current) => current?.id === message.id ? { ...current, content: "[Message deleted]", deleted_at: new Date().toISOString() } : current);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not delete message.");
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -167,8 +219,13 @@ function ChatPage() {
                 <div key={message.id}>
                   {currentDay !== previousDay && <div className="messages-day-divider"><span>{new Date(message.created_at).toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}</span></div>}
                   <div className={`messages-bubble-row${mine ? " mine" : ""}`}>
-                    <div className={`messages-bubble${mine ? " sent" : " received"}`}>
-                      <p>{message.content}</p>
+                    <div className="messages-bubble-actions">
+                      {!message.deleted_at && <button type="button" onClick={() => setReplyTarget(message)} aria-label="Reply to message" title="Reply"><Reply className="size-4" /></button>}
+                      {mine && !message.deleted_at && <button type="button" onClick={() => void removeMessage(message)} disabled={deletingId === message.id} aria-label="Delete message" title="Delete"><Trash2 className="size-4" /></button>}
+                    </div>
+                    <div className={`messages-bubble${mine ? " sent" : " received"}${message.deleted_at ? " deleted" : ""}`}>
+                      {message.reply_to_message_id && message.reply && <div className="messages-reply-quote"><strong>{message.reply.sender_id === user?.id ? "You" : other?.full_name ?? "Your match"}</strong><span>{message.reply.deleted_at ? "This message was deleted" : message.reply.content}</span></div>}
+                      <p>{message.deleted_at ? "This message was deleted" : message.content}</p>
                       <div className="messages-bubble-meta">
                         <time>{new Date(message.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</time>
                         {mine && <span>{message.read_at ? "Read" : "Sent"}</span>}
@@ -181,6 +238,7 @@ function ChatPage() {
           )}
         </div>
 
+        {replyTarget && <div className="messages-replying"><div><strong>Replying to {replyTarget.sender_id === user?.id ? "yourself" : other?.full_name ?? "your match"}</strong><span>{replyTarget.deleted_at ? "This message was deleted" : replyTarget.content}</span></div><button type="button" onClick={() => setReplyTarget(null)} aria-label="Cancel reply"><X className="size-4" /></button></div>}
         <form onSubmit={send} className="messages-composer">
           <textarea
             value={text}

@@ -14,7 +14,7 @@ interface Conversation {
   timestamp: string | null;
   unread: number;
 }
-type InboxMessage = { id: string; match_id: string; sender_id: string; content: string; created_at: string; read_at: string | null };
+type InboxMessage = { id: string; match_id: string; sender_id: string; content: string; created_at: string; read_at: string | null; deleted_at: string | null };
 
 function shortTime(timestamp: string | null) {
   if (!timestamp) return "";
@@ -48,7 +48,7 @@ export function MessagesInbox({ selectedMatchId }: { selectedMatchId?: string })
       const matchIds = rows.map((match) => match.id);
       const [{ data: profiles }, { data: messages }] = await Promise.all([
         supabase.from("profiles").select("id, full_name, avatar_url").in("id", otherIds),
-        supabase.from("messages").select("id, match_id, sender_id, content, created_at, read_at")
+        supabase.from("messages").select("id, match_id, sender_id, content, created_at, read_at, deleted_at")
           .in("match_id", matchIds).order("created_at", { ascending: false }),
       ]);
       const profileMap = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
@@ -69,7 +69,7 @@ export function MessagesInbox({ selectedMatchId }: { selectedMatchId?: string })
           otherId,
           name: profile?.full_name ?? "Your match",
           avatar: profile?.avatar_url ?? null,
-          preview: latest?.content ?? "Start a conversation",
+          preview: latest?.deleted_at ? "Message deleted" : latest?.content ?? "Start a conversation",
           timestamp: latest?.created_at ?? match.created_at,
           unread: unreadByMatch.get(match.id) ?? 0,
         };

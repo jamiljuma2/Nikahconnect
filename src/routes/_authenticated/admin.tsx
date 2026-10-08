@@ -1,9 +1,11 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Link } from "@tanstack/react-router";
+import { ArrowRight, CircleDollarSign, CreditCard, Eye, Heart, UsersRound } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import {
   checkIsAdmin,
@@ -39,6 +41,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 function AdminPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [realtimeConnected, setRealtimeConnected] = useState(false);
   const listUsers = useServerFn(listUsersForAdmin);
   const setSuspended = useServerFn(setUserSuspended);
   const setRole = useServerFn(setUserAdminRole);
@@ -76,8 +79,9 @@ function AdminPage() {
         { event: "*", schema: "public", table: "payments" },
         () => void queryClient.invalidateQueries({ queryKey: ["admin-stats"] }),
       )
-      .subscribe();
+      .subscribe((status) => setRealtimeConnected(status === "SUBSCRIBED"));
     return () => {
+      setRealtimeConnected(false);
       void supabase.removeChannel(channel);
     };
   }, [queryClient, user?.id]);
@@ -110,108 +114,134 @@ function AdminPage() {
     }
   };
 
+  const revenueLabel = stats.data
+    ? new Intl.NumberFormat("en-KE", {
+        style: "currency",
+        currency: "KES",
+        maximumFractionDigits: 0,
+      }).format(stats.data.revenue)
+    : "…";
+
   return (
-    <div>
-      <h1 className="font-display text-3xl font-semibold sm:text-4xl">Admin dashboard</h1>
-      <div className="mt-6 grid gap-3 grid-cols-2 sm:grid-cols-3 sm:gap-4 2xl:grid-cols-5">
-        <Stat label="Users" value={stats.data?.users ?? "…"} />
-        <Stat label="Matches" value={stats.data?.matches ?? "…"} />
-        <Stat label="Paid plans" value={stats.data?.payments ?? "…"} />
-        <Stat
-          label="Revenue collected"
-          value={
-            stats.data
-              ? new Intl.NumberFormat("en-KE", {
-                  style: "currency",
-                  currency: "KES",
-                  maximumFractionDigits: 0,
-                }).format(stats.data.revenue)
-              : "…"
-          }
-        />
-        <Stat label="Reveals" value={stats.data?.reveals ?? "…"} />
+    <div className="admin-dashboard">
+      <div className="admin-title-row">
+        <div>
+          <span className="admin-eyebrow">Overview</span>
+          <h1>Admin dashboard</h1>
+          <p>Manage members, review platform activity, and keep MingleConnect running smoothly.</p>
+        </div>
+        <Link to="/admin/payments" className="admin-outline-action">
+          <CreditCard size={17} aria-hidden="true" />
+          <span>Payment settings</span>
+          <ArrowRight size={16} aria-hidden="true" />
+        </Link>
       </div>
 
-      <h2 className="mt-10 font-display text-2xl font-semibold">Users & roles</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Grant or revoke admin access, and suspend abusive accounts.
-      </p>
-      <div className="mt-4 overflow-x-auto rounded-2xl border border-border bg-card">
-        <table className="w-full min-w-[720px] text-sm">
-          <thead className="bg-muted text-left text-xs uppercase tracking-wide text-muted-foreground">
-            <tr>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Email</th>
-              <th className="px-4 py-3">Role</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(usersQ.data ?? []).map((u) => {
-              const isSelf = u.id === user?.id;
-              return (
-                <tr key={u.id} className="border-t border-border">
-                  <td className="px-4 py-3 whitespace-nowrap">{u.full_name}</td>
-                  <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">{u.email}</td>
-                  <td className="px-4 py-3">
-                    {u.is_admin ? (
-                      <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs text-primary">
-                        Admin
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                        User
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    {u.suspended ? (
-                      <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-xs text-destructive">
-                        Suspended
-                      </span>
-                    ) : (
-                      <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs text-success">
-                        Active
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap justify-end gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => toggleAdmin(u.id, u.is_admin)}
-                        disabled={isSelf && u.is_admin}
-                        title={isSelf && u.is_admin ? "You can't revoke your own admin" : ""}
-                      >
-                        {u.is_admin ? "Revoke admin" : "Make admin"}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => toggleSuspend(u.id, u.suspended)}
-                        disabled={isSelf}
-                      >
-                        {u.suspended ? "Reinstate" : "Suspend"}
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      <div className="admin-overview-grid">
+        <section className="admin-stat-grid" aria-label="Platform statistics">
+          <Stat icon={<UsersRound />} label="Members" value={stats.data?.users ?? "…"} detail="Registered profiles" />
+          <Stat icon={<Heart />} label="Matches" value={stats.data?.matches ?? "…"} detail="Connections made" />
+          <Stat icon={<CreditCard />} label="Paid plans" value={stats.data?.payments ?? "…"} detail="Successful payments" />
+          <Stat icon={<Eye />} label="Contact reveals" value={stats.data?.reveals ?? "…"} detail="Numbers revealed" />
+        </section>
+
+        <aside className="admin-revenue-card">
+          <div className="admin-revenue-topline">
+            <span className="admin-revenue-icon"><CircleDollarSign size={20} /></span>
+            <span className={`admin-live-status ${realtimeConnected ? "is-live" : ""}`}>
+              <span />{realtimeConnected ? "Live" : "Connecting"}
+            </span>
+          </div>
+          <p className="admin-revenue-label">Revenue collected</p>
+          <p className="admin-revenue-value">{revenueLabel}</p>
+          <p className="admin-revenue-note">Confirmed M-Pesa payments across all paid plans.</p>
+          <div className="admin-revenue-footer">
+            <span>{stats.data?.payments ?? "…"} successful payments</span>
+            <span className="admin-revenue-live-copy">Updates live</span>
+          </div>
+        </aside>
       </div>
+
+      <section id="members" className="admin-members-panel">
+        <div className="admin-section-heading">
+          <div>
+            <span className="admin-eyebrow">Community</span>
+            <h2>Members & roles</h2>
+            <p>Grant or revoke admin access, and suspend or reinstate accounts.</p>
+          </div>
+          <span className="admin-member-count">{usersQ.data?.length ?? "…"} shown</span>
+        </div>
+        <div className="admin-table-wrap">
+          <table className="admin-users-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th className="admin-actions-heading">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(usersQ.data ?? []).map((u) => {
+                const isSelf = u.id === user?.id;
+                return (
+                  <tr key={u.id}>
+                    <td className="admin-member-name">{u.full_name || "Unnamed member"}</td>
+                    <td className="admin-member-email">{u.email}</td>
+                    <td>
+                      <span className={`admin-role-badge ${u.is_admin ? "is-admin" : ""}`}>
+                        {u.is_admin ? "Admin" : "Member"}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`admin-status-badge ${u.suspended ? "is-suspended" : ""}`}>
+                        <span />{u.suspended ? "Suspended" : "Active"}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="admin-row-actions">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => toggleAdmin(u.id, u.is_admin)}
+                          disabled={isSelf && u.is_admin}
+                          title={isSelf && u.is_admin ? "You can't revoke your own admin" : ""}
+                        >
+                          {u.is_admin ? "Revoke admin" : "Make admin"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => toggleSuspend(u.id, u.suspended)}
+                          disabled={isSelf}
+                        >
+                          {u.suspended ? "Reinstate" : "Suspend"}
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {usersQ.isLoading && <p className="admin-table-message">Loading members…</p>}
+          {!usersQ.isLoading && !usersQ.data?.length && (
+            <p className="admin-table-message">No members to show yet.</p>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
 
-function Stat({ label, value }: { label: string; value: number | string }) {
+function Stat({ icon, label, value, detail }: { icon: React.ReactNode; label: string; value: number | string; detail: string }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="mt-1 font-display text-3xl font-semibold">{value}</p>
+    <div className="admin-stat-card">
+      <span className="admin-stat-icon">{icon}</span>
+      <p className="admin-stat-label">{label}</p>
+      <p className="admin-stat-value">{value}</p>
+      <p className="admin-stat-detail">{detail}</p>
     </div>
   );
 }

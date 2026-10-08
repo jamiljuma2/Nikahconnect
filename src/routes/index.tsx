@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowUpRight, Heart, LockKeyhole, MessageCircleHeart, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowUpRight, Heart, LockKeyhole, MessageCircleHeart, ShieldCheck } from "lucide-react";
 import heroImg from "@/assets/landing-couple.png";
 
 export const Route = createFileRoute("/")({
@@ -61,7 +61,6 @@ function Landing() {
               <img src={heroImg} alt="A couple sharing a warm moment together" className="landing-hero-image" />
             </div>
             <span className="landing-photo-heart" aria-hidden="true"><Heart fill="currentColor" /></span>
-            <div className="landing-photo-note"><span><Sparkles className="size-4" /></span><div><strong>More than a match</strong><small>Make room for something real</small></div></div>
           </div>
         </section>
 

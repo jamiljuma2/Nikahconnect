@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Check, Infinity as InfIcon, Sparkles, Loader2, ShieldCheck, Smartphone } from "lucide-react";
+import { Check, Infinity as InfIcon, Loader2, ShieldCheck, Smartphone } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -78,7 +78,7 @@ function PlansPage() {
         className="plans-heading"
       >
         <span className="plans-kicker">
-          <Sparkles className="size-3.5" /> MingleConnect membership
+          MingleConnect membership
         </span>
         <h1>Simple, transparent pricing</h1>
         <p>Choose the reveal plan that fits your pace. Every plan includes secure M-Pesa checkout.</p>

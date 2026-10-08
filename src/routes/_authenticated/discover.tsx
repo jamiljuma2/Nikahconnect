@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Heart, Loader2, MapPin, Phone, Search, Sparkles } from "lucide-react";
+import { Heart, Loader2, MapPin, MessageCircle, Phone, Search } from "lucide-react";
 import { motion } from "motion/react";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -142,7 +142,6 @@ function Discover() {
   if (!allProfiles.length && !profilesQ.hasNextPage) {
     return (
       <div className="discover-empty">
-        <Sparkles className="mx-auto size-9" />
         <h2>You're all caught up</h2>
         <p>New profiles join every day. Check back soon or explore your matches.</p>
         <Link to="/matches" className="discover-empty-action">View matches</Link>
@@ -290,7 +289,7 @@ function DiscoverRevealButton({ profileId }: { profileId: string }) {
         title={`Open WhatsApp: ${phone}`}
         onClick={(event) => event.stopPropagation()}
       >
-        <Phone className="size-3.5" aria-hidden="true" />
+        <WhatsAppMark />
         <span>{phone}</span>
       </a>
     );
@@ -300,17 +299,26 @@ function DiscoverRevealButton({ profileId }: { profileId: string }) {
     <button
       type="button"
       className="discover-reveal-indicator"
-      aria-label="Reveal number and open WhatsApp"
-      title="Reveal number"
+      aria-label="Reveal phone number"
+      title="Reveal number to use on WhatsApp"
       disabled={busy}
       onClick={(event) => {
         event.stopPropagation();
         void handleReveal();
       }}
     >
-      {busy ? <Loader2 className="size-3.5 animate-spin" aria-hidden="true" /> : <Phone className="size-3.5" aria-hidden="true" />}
-      <span>{busy ? "Revealing…" : "Reveal"}</span>
+      {busy ? <Loader2 className="size-3.5 animate-spin" aria-hidden="true" /> : <WhatsAppMark />}
+      <span>{busy ? "Revealing…" : "Reveal number"}</span>
     </button>
+  );
+}
+
+function WhatsAppMark() {
+  return (
+    <span className="discover-whatsapp-mark" aria-hidden="true">
+      <MessageCircle />
+      <Phone />
+    </span>
   );
 }
 

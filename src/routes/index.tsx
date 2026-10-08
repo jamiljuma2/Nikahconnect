@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Heart, ShieldCheck, MessageCircleHeart } from "lucide-react";
-import heroImg from "@/assets/hero.jpg";
+import { ArrowUpRight, Heart, LockKeyhole, MessageCircleHeart, ShieldCheck, Sparkles } from "lucide-react";
+import heroImg from "@/assets/landing-couple.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,74 +26,67 @@ export const Route = createFileRoute("/")({
 function Landing() {
   return (
     <div className="landing-page">
-      <img
-        src={heroImg}
-        alt="Two people facing each other in warm sunset light"
-        className="landing-hero-image"
-        aria-hidden="true"
-      />
-      <div className="landing-image-wash" aria-hidden="true" />
-
-      <nav className="landing-nav" aria-label="Main navigation">
+      <header className="landing-nav">
         <Link to="/" className="landing-brand" aria-label="MingleConnect home">
           <span className="landing-brand-mark"><Heart className="size-4" fill="currentColor" /></span>
           <span>Mingle<span className="landing-brand-accent">Connect</span></span>
         </Link>
-        <div className="landing-nav-copy">
-          <span>Real people.</span>
-          <span>Real connections.</span>
-          <span className="landing-nav-accent">Real love.</span>
-        </div>
+        <nav className="landing-nav-links" aria-label="Main navigation">
+          <a href="#why-mingle">Why MingleConnect</a>
+          <a href="#our-promise">Our promise</a>
+        </nav>
         <Link to="/auth" search={{ mode: "login" } as never} className="landing-sign-in">
-          Sign in
+          Sign in <ArrowUpRight aria-hidden="true" />
         </Link>
-      </nav>
+      </header>
 
-      <main className="landing-content">
-        <p className="landing-eyebrow">MingleConnect / Dating with intention</p>
-        <h1>
-          <span>Two hearts.</span>
-          <strong>One connection.</strong>
-        </h1>
-        <p className="landing-subtitle">
-          Find someone who<br />
-          truly understands you.
-        </p>
+      <main>
+        <section className="landing-hero" aria-labelledby="landing-title">
+          <div className="landing-copy">
+            <p className="landing-eyebrow"><span /> DATING WITH INTENTION</p>
+            <h1 id="landing-title">A real connection<br />starts with <em>you.</em></h1>
+            <p className="landing-subtitle">
+              Meet genuine people who are ready for something meaningful. Your next great conversation could be closer than you think.
+            </p>
+            <div className="landing-actions">
+              <Link to="/auth" search={{ mode: "register" } as never} className="landing-cta">
+                Join MingleConnect <ArrowUpRight aria-hidden="true" />
+              </Link>
+              <span className="landing-join-note">Free to join · Made for meaningful connections</span>
+            </div>
+          </div>
 
-        <div className="landing-benefits" aria-label="MingleConnect benefits">
-          <LandingBenefit icon={<Heart />} lineOne="Meaningful" lineTwo="Matches" />
-          <LandingBenefit icon={<ShieldCheck />} lineOne="Safe &" lineTwo="Secure" />
-          <LandingBenefit icon={<MessageCircleHeart />} lineOne="Real" lineTwo="Conversations" />
-        </div>
+          <div className="landing-visual">
+            <div className="landing-photo-frame">
+              <img src={heroImg} alt="A couple sharing a warm moment together" className="landing-hero-image" />
+            </div>
+            <span className="landing-photo-heart" aria-hidden="true"><Heart fill="currentColor" /></span>
+            <div className="landing-photo-note"><span><Sparkles className="size-4" /></span><div><strong>More than a match</strong><small>Make room for something real</small></div></div>
+          </div>
+        </section>
 
-        <Link to="/auth" search={{ mode: "register" } as never} className="landing-cta">
-          Join free today
-        </Link>
-        <p className="landing-microcopy">It only takes a minute <span aria-hidden="true">♥</span></p>
+        <section className="landing-values" id="why-mingle" aria-label="What makes MingleConnect special">
+          <LandingValue icon={<ShieldCheck />} title="People first" detail="Genuine profiles" />
+          <LandingValue icon={<MessageCircleHeart />} title="Talk naturally" detail="Meaningful conversations" />
+          <LandingValue icon={<Heart />} title="Date with purpose" detail="Connections that matter" />
+          <LandingValue icon={<LockKeyhole />} title="Your choice" detail="Share contacts on your terms" />
+        </section>
+
+        <section className="landing-invitation" id="our-promise">
+          <div><p className="landing-invitation-kicker">YOUR STORY, YOUR PACE</p><h2>Good things start with hello.</h2></div>
+          <Link to="/auth" search={{ mode: "register" } as never} className="landing-bottom-cta">Find your connection <ArrowUpRight aria-hidden="true" /></Link>
+        </section>
       </main>
-
-      <aside className="landing-callout" aria-label="Your love story starts here">
-        <span className="landing-callout-heart"><Heart fill="currentColor" /></span>
-        <p>Your love story<br />starts here</p>
-        <span className="landing-callout-rule" aria-hidden="true"><i /></span>
-      </aside>
+      <footer className="landing-footer"><span>© {new Date().getFullYear()} MingleConnect</span><span>Made for real connections <Heart className="size-3" fill="currentColor" aria-hidden="true" /></span></footer>
     </div>
   );
 }
 
-function LandingBenefit({
-  icon,
-  lineOne,
-  lineTwo,
-}: {
-  icon: React.ReactNode;
-  lineOne: string;
-  lineTwo: string;
-}) {
+function LandingValue({ icon, title, detail }: { icon: React.ReactNode; title: string; detail: string }) {
   return (
-    <div className="landing-benefit">
-      <span className="landing-benefit-icon">{icon}</span>
-      <span>{lineOne}<br />{lineTwo}</span>
+    <div className="landing-value">
+      <span className="landing-value-icon">{icon}</span>
+      <span><strong>{title}</strong><small>{detail}</small></span>
     </div>
   );
 }

@@ -741,7 +741,23 @@
   background: rgb(18 2 34 / 47%) !important;
   color: var(--auth-ink) !important;
   box-shadow: inset 0 1px rgb(255 255 255 / 4%);
+  transition: border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease, transform 220ms ease;
 }
+
+.auth-fields > * { animation: auth-field-in 420ms cubic-bezier(.2, .8, .2, 1) both; }
+.auth-fields > *:nth-child(2) { animation-delay: 35ms; }
+.auth-fields > *:nth-child(3) { animation-delay: 70ms; }
+.auth-fields > *:nth-child(4) { animation-delay: 105ms; }
+.auth-fields > *:nth-child(5) { animation-delay: 140ms; }
+.auth-fields > *:nth-child(6) { animation-delay: 175ms; }
+.auth-fields > *:nth-child(7) { animation-delay: 210ms; }
+.auth-fields > *:nth-child(8) { animation-delay: 245ms; }
+.auth-fields input,
+.auth-fields textarea,
+.auth-fields [role="combobox"] { transition: border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease, transform 220ms ease; }
+.auth-fields input:focus-visible,
+.auth-fields textarea:focus-visible,
+.auth-fields [role="combobox"]:focus-visible { transform: translateY(-1px); }
 
 .auth-input::placeholder { color: rgb(242 220 245 / 35%); }
 
@@ -783,9 +799,14 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+@keyframes auth-field-in {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 760px) {
-  .auth-page { padding: 18px 14px; }
-  .auth-frame { display: block; min-height: 0; width: min(100%, 520px); }
+  .auth-page { display: flex; min-height: 100dvh; flex-direction: column; align-items: center; justify-content: center; padding: max(12px, env(safe-area-inset-top)) 14px max(12px, env(safe-area-inset-bottom)); }
+  .auth-frame { display: block; min-height: 0; width: min(100%, 520px); margin-block: auto; }
   .auth-frame-login { width: min(100%, 430px); }
   .auth-frame-login .auth-form-panel { padding: 32px 24px 28px; }
   .auth-frame-register { width: min(100%, 520px); }
@@ -816,7 +837,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .auth-frame, .auth-orbit-one, .auth-orbit-two { animation: none; }
-  .auth-discover, .auth-submit { transition: none; }
+  .auth-fields > * { animation: none; }
+  .auth-input, .auth-fields input, .auth-fields textarea, .auth-fields [role="combobox"], .auth-discover, .auth-submit { transition: none; }
 }
 
 /* Landing page */

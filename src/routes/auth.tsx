@@ -15,7 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, Eye, EyeOff, Check, X } from "lucide-react";
+import { Eye, EyeOff, Check, X } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 
 const search = z.object({
   mode: z.enum(["login", "register"]).default("login"),
@@ -68,8 +69,7 @@ function AuthPage() {
       <main className="auth-frame">
         <section className="auth-intro">
           <Link to="/" className="auth-brand" aria-label="MingleConnect home">
-            <span className="auth-brand-mark"><Heart className="size-4" fill="currentColor" /></span>
-            <span>Mingle<span className="auth-brand-accent">Connect</span></span>
+            <BrandLogo className="auth-brand-logo" />
           </Link>
           <div className="auth-intro-copy">
             <p className="auth-kicker">Your next chapter starts here</p>

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowUpRight, Heart, LockKeyhole, MessageCircleHeart, ShieldCheck } from "lucide-react";
 import heroImg from "@/assets/landing-couple.png";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -28,8 +29,7 @@ function Landing() {
     <div className="landing-page">
       <header className="landing-nav">
         <Link to="/" className="landing-brand" aria-label="MingleConnect home">
-          <span className="landing-brand-mark"><Heart className="size-4" fill="currentColor" /></span>
-          <span>Mingle<span className="landing-brand-accent">Connect</span></span>
+          <BrandLogo className="landing-brand-logo" />
         </Link>
         <nav className="landing-nav-links" aria-label="Main navigation">
           <a href="#why-mingle">Why MingleConnect</a>

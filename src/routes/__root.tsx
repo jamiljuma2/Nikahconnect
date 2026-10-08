@@ -17,6 +17,7 @@ import "@fontsource/inter/500.css";
 import "@fontsource/inter/600.css";
 
 import appCss from "../styles.css?url";
+import appIcon from "../assets/mingleconnect-icon.png";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -85,11 +86,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "MingleConnect — Meaningful Dating in Kenya" },
-      { name: "description", content: "Spark Connect is a mobile-first dating platform for users to create profiles, find matches, and chat." },
-      { property: "og:description", content: "Spark Connect is a mobile-first dating platform for users to create profiles, find matches, and chat." },
-      { name: "twitter:description", content: "Spark Connect is a mobile-first dating platform for users to create profiles, find matches, and chat." },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/png", href: appIcon },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,

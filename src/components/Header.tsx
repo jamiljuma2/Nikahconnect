@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Heart, MessageCircle, Crown, Settings, LogOut, Compass, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/BrandLogo";
 import { useAuth } from "@/lib/use-auth";
 
 export function Header() {
@@ -31,9 +32,10 @@ export function Header() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-2 px-3 sm:px-4">
         <Link
           to="/discover"
-          className="shrink-0 font-display text-lg font-semibold tracking-tight sm:text-2xl"
+          aria-label="MingleConnect — Discover"
+          className="header-brand shrink-0"
         >
-          Mingle<span className="text-primary">Connect</span>
+          <BrandLogo className="header-brand-logo" />
         </Link>
         <nav className="flex min-w-0 items-center gap-0.5 sm:gap-2">
           <NavLink to="/discover" icon={<Compass className="size-4" />} label="Discover" mobileHidden />

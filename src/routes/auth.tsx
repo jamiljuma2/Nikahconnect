@@ -49,7 +49,11 @@ function AuthPage() {
   const { mode, next } = Route.useSearch();
   const router = useRouter();
   const nextPath = safeNext(next);
-  const goNext = () => {
+  const goNext = (isAdmin = false) => {
+    if (isAdmin) {
+      window.location.assign("/admin");
+      return;
+    }
     if (nextPath) {
       window.location.assign(nextPath);
     } else {
@@ -179,18 +183,25 @@ function PasswordInput({
   );
 }
 
-function LoginForm({ onDone }: { onDone: () => void }) {
+function LoginForm({ onDone }: { onDone: (isAdmin: boolean) => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data: signInData, error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Welcome back!");
-    onDone();
+    const { data: roles, error: roleError } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", signInData.user.id);
+    if (roleError) {
+      console.error("Could not check account role after sign in", roleError);
+    }
+    onDone((roles ?? []).some((role) => role.role === "admin"));
   };
   return (
     <form onSubmit={submit} className="auth-fields">

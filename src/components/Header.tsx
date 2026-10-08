@@ -1,6 +1,7 @@
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Heart, MessageCircle, Crown, Settings, LogOut, Compass, Shield } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Heart, MessageCircle, Crown, Settings, LogOut, Compass, Shield, Menu, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -9,6 +10,17 @@ import { useAuth } from "@/lib/use-auth";
 export function Header({ likesCount, unreadMessagesCount }: { likesCount: number; unreadMessagesCount: number }) {
   const router = useRouter();
   const { user } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  useEffect(() => setMenuOpen(false), [pathname]);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [menuOpen]);
   const signOut = async () => {
     await supabase.auth.signOut();
     router.navigate({ to: "/" });
@@ -37,7 +49,7 @@ export function Header({ likesCount, unreadMessagesCount }: { likesCount: number
         >
           <BrandLogo className="header-brand-logo" />
         </Link>
-        <nav className="flex min-w-0 items-center gap-0.5 sm:gap-2">
+        <nav className="hidden min-w-0 items-center gap-0.5 sm:gap-2 md:flex">
           <NavLink to="/discover" icon={<Compass className="size-4" />} label="Discover" mobileHidden />
           <NavLink to="/likes" icon={<Heart className="size-4" />} label="Likes" notificationCount={likesCount} />
           <NavLink to="/matches" icon={<MessageCircle className="size-4" />} label="Messages" notificationCount={unreadMessagesCount} />
@@ -56,8 +68,49 @@ export function Header({ likesCount, unreadMessagesCount }: { likesCount: number
             <LogOut className="size-4" />
           </Button>
         </nav>
+        <button
+          type="button"
+          className="mobile-menu-toggle md:hidden"
+          aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+          aria-expanded={menuOpen}
+          aria-controls="mobile-navigation-drawer"
+          onClick={() => setMenuOpen((open) => !open)}
+        >
+          {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+        </button>
       </div>
+      {menuOpen && (
+        <>
+          <button type="button" className="mobile-menu-backdrop md:hidden" aria-label="Close navigation menu" onClick={() => setMenuOpen(false)} />
+          <aside id="mobile-navigation-drawer" className="mobile-navigation-drawer md:hidden" aria-label="Mobile navigation">
+            <div className="mobile-drawer-heading"><span>Navigate</span><small>Everything you need in one place</small></div>
+            <nav className="mobile-drawer-links" aria-label="Main menu" onClick={() => setMenuOpen(false)}>
+              <DrawerLink to="/discover" icon={<Compass />} label="Discover" />
+              <DrawerLink to="/likes" icon={<Heart />} label="Likes" count={likesCount} />
+              <DrawerLink to="/matches" icon={<MessageCircle />} label="Messages" count={unreadMessagesCount} />
+              <DrawerLink to="/plans" icon={<Crown />} label="Plans" />
+              <DrawerLink to="/settings" icon={<Settings />} label="Settings" />
+              {isAdmin && <DrawerLink to="/admin" icon={<Shield />} label="Admin" />}
+            </nav>
+            <button type="button" className="mobile-drawer-signout" onClick={signOut}><LogOut className="size-4" /> Sign out</button>
+          </aside>
+        </>
+      )}
     </header>
+  );
+}
+
+function DrawerLink({ to, icon, label, count = 0 }: { to: string; icon: React.ReactNode; label: string; count?: number }) {
+  return (
+    <Link
+      to={to}
+      className="mobile-drawer-link"
+      activeProps={{ className: "mobile-drawer-link active" }}
+    >
+      <span className="mobile-drawer-link-icon">{icon}</span>
+      <span>{label}</span>
+      {count > 0 && <span className="mobile-drawer-count">{count > 99 ? "99+" : count}</span>}
+    </Link>
   );
 }
 

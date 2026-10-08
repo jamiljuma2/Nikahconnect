@@ -66,7 +66,7 @@ function AuthPage() {
       <div className="auth-outline auth-outline-one" aria-hidden="true" />
       <div className="auth-outline auth-outline-two" aria-hidden="true" />
 
-      <main className={`auth-frame${mode === "login" ? " auth-frame-login" : ""}`}>
+      <main className={`auth-frame ${mode === "login" ? "auth-frame-login" : "auth-frame-register"}`}>
         {mode === "register" && (
           <section className="auth-intro">
             <Link to="/" className="auth-brand" aria-label="MingleConnect home">
@@ -309,11 +309,11 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
   };
 
   return (
-    <form onSubmit={submit} className="space-y-4">
-      <Field label="Full name">
+    <form onSubmit={submit} className="auth-fields register-fields">
+      <Field label="Full name" className="register-field">
         <Input value={form.full_name} onChange={(e) => set("full_name", e.target.value)} required />
       </Field>
-      <Field label="Email">
+      <Field label="Email" className="register-field">
         <Input
           type="email"
           value={form.email}
@@ -322,7 +322,7 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
           autoComplete="email"
         />
       </Field>
-      <Field label="Phone number">
+      <Field label="Phone number" className="register-field">
         <Input
           placeholder="+254712345678"
           value={form.phone_number}
@@ -331,7 +331,7 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
           autoComplete="tel"
         />
       </Field>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="register-field-wide register-pair">
         <Field label="Gender">
           <Select
             value={form.gender}
@@ -356,7 +356,7 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
           />
         </Field>
       </div>
-      <Field label="Location">
+      <Field label="Location" className="register-field">
         <Input
           placeholder="Nairobi, Kenya"
           value={form.location}
@@ -364,15 +364,15 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
           required
         />
       </Field>
-      <Field label="Bio (optional)">
+      <Field label="Bio (optional)" className="register-field-wide">
         <Textarea
-          rows={3}
+          rows={2}
           value={form.bio}
           onChange={(e) => set("bio", e.target.value)}
           placeholder="A line about you…"
         />
       </Field>
-      <Field label="Password">
+      <Field label="Password" className="register-field">
         <div onFocus={() => setPwFocused(true)}>
           <PasswordInput
             value={form.password}
@@ -420,7 +420,7 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
           </div>
         )}
       </Field>
-      <Field label="Confirm password">
+      <Field label="Confirm password" className="register-field">
         <PasswordInput
           value={form.confirm_password}
           onChange={(v) => set("confirm_password", v)}
@@ -449,16 +449,16 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
           )}
         </AnimatePresence>
       </Field>
-      <Button type="submit" className="w-full gradient-romance text-primary-foreground" disabled={busy}>
+      <Button type="submit" className="register-submit w-full gradient-romance text-primary-foreground" disabled={busy}>
         {busy ? "Creating account…" : "Create account"}
       </Button>
     </form>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
   return (
-    <div className="space-y-1.5">
+    <div className={`space-y-1.5 ${className ?? ""}`}>
       <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </Label>

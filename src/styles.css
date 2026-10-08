@@ -162,7 +162,8 @@
   display: grid;
   min-height: 100svh;
   place-items: center;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   padding: 32px 20px;
   isolation: isolate;
   background:
@@ -219,6 +220,10 @@
 
 .auth-frame-login .auth-form-shell { padding: 0; background: transparent; }
 .auth-frame-login .auth-form-panel { width: 100%; min-height: 0; padding: 38px 36px 34px; border: 1px solid rgb(255 237 255 / 16%); border-radius: 20px; background: linear-gradient(145deg, rgb(111 44 125 / 47%), rgb(42 13 67 / 58%)); }
+
+.auth-frame-register { width: min(100%, 1120px); grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
+.auth-frame-register .auth-form-panel { width: min(100%, 520px); min-height: 0; padding: 34px clamp(24px, 3vw, 38px) 30px; border-radius: 18px; }
+.auth-frame-register .auth-form-shell { padding: 30px clamp(24px, 3vw, 40px); }
 
 .auth-intro {
   position: relative;
@@ -364,6 +369,10 @@
 .auth-mode-tab-active { border-bottom: 2px solid #ff8a55; }
 
 .auth-fields { display: flex; flex-direction: column; gap: 16px; }
+.register-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 16px; }
+.register-field { min-width: 0; }
+.register-field-wide, .register-submit { grid-column: 1 / -1; min-width: 0; }
+.register-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 
 .auth-fields label,
 .auth-form-panel label {
@@ -428,16 +437,30 @@
   .auth-frame { display: block; min-height: 0; width: min(100%, 520px); }
   .auth-frame-login { width: min(100%, 430px); }
   .auth-frame-login .auth-form-panel { padding: 32px 24px 28px; }
-  .auth-intro { min-height: 295px; padding: 30px 27px 27px; }
-  .auth-intro-copy { margin: 45px 0 28px; }
-  .auth-intro h1 { margin-top: 9px; font-size: 52px; }
-  .auth-message { margin: 14px 0 18px; font-size: 13px; line-height: 1.55; }
+  .auth-frame-register { width: min(100%, 520px); }
+  .auth-frame-register .auth-form-shell { padding: 0 14px 18px; background: transparent; }
+  .auth-frame-register .auth-form-panel { padding: 26px 22px 24px; }
+  .auth-intro { min-height: 0; padding: 24px 27px 18px; }
+  .auth-frame-register .auth-intro-copy { margin: 25px 0 0; }
+  .auth-intro h1 { margin-top: 9px; font-size: 46px; }
+  .auth-message { margin: 12px 0 0; font-size: 13px; line-height: 1.55; }
+  .auth-frame-register .auth-discover { display: none; }
+  .auth-brand-logo { width: min(225px, calc(100vw - 88px)); }
   .auth-footer-note { display: none; }
   .auth-form-shell { padding: 20px 14px 24px; }
   .auth-form-panel { width: 100%; min-height: 0; padding: 28px 22px 24px; }
   .auth-orbit-one { top: -110px; right: -190px; }
   .auth-orbit-two { bottom: -180px; left: -220px; }
   .auth-band { opacity: .55; }
+}
+
+@media (max-width: 520px) {
+  .register-fields { grid-template-columns: minmax(0, 1fr); }
+  .register-field-wide, .register-submit { grid-column: 1; }
+}
+
+@media (max-width: 380px) {
+  .register-pair { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (prefers-reduced-motion: reduce) {

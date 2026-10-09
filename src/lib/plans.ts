@@ -14,16 +14,16 @@ export const PLANS: Record<PlanId, Plan> = {
   starter: {
     id: "starter",
     name: "Starter",
-    price: 150,
-    reveals: 3,
+    price: 249,
+    reveals: 2,
     unlimited: false,
     tagline: "Try it out",
-    features: ["3 contact reveals", "Unlimited matches & chats", "Valid for 30 days"],
+    features: ["2 contact reveals", "Unlimited matches & chats", "Valid for 30 days"],
   },
   standard: {
     id: "standard",
     name: "Standard",
-    price: 250,
+    price: 499,
     reveals: 5,
     unlimited: false,
     tagline: "Most popular",
@@ -32,7 +32,7 @@ export const PLANS: Record<PlanId, Plan> = {
   premium: {
     id: "premium",
     name: "Premium",
-    price: 500,
+    price: 899,
     reveals: Number.POSITIVE_INFINITY,
     unlimited: true,
     tagline: "No limits",
@@ -41,8 +41,8 @@ export const PLANS: Record<PlanId, Plan> = {
 };
 
 export const planForAmount = (amount: number): PlanId | null => {
-  if (amount === 150) return "starter";
-  if (amount === 250) return "standard";
-  if (amount === 500) return "premium";
+  if (amount === 249) return "starter";
+  if (amount === 499) return "standard";
+  if (amount === 899) return "premium";
   return null;
 };

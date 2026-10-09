@@ -300,6 +300,7 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender_type"]
           id: string
           interests: string[] | null
+          last_seen_at: string | null
           location: string
           occupation: string | null
           relationship_goal: string | null
@@ -316,6 +317,7 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender_type"]
           id: string
           interests?: string[] | null
+          last_seen_at?: string | null
           location: string
           occupation?: string | null
           relationship_goal?: string | null
@@ -332,6 +334,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"]
           id?: string
           interests?: string[] | null
+          last_seen_at?: string | null
           location?: string
           occupation?: string | null
           relationship_goal?: string | null

@@ -4,12 +4,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
+import { formatLastSeen, useMessageActivity } from "@/hooks/use-message-activity";
 
 interface Conversation {
   id: string;
   otherId: string;
   name: string;
   avatar: string | null;
+  lastSeenAt: string | null;
   preview: string;
   timestamp: string | null;
   unread: number;
@@ -47,7 +49,7 @@ export function MessagesInbox({ selectedMatchId }: { selectedMatchId?: string })
       const otherIds = rows.map((match) => match.user_one === user!.id ? match.user_two : match.user_one);
       const matchIds = rows.map((match) => match.id);
       const [{ data: profiles }, { data: messages }] = await Promise.all([
-        supabase.from("profiles").select("id, full_name, avatar_url").in("id", otherIds),
+        supabase.from("profiles").select("id, full_name, avatar_url, last_seen_at").in("id", otherIds),
         supabase.from("messages").select("id, match_id, sender_id, content, created_at, read_at, deleted_at")
           .in("match_id", matchIds).order("created_at", { ascending: false }),
       ]);
@@ -69,6 +71,7 @@ export function MessagesInbox({ selectedMatchId }: { selectedMatchId?: string })
           otherId,
           name: profile?.full_name ?? "Your match",
           avatar: profile?.avatar_url ?? null,
+          lastSeenAt: profile?.last_seen_at ?? null,
           preview: latest?.deleted_at ? "Message deleted" : latest?.content ?? "Start a conversation",
           timestamp: latest?.created_at ?? match.created_at,
           unread: unreadByMatch.get(match.id) ?? 0,
@@ -76,6 +79,8 @@ export function MessagesInbox({ selectedMatchId }: { selectedMatchId?: string })
       }).sort((a, b) => new Date(b.timestamp ?? 0).getTime() - new Date(a.timestamp ?? 0).getTime());
     },
   });
+
+  const getActivity = useMessageActivity(inboxQ.data?.map((conversation) => conversation.otherId) ?? []);
 
   useEffect(() => {
     if (!user) return;
@@ -121,8 +126,9 @@ export function MessagesInbox({ selectedMatchId }: { selectedMatchId?: string })
         </div>
       ) : (
         <nav className="messages-conversation-list" aria-label="Conversations">
-          {conversations.map((conversation) => (
-            <Link
+          {conversations.map((conversation) => {
+            const activity = getActivity(conversation.otherId);
+            return <Link
               key={conversation.id}
               to="/chat/$matchId"
               params={{ matchId: conversation.id }}
@@ -135,9 +141,12 @@ export function MessagesInbox({ selectedMatchId }: { selectedMatchId?: string })
               <span className="messages-conversation-copy">
                 <span className="messages-conversation-top"><strong>{conversation.name}</strong><time>{shortTime(conversation.timestamp)}</time></span>
                 <span className="messages-conversation-bottom"><span className="messages-preview">{conversation.preview}</span>{conversation.unread > 0 && <span className="messages-unread" aria-label={`${conversation.unread} unread messages`}>{conversation.unread}</span>}</span>
+                <span className={`messages-activity${activity.online ? " is-online" : ""}`}>
+                  <span aria-hidden="true" />{activity.online ? "Online" : formatLastSeen(activity.lastSeenAt ?? conversation.lastSeenAt)}
+                </span>
               </span>
             </Link>
-          ))}
+          })}
         </nav>
       )}
     </aside>

@@ -9,6 +9,7 @@ import { CHAT_DIGIT_ERROR, containsDigit } from "@/lib/digit-filter";
 import { MessagesInbox } from "@/components/MessagesInbox";
 import { deleteMessage } from "@/lib/messaging.functions";
 import { formatLastSeen, type ProfileActivity } from "@/hooks/use-message-activity";
+import { notifyUserError } from "@/lib/user-facing-errors";
 
 export const Route = createFileRoute("/_authenticated/chat/$matchId")({
   head: () => ({
@@ -168,7 +169,7 @@ function ChatPage() {
     if (error) {
       if (error.message.toLowerCase().includes("messages_no_digits"))
         toast.error(CHAT_DIGIT_ERROR);
-      else toast.error(error.message);
+      else notifyUserError(error, "We couldn’t send your message. Please try again.");
       return;
     }
     setText("");
@@ -188,7 +189,7 @@ function ChatPage() {
           : item));
       setReplyTarget((current) => current?.id === message.id ? { ...current, content: "[Message deleted]", deleted_at: new Date().toISOString() } : current);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete message.");
+      notifyUserError(error, "We couldn’t delete that message. Please try again.");
     } finally {
       setDeletingId(null);
     }

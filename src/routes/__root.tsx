@@ -21,6 +21,7 @@ import appIcon from "../assets/mingleconnect-icon.png";
 import { Toaster } from "@/components/ui/sonner";
 import { InstallAppBanner } from "@/components/InstallAppBanner";
 import { supabase } from "@/integrations/supabase/client";
+import { userFacingErrorMessage } from "@/lib/user-facing-errors";
 
 function NotFoundComponent() {
   return (
@@ -51,7 +52,7 @@ function ErrorComponent({ error, reset }: import("@tanstack/react-router").Error
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="font-display text-2xl text-foreground">Something went wrong</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{error instanceof Error ? error.message : String(error)}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{userFacingErrorMessage(error, "We couldn’t load this page. Please try again.")}</p>
         <div className="mt-6 flex justify-center gap-2">
           <button
             onClick={() => {

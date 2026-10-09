@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { Button } from "@/components/ui/button";
 import { getMyBalance, revealPhone } from "@/lib/dating.functions";
+import { notifyUserError } from "@/lib/user-facing-errors";
 
 export const Route = createFileRoute("/_authenticated/discover")({
   head: () => ({
@@ -91,7 +92,7 @@ function Discover() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["matches"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => notifyUserError(e, "We couldn’t update your likes. Please try again."),
   });
 
   const allProfiles = useMemo(() => {
@@ -295,7 +296,7 @@ function DiscoverRevealButton({
       await qc.invalidateQueries({ queryKey: ["balance"] });
     } catch (error) {
       const message = (error as Error).message;
-      toast.error(message);
+      notifyUserError(error, "We couldn’t unlock this contact. Please try again.");
       if (/subscription|balance|plan/i.test(message)) navigate({ to: "/plans" });
     } finally {
       setBusy(false);

@@ -19,6 +19,7 @@ import {
 import { PLANS, type PlanId } from "@/lib/plans";
 import { getMyPayments, initiatePayment, verifyAndActivatePayment } from "@/lib/payments.functions";
 import { getMyBalance } from "@/lib/dating.functions";
+import { notifyUserError } from "@/lib/user-facing-errors";
 
 export const Route = createFileRoute("/_authenticated/plans")({
   head: () => ({
@@ -262,7 +263,7 @@ function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
         setIdemKey(crypto.randomUUID());
       }
     } catch (e) {
-      toast.error((e as Error).message);
+      notifyUserError(e, "We couldn’t start your payment. Please try again.");
     } finally {
       setBusy(false);
     }

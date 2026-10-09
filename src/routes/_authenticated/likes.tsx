@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
+import { notifyUserError } from "@/lib/user-facing-errors";
 
 export const Route = createFileRoute("/_authenticated/likes")({
   head: () => ({
@@ -92,7 +93,7 @@ function LikesPage() {
         queryClient.invalidateQueries({ queryKey: ["message-inbox", user?.id] }),
       ]);
     },
-    onError: (error: Error) => toast.error(error.message),
+    onError: (error: Error) => notifyUserError(error, "We couldn’t update your likes. Please try again."),
   });
 
   return (

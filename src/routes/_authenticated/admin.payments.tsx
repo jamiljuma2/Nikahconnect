@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { checkIsAdmin } from "@/lib/admin.functions";
 import { getPayheroSettings, savePayheroSettings } from "@/lib/payhero-settings.functions";
+import { notifyUserError } from "@/lib/user-facing-errors";
 
 export const Route = createFileRoute("/_authenticated/admin/payments")({
   head: () => ({
@@ -53,7 +54,7 @@ function PaymentSettingsPage() {
       setPassword("");
       q.refetch();
     } catch (err) {
-      toast.error((err as Error).message);
+      notifyUserError(err, "We couldn’t save the payment settings. Please try again.");
     } finally {
       setBusy(false);
     }

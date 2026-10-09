@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { notifyUserError } from "@/lib/user-facing-errors";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -118,7 +119,7 @@ function SettingsPage() {
       );
       await navigate({ to: "/auth", search: { mode: "login" } });
     } catch (error) {
-      toast.error((error as Error).message || "Could not update your account.");
+      notifyUserError(error, "We couldn’t update your account. Please try again.");
     } finally {
       setAccountBusy(false);
     }
@@ -132,7 +133,7 @@ function SettingsPage() {
       toast.success("Your account is active again.");
       window.location.assign("/discover");
     } catch (error) {
-      toast.error((error as Error).message || "Could not reactivate your account.");
+      notifyUserError(error, "We couldn’t reactivate your account. Please try again.");
     } finally {
       setAccountBusy(false);
     }
@@ -169,7 +170,7 @@ function SettingsPage() {
       })
       .eq("id", user.id);
     setBusy(false);
-    if (error) toast.error(error.message);
+    if (error) notifyUserError(error, "We couldn’t save your profile. Please try again.");
     else if (isSetup) {
       toast.success("Profile complete. Welcome to MingleConnect!");
       navigate({ to: "/discover" });
@@ -188,7 +189,7 @@ function SettingsPage() {
     });
     if (error) {
       setUploading(false);
-      return toast.error(error.message);
+      return notifyUserError(error, "We couldn’t upload your photo. Please try again.");
     }
     const { data: signed } = await supabase.storage
       .from("profile-photos")

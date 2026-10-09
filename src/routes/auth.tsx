@@ -17,6 +17,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Eye, EyeOff, Check, X } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
+import { notifyUserError } from "@/lib/user-facing-errors";
 
 const search = z.object({
   mode: z.enum(["login", "register"]).default("login"),
@@ -192,7 +193,7 @@ function LoginForm({ onDone }: { onDone: (isAdmin: boolean) => void }) {
     setBusy(true);
     const { data: signInData, error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) return notifyUserError(error, "We couldn’t sign you in. Please try again.");
     toast.success("Welcome back!");
     const { data: roles, error: roleError } = await supabase
       .from("user_roles")
@@ -306,15 +307,15 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
     });
     if (error) {
       setBusy(false);
-      return toast.error(error.message);
+      return notifyUserError(error, "We couldn’t create your account. Please try again.");
     }
     if (!data.session) {
       setBusy(false);
-      return toast.error("Email verification is enabled. Disable Confirm Email in Supabase Auth settings before new users can sign in.");
+      return toast.error("Your account was created. Please check your email to finish setting it up.");
     }
     const { error: signOutError } = await supabase.auth.signOut();
     setBusy(false);
-    if (signOutError) return toast.error(`Account created, but signing out failed: ${signOutError.message}`);
+    if (signOutError) return notifyUserError(signOutError, "Your account was created, but we couldn’t finish signing you out. Please sign in to continue.");
     toast.success("Account created. Sign in to complete your profile.");
     onDone();
   };

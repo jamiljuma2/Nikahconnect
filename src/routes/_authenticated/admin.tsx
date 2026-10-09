@@ -16,6 +16,7 @@ import {
 import { useAuth } from "@/lib/use-auth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { notifyUserError } from "@/lib/user-facing-errors";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -114,7 +115,7 @@ function AdminPage() {
       toast.success(!suspended ? "User suspended" : "User reinstated");
       await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
     } catch (e) {
-      toast.error((e as Error).message);
+      notifyUserError(e, "We couldn’t update this account. Please try again.");
     } finally {
       setUpdatingUserId(null);
     }
@@ -127,7 +128,7 @@ function AdminPage() {
       toast.success(!isAdmin ? "Granted admin role" : "Revoked admin role");
       await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
     } catch (e) {
-      toast.error((e as Error).message);
+      notifyUserError(e, "We couldn’t update this role. Please try again.");
     } finally {
       setUpdatingUserId(null);
     }

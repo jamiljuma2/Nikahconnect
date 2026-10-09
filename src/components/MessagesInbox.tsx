@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
-import { formatLastSeen, useMessageActivity } from "@/hooks/use-message-activity";
+import { formatLastSeen, useMessageActivity, type ProfileActivity } from "@/hooks/use-message-activity";
 
 interface Conversation {
   id: string;
@@ -27,7 +27,10 @@ function shortTime(timestamp: string | null) {
     : date.toLocaleDateString([], { month: "short", day: "numeric" });
 }
 
-export function MessagesInbox({ selectedMatchId }: { selectedMatchId?: string }) {
+export function MessagesInbox({ selectedMatchId, onProfileActivity }: {
+  selectedMatchId?: string;
+  onProfileActivity?: (activity: ProfileActivity) => void;
+}) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
@@ -81,6 +84,12 @@ export function MessagesInbox({ selectedMatchId }: { selectedMatchId?: string })
   });
 
   const getActivity = useMessageActivity(inboxQ.data?.map((conversation) => conversation.otherId) ?? []);
+  const selectedConversation = inboxQ.data?.find((conversation) => conversation.id === selectedMatchId);
+  const selectedActivity = selectedConversation ? getActivity(selectedConversation.otherId) : null;
+
+  useEffect(() => {
+    if (selectedActivity) onProfileActivity?.(selectedActivity);
+  }, [onProfileActivity, selectedActivity?.online, selectedActivity?.lastSeenAt]);
 
   useEffect(() => {
     if (!user) return;

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, Reply, Send, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/use-auth";
 import { CHAT_DIGIT_ERROR, containsDigit } from "@/lib/digit-filter";
 import { MessagesInbox } from "@/components/MessagesInbox";
 import { deleteMessage } from "@/lib/messaging.functions";
-import { formatLastSeen, useMessageActivity } from "@/hooks/use-message-activity";
+import { formatLastSeen, type ProfileActivity } from "@/hooks/use-message-activity";
 
 export const Route = createFileRoute("/_authenticated/chat/$matchId")({
   head: () => ({
@@ -54,13 +54,14 @@ function ChatPage() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [other, setOther] = useState<MiniProfile | null>(null);
-  const getActivity = useMessageActivity(other ? [other.id] : []);
+  const [otherActivity, setOtherActivity] = useState<ProfileActivity>({ online: false, lastSeenAt: null });
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [replyTarget, setReplyTarget] = useState<Message | null>(null);
   const deleteMessageFn = useServerFn(deleteMessage);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const handleProfileActivity = useCallback((activity: ProfileActivity) => setOtherActivity(activity), []);
 
   // Load match + messages + subscribe
   useEffect(() => {
@@ -195,7 +196,7 @@ function ChatPage() {
 
   return (
     <section className="messages-layout messages-chat-layout has-active-chat" aria-label="Messages">
-      <MessagesInbox selectedMatchId={matchId} />
+      <MessagesInbox selectedMatchId={matchId} onProfileActivity={handleProfileActivity} />
       <div className="messages-chat-panel">
         <header className="messages-chat-header">
           <Link to="/matches" className="messages-back" aria-label="Back to messages">
@@ -204,7 +205,7 @@ function ChatPage() {
           {other ? (
             <>
               {other.avatar_url ? <img src={other.avatar_url} alt="" className="messages-header-avatar" /> : <span className="messages-header-fallback">{other.full_name.charAt(0)}</span>}
-              <div className="min-w-0"><h1>{other.full_name}</h1><p className={`messages-header-activity${getActivity(other.id).online ? " is-online" : ""}`}><span aria-hidden="true" />{getActivity(other.id).online ? "Online" : formatLastSeen(getActivity(other.id).lastSeenAt)}</p></div>
+              <div className="min-w-0"><h1>{other.full_name}</h1><p className={`messages-header-activity${otherActivity.online ? " is-online" : ""}`}><span aria-hidden="true" />{otherActivity.online ? "Online" : formatLastSeen(otherActivity.lastSeenAt)}</p></div>
             </>
           ) : <div className="messages-header-skeleton" />}
         </header>

@@ -41,7 +41,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               <LayoutDashboard size={18} aria-hidden="true" />
               <span>Dashboard</span>
             </Link>
-            <Link to="/admin" hash="members" className="admin-nav-link">
+            <Link to="/admin" hash="members" hashScrollIntoView className="admin-nav-link">
               <UsersRound size={18} aria-hidden="true" />
               <span>Members & roles</span>
             </Link>
@@ -79,7 +79,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                   <p className="admin-nav-label">Workspace</p>
                   <div className="admin-nav">
                     <SheetClose asChild><Link to="/admin" activeOptions={{ exact: true }} className="admin-nav-link" activeProps={{ className: "admin-nav-link is-active" }}><LayoutDashboard size={18} aria-hidden="true" /><span>Dashboard</span></Link></SheetClose>
-                    <SheetClose asChild><Link to="/admin" hash="members" className="admin-nav-link"><UsersRound size={18} aria-hidden="true" /><span>Members & roles</span></Link></SheetClose>
+                    <SheetClose asChild><Link to="/admin" hash="members" hashScrollIntoView className="admin-nav-link"><UsersRound size={18} aria-hidden="true" /><span>Members & roles</span></Link></SheetClose>
                   </div>
                 </div>
                 <div className="admin-nav-group">

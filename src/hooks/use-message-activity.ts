@@ -74,7 +74,7 @@ export interface ProfileActivity {
 }
 
 export function formatLastSeen(timestamp: string | null) {
-  if (!timestamp) return "Activity unavailable";
+  if (!timestamp) return "Last seen recently";
   const elapsed = Math.max(0, Date.now() - new Date(timestamp).getTime());
   if (elapsed < 60_000) return "Last seen just now";
   if (elapsed < 60 * 60_000) return `Last seen ${Math.floor(elapsed / 60_000)}m ago`;

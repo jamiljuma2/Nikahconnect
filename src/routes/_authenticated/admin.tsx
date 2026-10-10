@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Eye, Heart, MoreHorizontal, Search, ShieldCheck, ShieldOff, UserRoundCheck, UserRoundX, UsersRound } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
+import { supabase } from "@/integrations/supabase/client";
 import {
   getAdminDashboardStats,
   listUsersForAdmin,

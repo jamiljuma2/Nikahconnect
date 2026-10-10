@@ -8,9 +8,21 @@ import { useAppNotifications } from "@/hooks/use-app-notifications";
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth", search: { mode: "login" } });
-    return { user: data.user };
+    try {
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user) return { user: data.session.user };
+    } catch {
+      // A brief auth network failure should not log out a user with a valid local session.
+    }
+
+    try {
+      const { data, error } = await supabase.auth.getUser();
+      if (!error && data.user) return { user: data.user };
+    } catch {
+      // Fall through to the sign-in route if neither auth check can find a session.
+    }
+
+    throw redirect({ to: "/auth", search: { mode: "login" } });
   },
   component: AuthenticatedLayout,
 });

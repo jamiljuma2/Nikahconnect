@@ -52,7 +52,10 @@ function AuthPage() {
   const nextPath = safeNext(next);
   const goNext = (isAdmin = false) => {
     if (isAdmin) {
-      window.location.assign("/admin");
+      // Keep the Supabase session in memory while entering the protected route.
+      // A full document reload here can race session restoration with the
+      // admin route's server-side role check.
+      void router.navigate({ to: "/admin" });
       return;
     }
     if (nextPath) {

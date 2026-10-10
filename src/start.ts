@@ -3,10 +3,15 @@ import { createCsrfMiddleware, createStart, createMiddleware } from "@tanstack/r
 import { renderErrorPage } from "./lib/error-page";
 import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
 
-const errorMiddleware = createMiddleware().server(async ({ next }) => {
+const errorMiddleware = createMiddleware().server(async ({ next, handlerType }) => {
   try {
     return await next();
   } catch (error) {
+    // Server functions need TanStack's serialized error response. Returning an
+    // HTML page for an auth/session failure corrupts the RPC response and can
+    // surface as a full-screen error during sign-in.
+    if (handlerType === "serverFn") throw error;
+
     if (error != null && typeof error === "object" && "statusCode" in error) {
       throw error;
     }

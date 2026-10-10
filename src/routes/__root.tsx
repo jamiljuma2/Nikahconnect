@@ -126,9 +126,18 @@ function RootComponent() {
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
-        router.invalidate();
-        if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
+      // LoginForm navigates after sign-in has completed. Invalidating the
+      // current route at the same time can race that navigation and briefly
+      // render a router error during session establishment.
+      if (event === "SIGNED_IN") return;
+
+      if (event === "SIGNED_OUT" || event === "USER_UPDATED") {
+        void router.invalidate();
+        if (event === "SIGNED_OUT") {
+          queryClient.clear();
+        } else {
+          void queryClient.invalidateQueries();
+        }
       }
     });
     return () => sub.subscription.unsubscribe();

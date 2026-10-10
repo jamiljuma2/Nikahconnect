@@ -8,16 +8,40 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+    let active = true;
+    let receivedAuthEvent = false;
+    const applySession = (s: Session | null) => {
+      if (!active) return;
       setSession(s);
       setUser(s?.user ?? null);
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
       setLoading(false);
+    };
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+      receivedAuthEvent = true;
+      applySession(s);
     });
-    return () => sub.subscription.unsubscribe();
+
+    void supabase.auth
+      .getSession()
+      .then(({ data, error }) => {
+        // The auth listener may have delivered a newer sign-in, sign-out, or
+        // recovery session while the initial storage lookup was still pending.
+        if (active && !receivedAuthEvent) {
+          if (error) console.warn("Could not restore the saved auth session", error);
+          applySession(data.session);
+        }
+      })
+      .catch((error: unknown) => {
+        if (!active || receivedAuthEvent) return;
+        console.warn("Could not restore the saved auth session", error);
+        applySession(null);
+      });
+
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   return { session, user, loading };

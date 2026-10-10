@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const PAYHERO_BASE = "https://backend.payhero.co.ke/api/v2";
 const PLANS = {
-  starter: { reveals: 2, unlimited: false },
+  starter: { reveals: 3, unlimited: false },
   standard: { reveals: 5, unlimited: false },
   premium: { reveals: 0, unlimited: true },
 } as const;

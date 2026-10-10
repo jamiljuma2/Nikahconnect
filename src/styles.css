@@ -794,6 +794,11 @@
 
 .auth-submit:disabled { cursor: wait; opacity: .62; }
 
+.auth-forgot-link, .auth-back-link { align-self: flex-end; color: #ffb274; font-size: 12px; text-decoration: none; transition: color 160ms ease; }
+.auth-forgot-link:hover, .auth-back-link:hover { color: #ffd0a8; text-decoration: underline; }
+.auth-back-link { align-self: center; }
+.auth-reset-note { margin: 0; color: var(--auth-muted); font-size: 13px; line-height: 1.6; text-align: center; }
+
 .auth-form-content .text-muted-foreground { color: var(--auth-muted); }
 
 .auth-orbit,

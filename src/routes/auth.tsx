@@ -20,7 +20,7 @@ import { BrandLogo } from "@/components/BrandLogo";
 import { notifyUserError } from "@/lib/user-facing-errors";
 
 const search = z.object({
-  mode: z.enum(["login", "register"]).default("login"),
+  mode: z.enum(["login", "register", "forgot", "reset"]).default("login"),
   next: z.string().optional(),
 });
 
@@ -71,7 +71,7 @@ function AuthPage() {
       <div className="auth-outline auth-outline-one" aria-hidden="true" />
       <div className="auth-outline auth-outline-two" aria-hidden="true" />
 
-      <main className={`auth-frame ${mode === "login" ? "auth-frame-login" : "auth-frame-register"}`}>
+      <main className={`auth-frame ${mode === "register" ? "auth-frame-register" : "auth-frame-login"}`}>
         {mode === "register" && (
           <section className="auth-intro">
             <Link to="/" className="auth-brand" aria-label="MingleConnect home">
@@ -94,23 +94,35 @@ function AuthPage() {
           <div className="auth-form-panel">
             <div className="auth-form-heading">
               <span className="auth-form-eyebrow">MingleConnect</span>
-              <h2 id="auth-title">{mode === "register" ? "Create account" : "Sign in"}</h2>
+              <h2 id="auth-title">
+                {mode === "register" ? "Create account" : mode === "forgot" ? "Reset your password" : mode === "reset" ? "Choose a new password" : "Sign in"}
+              </h2>
               <span className="auth-rule auth-rule-center" aria-hidden="true" />
               <p>
                 {mode === "register"
                   ? "It only takes a minute to begin."
-                  : "Welcome back. Your story is waiting."}
+                  : mode === "forgot"
+                    ? "We’ll email you a secure link to get back into your account."
+                    : mode === "reset"
+                      ? "Choose a new password for your account."
+                      : "Welcome back. Your story is waiting."}
               </p>
             </div>
 
-            <div className="auth-mode-tabs" aria-label="Authentication mode">
-              <ModeTab to="login" current={mode}>Sign in</ModeTab>
-              <ModeTab to="register" current={mode}>Register</ModeTab>
-            </div>
+            {(mode === "login" || mode === "register") && (
+              <div className="auth-mode-tabs" aria-label="Authentication mode">
+                <ModeTab to="login" current={mode}>Sign in</ModeTab>
+                <ModeTab to="register" current={mode}>Register</ModeTab>
+              </div>
+            )}
 
             <div className="auth-form-content">
               {mode === "register" ? (
                 <RegisterForm onDone={() => router.navigate({ to: "/auth", search: { mode: "login", next: "/settings?setup=1" } })} />
+              ) : mode === "forgot" ? (
+                <ForgotPasswordForm />
+              ) : mode === "reset" ? (
+                <ResetPasswordForm onDone={() => router.navigate({ to: "/auth", search: { mode: "login" } })} />
               ) : (
                 <LoginForm onDone={goNext} />
               )}
@@ -212,9 +224,84 @@ function LoginForm({ onDone }: { onDone: (isAdmin: boolean) => void }) {
       <Field label="Password">
         <PasswordInput value={password} onChange={setPassword} autoComplete="current-password" />
       </Field>
+      <Link className="auth-forgot-link" to="/auth" search={{ mode: "forgot" }}>Forgot password?</Link>
       <Button type="submit" className="auth-submit w-full" disabled={busy}>
         {busy ? "Signing in…" : "Sign in"}
       </Button>
+    </form>
+  );
+}
+
+function ForgotPasswordForm() {
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      redirectTo: `${window.location.origin}/auth?mode=reset`,
+    });
+    setBusy(false);
+    if (error) return notifyUserError(error, "We couldn’t send a reset link. Please try again shortly.");
+    setSent(true);
+  };
+
+  if (sent) {
+    return (
+      <div className="auth-fields">
+        <p className="auth-reset-note">If an account exists for that email, a password reset link is on its way. Check your inbox and spam folder.</p>
+        <Link className="auth-back-link" to="/auth" search={{ mode: "login" }}>Back to sign in</Link>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={submit} className="auth-fields">
+      <Field label="Email">
+        <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" className="auth-input" />
+      </Field>
+      <Button type="submit" className="auth-submit w-full" disabled={busy}>
+        {busy ? "Sending link…" : "Send reset link"}
+      </Button>
+      <Link className="auth-back-link" to="/auth" search={{ mode: "login" }}>Back to sign in</Link>
+    </form>
+  );
+}
+
+function ResetPasswordForm({ onDone }: { onDone: () => void }) {
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = strongPassword.safeParse(password);
+    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Please choose a stronger password.");
+    if (password !== confirmPassword) return toast.error("Passwords do not match.");
+
+    setBusy(true);
+    const { error } = await supabase.auth.updateUser({ password });
+    setBusy(false);
+    if (error) return notifyUserError(error, "We couldn’t update your password. Request a new reset link and try again.");
+    toast.success("Your password has been updated. You can now sign in.");
+    await supabase.auth.signOut();
+    onDone();
+  };
+
+  return (
+    <form onSubmit={submit} className="auth-fields">
+      <Field label="New password">
+        <PasswordInput value={password} onChange={setPassword} autoComplete="new-password" />
+      </Field>
+      <Field label="Confirm new password">
+        <PasswordInput value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" />
+      </Field>
+      <Button type="submit" className="auth-submit w-full" disabled={busy}>
+        {busy ? "Updating password…" : "Update password"}
+      </Button>
+      <Link className="auth-back-link" to="/auth" search={{ mode: "login" }}>Back to sign in</Link>
     </form>
   );
 }

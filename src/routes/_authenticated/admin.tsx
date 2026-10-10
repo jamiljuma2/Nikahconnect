@@ -1,7 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
@@ -9,6 +8,7 @@ import { ArrowRight, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Ey
 import { useServerFn } from "@tanstack/react-start";
 import {
   checkIsAdmin,
+  getAdminDashboardStats,
   listUsersForAdmin,
   setUserAdminRole,
   setUserSuspended,
@@ -50,32 +50,13 @@ function AdminPage() {
   const [memberPage, setMemberPage] = useState(0);
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
   const listUsers = useServerFn(listUsersForAdmin);
+  const getStats = useServerFn(getAdminDashboardStats);
   const setSuspended = useServerFn(setUserSuspended);
   const setRole = useServerFn(setUserAdminRole);
 
   const stats = useQuery({
     queryKey: ["admin-stats"],
-    queryFn: async () => {
-      const [users, matches, payments, reveals, revenue] = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("matches").select("id", { count: "exact", head: true }),
-        supabase
-          .from("payments")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "success"),
-        supabase.from("number_reveals").select("id", { count: "exact", head: true }),
-        supabase.rpc("admin_collected_revenue"),
-      ]);
-      const queryError = [users, matches, payments, reveals, revenue].find((result) => result.error)?.error;
-      if (queryError) throw new Error(queryError.message);
-      return {
-        users: users.count ?? 0,
-        matches: matches.count ?? 0,
-        payments: payments.count ?? 0,
-        reveals: reveals.count ?? 0,
-        revenue: Number(revenue.data ?? 0),
-      };
-    },
+    queryFn: () => getStats(),
   });
 
   useEffect(() => {

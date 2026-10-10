@@ -26,6 +26,34 @@ export const checkIsAdmin = createServerFn({ method: "GET" })
     return { isAdmin: !!data };
   });
 
+export const getAdminDashboardStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const [users, matches, payments, reveals, revenuePayments] = await Promise.all([
+      supabaseAdmin.from("profiles").select("id", { count: "exact", head: true }),
+      supabaseAdmin.from("matches").select("id", { count: "exact", head: true }),
+      supabaseAdmin
+        .from("payments")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "success"),
+      supabaseAdmin.from("number_reveals").select("id", { count: "exact", head: true }),
+      supabaseAdmin.from("payments").select("amount").eq("status", "success"),
+    ]);
+
+    const queryError = [users, matches, payments, reveals, revenuePayments].find((result) => result.error)?.error;
+    if (queryError) throw new Error("Dashboard metrics couldn’t be loaded. Please try again.");
+
+    return {
+      users: users.count ?? 0,
+      matches: matches.count ?? 0,
+      payments: payments.count ?? 0,
+      reveals: reveals.count ?? 0,
+      revenue: (revenuePayments.data ?? []).reduce((sum, payment) => sum + payment.amount, 0),
+    };
+  });
+
 export const listUsersForAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((data) => z.object({

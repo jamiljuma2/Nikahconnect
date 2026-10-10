@@ -1211,7 +1211,7 @@
 .discover-reveal-indicator > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .discover-reveal-indicator > svg { color: #ff7893; }
 .discover-reveal-indicator.is-locked { border-color: rgb(255 255 255 / 16%); background: rgb(16 16 18 / 90%); color: #f5e3c7; }
-.discover-reveal-indicator.is-locked > svg { color: #edbe73; }
+.discover-reveal-indicator.is-locked > svg { color: #69c58a; }
 .discover-whatsapp-mark { position: relative; display: inline-grid; width: 18px; height: 18px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: #25d366; color: white; }
 .discover-whatsapp-mark svg:first-child { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2.3; }
 .discover-whatsapp-mark svg:last-child { position: absolute; width: 7px; height: 7px; stroke: currentColor; stroke-width: 2.7; }

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Heart, Loader2, LockKeyhole, MapPin, MessageCircle, Phone, Search } from "lucide-react";
+import { Heart, Loader2, MapPin, MessageCircle, MessageCircleHeart, Phone, Search } from "lucide-react";
 import { motion } from "motion/react";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -337,9 +337,9 @@ function DiscoverRevealButton({
         {checkingRevealAccess ? (
           <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
         ) : (
-          <LockKeyhole className="size-3.5" aria-hidden="true" />
+          <MessageCircleHeart className="size-3.5" aria-hidden="true" />
         )}
-        <span>{checkingRevealAccess ? "Checking plan…" : "Unlock number"}</span>
+        <span>{checkingRevealAccess ? "Checking plan…" : "See contact"}</span>
       </button>
     );
   }

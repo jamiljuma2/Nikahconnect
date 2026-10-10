@@ -1323,7 +1323,7 @@
   .messages-layout:not(.messages-chat-layout) { grid-template-rows: minmax(430px, calc(100dvh - 12rem)); }
   .messages-layout:not(.messages-chat-layout) .messages-inbox { border-right: 0; }
   .messages-layout:not(.messages-chat-layout) .messages-welcome { display: none; }
-  .messages-chat-layout { min-height: 100dvh; height: 100dvh; border: 0; border-radius: 0; }
+  .messages-chat-layout { position: fixed; z-index: 30; top: var(--chat-visual-offset, 0px); right: 0; left: 0; min-height: 0; height: var(--chat-visual-height, 100dvh); border: 0; border-radius: 0; }
   .messages-chat-layout.has-active-chat .messages-inbox { display: none; }
   .messages-back { display: flex; }
   .messages-chat-header { min-height: 66px; padding: 9px 12px; }

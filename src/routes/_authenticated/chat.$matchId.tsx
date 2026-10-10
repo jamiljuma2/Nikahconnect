@@ -153,6 +153,24 @@ function ChatPage() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const updateChatViewport = () => {
+      document.documentElement.style.setProperty("--chat-visual-height", `${viewport.height}px`);
+      document.documentElement.style.setProperty("--chat-visual-offset", `${viewport.offsetTop}px`);
+    };
+    updateChatViewport();
+    viewport.addEventListener("resize", updateChatViewport);
+    viewport.addEventListener("scroll", updateChatViewport);
+    return () => {
+      viewport.removeEventListener("resize", updateChatViewport);
+      viewport.removeEventListener("scroll", updateChatViewport);
+      document.documentElement.style.removeProperty("--chat-visual-height");
+      document.documentElement.style.removeProperty("--chat-visual-offset");
+    };
+  }, []);
+
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
     const content = text.trim();

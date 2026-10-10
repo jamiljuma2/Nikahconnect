@@ -7,13 +7,13 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Eye, Heart, MoreHorizontal, Search, ShieldCheck, ShieldOff, UserRoundCheck, UserRoundX, UsersRound } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import {
-  checkIsAdmin,
   getAdminDashboardStats,
   listUsersForAdmin,
   setUserAdminRole,
   setUserSuspended,
 } from "@/lib/admin.functions";
 import { useAuth } from "@/lib/use-auth";
+import { isCurrentUserAdmin } from "@/lib/admin-route-guard";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { notifyUserError } from "@/lib/user-facing-errors";
@@ -30,13 +30,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
     ],
   }),
   beforeLoad: async () => {
-    try {
-      const { isAdmin } = await checkIsAdmin();
-      if (!isAdmin) throw redirect({ to: "/discover" });
-    } catch (e) {
-      if ((e as { isRedirect?: boolean }).isRedirect) throw e;
-      throw redirect({ to: "/discover" });
-    }
+    if (!(await isCurrentUserAdmin())) throw redirect({ to: "/discover" });
   },
   component: AdminPage,
 });

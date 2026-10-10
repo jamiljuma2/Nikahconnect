@@ -7,7 +7,7 @@ import { Eye, EyeOff, ShieldCheck, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { checkIsAdmin } from "@/lib/admin.functions";
+import { isCurrentUserAdmin } from "@/lib/admin-route-guard";
 import { getPayheroSettings, savePayheroSettings } from "@/lib/payhero-settings.functions";
 import { notifyUserError } from "@/lib/user-facing-errors";
 
@@ -23,13 +23,7 @@ export const Route = createFileRoute("/_authenticated/admin/payments")({
     ],
   }),
   beforeLoad: async () => {
-    try {
-      const { isAdmin } = await checkIsAdmin();
-      if (!isAdmin) throw redirect({ to: "/discover" });
-    } catch (e) {
-      if ((e as { isRedirect?: boolean }).isRedirect) throw e;
-      throw redirect({ to: "/discover" });
-    }
+    if (!(await isCurrentUserAdmin())) throw redirect({ to: "/discover" });
   },
   component: PaymentSettingsPage,
 });

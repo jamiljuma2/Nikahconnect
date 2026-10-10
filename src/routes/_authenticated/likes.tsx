@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Heart, Loader2, MapPin, MessageCircle, Sparkles } from "lucide-react";
+import { Heart, Loader2, MapPin, MessageCircle, Sparkles, LockKeyhole } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { notifyUserError } from "@/lib/user-facing-errors";
+import { getMyBalance } from "@/lib/dating.functions";
 
 export const Route = createFileRoute("/_authenticated/likes")({
   head: () => ({
@@ -32,9 +33,15 @@ interface Liker {
 function LikesPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const planQ = useQuery({
+    queryKey: ["balance"],
+    enabled: !!user,
+    queryFn: () => getMyBalance(),
+  });
+  const canSeeLikes = planQ.data?.activePlan === "standard" || planQ.data?.activePlan === "premium";
   const likesQ = useQuery({
     queryKey: ["people-who-like-me", user?.id],
-    enabled: !!user,
+    enabled: !!user && canSeeLikes,
     queryFn: async () => {
       const { data: incomingLikes, error: likesError } = await supabase
         .from("likes")
@@ -105,10 +112,24 @@ function LikesPage() {
           <h1>Likes you</h1>
           <p className="likes-description">See who’s interested and make the first move when it feels right.</p>
         </div>
-        <span className="likes-total">{likesQ.data?.length ?? 0}</span>
+        {canSeeLikes && <span className="likes-total">{likesQ.data?.length ?? 0}</span>}
       </header>
 
-      {likesQ.isLoading ? (
+      {planQ.isLoading ? (
+        <div className="likes-loading"><Loader2 className="animate-spin" size={20} /> Checking your plan…</div>
+      ) : planQ.isError ? (
+        <div className="likes-empty-state">
+          <p>Your plan couldn’t be checked right now.</p>
+          <Button variant="outline" onClick={() => void planQ.refetch()}>Try again</Button>
+        </div>
+      ) : !canSeeLikes ? (
+        <div className="likes-empty-state likes-upgrade-state">
+          <span><LockKeyhole size={22} /></span>
+          <h2>See who’s interested in you</h2>
+          <p>Upgrade to Standard or Premium to view the people who have liked your profile.</p>
+          <Link to="/plans">View plans</Link>
+        </div>
+      ) : likesQ.isLoading ? (
         <div className="likes-loading"><Loader2 className="animate-spin" size={20} /> Loading likes…</div>
       ) : likesQ.isError ? (
         <div className="likes-empty-state">

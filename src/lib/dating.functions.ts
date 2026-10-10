@@ -85,7 +85,7 @@ export const getMyBalance = createServerFn({ method: "GET" })
       (sub) => sub.payment_id && (!sub.expiry_date || new Date(sub.expiry_date) > new Date()),
     );
     const paymentIds = activeSubscriptions.map((sub) => sub.payment_id!);
-    if (!paymentIds.length) return { subscription: null };
+    if (!paymentIds.length) return { subscription: null, activePlan: null };
 
     const { data: payments, error: paymentError } = await supabaseAdmin
       .from("payments")
@@ -96,10 +96,16 @@ export const getMyBalance = createServerFn({ method: "GET" })
     if (paymentError) throw new Error(paymentError.message);
 
     const successfulPayments = new Set((payments ?? []).map((payment) => payment.id));
-    const subscription = activeSubscriptions.find(
+    const paidSubscriptions = activeSubscriptions.filter((sub) =>
+      successfulPayments.has(sub.payment_id!),
+    );
+    const subscription = paidSubscriptions.find(
       (sub) =>
-        successfulPayments.has(sub.payment_id!) &&
         (sub.is_unlimited || sub.remaining_reveals > 0),
     );
-    return { subscription: subscription ?? null };
+    const activePlan =
+      paidSubscriptions.find((sub) => sub.plan === "standard" || sub.plan === "premium")?.plan ??
+      paidSubscriptions[0]?.plan ??
+      null;
+    return { subscription: subscription ?? null, activePlan };
   });

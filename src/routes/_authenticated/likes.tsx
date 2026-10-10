@@ -38,7 +38,7 @@ function LikesPage() {
     enabled: !!user,
     queryFn: () => getMyBalance(),
   });
-  const canSeeLikes = planQ.data?.activePlan === "standard" || planQ.data?.activePlan === "premium";
+  const canSeeLikes = !!planQ.data?.activePlan;
   const likesQ = useQuery({
     queryKey: ["people-who-like-me", user?.id],
     enabled: !!user && canSeeLikes,
@@ -126,7 +126,7 @@ function LikesPage() {
         <div className="likes-empty-state likes-upgrade-state">
           <span><LockKeyhole size={22} /></span>
           <h2>See who’s interested in you</h2>
-          <p>Upgrade to Standard or Premium to view the people who have liked your profile.</p>
+          <p>An active subscription lets you view the people who have liked your profile.</p>
           <Link to="/plans">View plans</Link>
         </div>
       ) : likesQ.isLoading ? (

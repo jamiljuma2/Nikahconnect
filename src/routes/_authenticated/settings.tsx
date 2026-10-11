@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { notifyUserError } from "@/lib/user-facing-errors";
+import { isProfileComplete } from "@/lib/profile-completion";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -68,6 +69,9 @@ function SettingsPage() {
   });
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
   const [deactivatedAt, setDeactivatedAt] = useState<string | null>(null);
   const [accountDialog, setAccountDialog] = useState<"deactivate" | "delete" | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState("");
@@ -75,15 +79,16 @@ function SettingsPage() {
 
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("profiles")
-      .select(
-        "full_name, location, bio, occupation, relationship_goal, interests, avatar_url, deactivated_at",
-      )
-      .eq("id", user.id)
-      .single()
-      .then(({ data }) => {
-        if (!data) return;
+    let active = true;
+    void (async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select(
+          "full_name, location, bio, occupation, relationship_goal, interests, avatar_url, deactivated_at",
+        )
+        .eq("id", user.id)
+        .single();
+      if (active && data) {
         setForm({
           full_name: data.full_name ?? "",
           location: data.location ?? "",
@@ -94,8 +99,25 @@ function SettingsPage() {
           avatar_url: data.avatar_url ?? "",
         });
         setDeactivatedAt(data.deactivated_at);
-      });
-  }, [user]);
+        if (!isProfileComplete(data) && setup !== "1") {
+          void navigate({ to: "/settings", search: { setup: "1" }, replace: true });
+        }
+      }
+      if (active) {
+        if (error) notifyUserError(error, "We couldn’t load your profile. Please try again.");
+        setProfileLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [navigate, setup, user]);
+
+  useEffect(() => {
+    return () => {
+      if (photoPreview) URL.revokeObjectURL(photoPreview);
+    };
+  }, [photoPreview]);
 
   const handleAccountAction = async () => {
     if (accountDialog === "delete" && deleteConfirmation !== "DELETE") return;
@@ -142,15 +164,15 @@ function SettingsPage() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (
-      isSetup &&
-      (!form.full_name.trim() ||
-        !form.location.trim() ||
-        !form.occupation.trim() ||
-        !form.relationship_goal.trim() ||
-        !form.interests.trim())
-    ) {
-      toast.error("Complete the required profile details before continuing.");
+    const profileToSave = {
+      ...form,
+      interests: form.interests
+        .split(",")
+        .map((interest) => interest.trim())
+        .filter(Boolean),
+    };
+    if (isSetup && !isProfileComplete(profileToSave)) {
+      toast.error("Add a profile photo and complete the required profile details to continue.");
       return;
     }
     setBusy(true);
@@ -162,10 +184,7 @@ function SettingsPage() {
         bio: form.bio,
         occupation: form.occupation,
         relationship_goal: form.relationship_goal,
-        interests: form.interests
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean),
+        interests: profileToSave.interests,
         avatar_url: form.avatar_url || null,
       })
       .eq("id", user.id);
@@ -179,26 +198,88 @@ function SettingsPage() {
 
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file || !user) return;
-    if (file.size > 5 * 1024 * 1024) return toast.error("Max 5MB");
-    setUploading(true);
-    const path = `${user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-    const { error } = await supabase.storage.from("profile-photos").upload(path, file, {
-      cacheControl: "3600",
-      upsert: false,
-    });
-    if (error) {
-      setUploading(false);
-      return notifyUserError(error, "We couldn’t upload your photo. Please try again.");
+    setPhotoError(null);
+    const validTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+    if (!validTypes.includes(file.type)) {
+      setPhotoError("Choose a JPG, PNG, WebP, or AVIF image.");
+      return;
     }
-    const { data: signed } = await supabase.storage
-      .from("profile-photos")
-      .createSignedUrl(path, 60 * 60 * 24 * 365);
-    const url = signed?.signedUrl ?? "";
-    setForm((f) => ({ ...f, avatar_url: url }));
-    await supabase.from("profile_photos").insert({ user_id: user.id, url });
-    setUploading(false);
-    toast.success("Photo uploaded — don't forget to save.");
+    if (file.size === 0 || file.size > 5 * 1024 * 1024) {
+      setPhotoError(
+        file.size === 0
+          ? "This image is empty. Choose another file."
+          : "Photos must be 5 MB or smaller.",
+      );
+      return;
+    }
+
+    setPhotoPreview(URL.createObjectURL(file));
+    setUploading(true);
+    let uploadedPath: string | null = null;
+    let savedPhotoUrl: string | null = null;
+    try {
+      const extension = file.type === "image/jpeg" ? "jpg" : file.type.slice("image/".length);
+      const path = `${user.id}/${crypto.randomUUID()}.${extension}`;
+      const { error: uploadError } = await supabase.storage
+        .from("profile-photos")
+        .upload(path, file, {
+          cacheControl: "3600",
+          contentType: file.type,
+          upsert: false,
+        });
+      if (uploadError) throw uploadError;
+      uploadedPath = path;
+
+      const { data } = supabase.storage.from("profile-photos").getPublicUrl(path);
+      const url = data.publicUrl;
+      const { error: photoError } = await supabase
+        .from("profile_photos")
+        .insert({ user_id: user.id, url });
+      if (photoError) throw photoError;
+      savedPhotoUrl = url;
+
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: url })
+        .eq("id", user.id);
+      if (profileError) throw profileError;
+
+      setForm((current) => ({ ...current, avatar_url: url }));
+      setPhotoPreview(null);
+      toast.success("Your profile photo is uploaded and saved.");
+    } catch (error) {
+      if (savedPhotoUrl) {
+        try {
+          const { error: cleanupError } = await supabase
+            .from("profile_photos")
+            .delete()
+            .eq("user_id", user.id)
+            .eq("url", savedPhotoUrl);
+          if (cleanupError)
+            console.error("Could not clean up an unsuccessful profile photo record", cleanupError);
+        } catch (cleanupError) {
+          console.error("Could not clean up an unsuccessful profile photo record", cleanupError);
+        }
+      }
+      if (uploadedPath) {
+        try {
+          const { error: cleanupError } = await supabase.storage
+            .from("profile-photos")
+            .remove([uploadedPath]);
+          if (cleanupError)
+            console.error("Could not clean up an unsuccessful profile photo upload", cleanupError);
+        } catch (cleanupError) {
+          console.error("Could not clean up an unsuccessful profile photo upload", cleanupError);
+        }
+      }
+      setPhotoPreview(null);
+      setPhotoError("We couldn’t save that photo. Check your connection and try again.");
+      notifyUserError(error, "We couldn’t upload your photo. Please try again.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
@@ -221,27 +302,70 @@ function SettingsPage() {
             <p id="photo-heading" className="profile-section-label">
               Profile photo
             </p>
-            <p className="profile-section-hint">A warm first impression goes a long way.</p>
+            <p className="profile-section-hint">
+              {isSetup
+                ? "Add a clear photo to finish setting up your profile. JPG, PNG, WebP, or AVIF · up to 5 MB."
+                : "A warm first impression goes a long way. JPG, PNG, WebP, or AVIF · up to 5 MB."}
+            </p>
           </div>
-          <div className="profile-photo-control">
-            {form.avatar_url ? (
-              <img src={form.avatar_url} alt="Your profile" className="profile-avatar" />
-            ) : (
-              <div className="profile-avatar profile-avatar-fallback">
-                {form.full_name.charAt(0) || "?"}
+          <div className="profile-photo-upload-area">
+            <div className="profile-photo-control">
+              {photoPreview || form.avatar_url ? (
+                <img
+                  src={photoPreview ?? form.avatar_url}
+                  alt={photoPreview ? "Preview of your selected profile photo" : "Your profile"}
+                  className="profile-avatar"
+                />
+              ) : (
+                <div className="profile-avatar profile-avatar-fallback">
+                  {form.full_name.charAt(0) || "?"}
+                </div>
+              )}
+              <Label
+                className={`profile-upload cursor-pointer ${uploading || profileLoading ? "profile-upload-disabled" : ""}`}
+              >
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/avif"
+                  className="sr-only"
+                  aria-label="Upload a profile photo"
+                  disabled={uploading || profileLoading}
+                  onChange={onUpload}
+                />
+                <span>
+                  {uploading || profileLoading ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Camera className="size-4" />
+                  )}
+                  {profileLoading
+                    ? "Loading profile…"
+                    : uploading
+                      ? "Uploading photo…"
+                      : form.avatar_url
+                        ? "Change photo"
+                        : "Upload photo"}
+                </span>
+              </Label>
+            </div>
+            {uploading ? (
+              <div className="profile-upload-status" role="status">
+                <span>Uploading and saving your photo…</span>
+                <div
+                  className="profile-upload-progress"
+                  role="progressbar"
+                  aria-label="Photo upload progress"
+                  aria-valuetext="Upload in progress"
+                >
+                  <span />
+                </div>
               </div>
-            )}
-            <Label className="profile-upload cursor-pointer">
-              <input type="file" accept="image/*" className="hidden" onChange={onUpload} />
-              <span>
-                {uploading ? (
-                  <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <Camera className="size-4" />
-                )}
-                {uploading ? "Uploading…" : "Upload photo"}
-              </span>
-            </Label>
+            ) : null}
+            {photoError ? (
+              <p className="profile-photo-error" role="alert">
+                {photoError}
+              </p>
+            ) : null}
           </div>
         </section>
 
@@ -332,121 +456,126 @@ function SettingsPage() {
         </div>
       </form>
 
-      <section className="profile-section mt-8" aria-labelledby="account-controls-heading">
-        <div className="profile-section-heading">
-          <p id="account-controls-heading" className="profile-section-label">
-            Account controls
-          </p>
-          <p className="profile-section-hint">Take a break or remove your account and profile.</p>
-        </div>
-
-        {deactivatedAt ? (
-          <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
-            Your account is temporarily deactivated and hidden from Discover. Reactivate it whenever
-            you’re ready.
-          </div>
-        ) : null}
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-2xl border border-border/70 bg-white/70 p-5">
-            <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
-              <ShieldAlert className="size-4 text-primary" /> Temporarily deactivate
-            </h2>
-            <p className="mt-2 min-h-12 text-sm leading-6 text-muted-foreground">
-              Hide your profile from Discover. Your account and conversations stay saved, and you
-              can reactivate after signing in.
+      {!isSetup ? (
+        <section className="profile-section mt-8" aria-labelledby="account-controls-heading">
+          <div className="profile-section-heading">
+            <p id="account-controls-heading" className="profile-section-label">
+              Account controls
             </p>
-            {deactivatedAt ? (
-              <Button
-                type="button"
-                className="mt-4"
-                onClick={handleReactivate}
-                disabled={accountBusy}
-              >
-                {accountBusy ? <Loader2 className="size-4 animate-spin" /> : null}
-                Reactivate account
-              </Button>
-            ) : (
-              <Button
-                type="button"
-                variant="outline"
-                className="mt-4"
-                onClick={() => setAccountDialog("deactivate")}
-              >
-                Deactivate temporarily
-              </Button>
-            )}
+            <p className="profile-section-hint">Take a break or remove your account and profile.</p>
           </div>
 
-          <div className="rounded-2xl border border-destructive/25 bg-destructive/[0.03] p-5">
-            <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
-              <UserRoundX className="size-4 text-destructive" /> Permanently delete
-            </h2>
-            <p className="mt-2 min-h-12 text-sm leading-6 text-muted-foreground">
-              Delete your profile, photos, matches, messages, and account access. Completed payment
-              totals are retained for accounting with your account and M-Pesa number removed.
-            </p>
-            <Button
-              type="button"
-              variant="destructive"
-              className="mt-4"
-              onClick={() => setAccountDialog("delete")}
-            >
-              Delete account permanently
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      <AlertDialog
-        open={accountDialog !== null}
-        onOpenChange={(open) => {
-          if (!open && !accountBusy) {
-            setAccountDialog(null);
-            setDeleteConfirmation("");
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {accountDialog === "delete"
-                ? "Permanently delete your account?"
-                : "Temporarily deactivate your account?"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {accountDialog === "delete"
-                ? "This cannot be undone. Your profile, photos, matches, messages, and account access will be removed. Completed payment totals will be anonymized and retained for accounting."
-                : "Your profile will be hidden from Discover and you’ll be signed out. Sign in again and reactivate whenever you want to return."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          {accountDialog === "delete" ? (
-            <div className="grid gap-2">
-              <Label htmlFor="confirm-account-delete">Type DELETE to confirm</Label>
-              <Input
-                id="confirm-account-delete"
-                autoComplete="off"
-                value={deleteConfirmation}
-                onChange={(event) => setDeleteConfirmation(event.target.value)}
-              />
+          {deactivatedAt ? (
+            <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+              Your account is temporarily deactivated and hidden from Discover. Reactivate it
+              whenever you’re ready.
             </div>
           ) : null}
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={accountBusy}>Cancel</AlertDialogCancel>
-            <Button
-              type="button"
-              variant={accountDialog === "delete" ? "destructive" : "default"}
-              disabled={
-                accountBusy || (accountDialog === "delete" && deleteConfirmation !== "DELETE")
-              }
-              onClick={handleAccountAction}
-            >
-              {accountBusy ? <Loader2 className="size-4 animate-spin" /> : null}
-              {accountDialog === "delete" ? "Delete permanently" : "Deactivate"}
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="rounded-2xl border border-border/70 bg-white/70 p-5">
+              <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+                <ShieldAlert className="size-4 text-primary" /> Temporarily deactivate
+              </h2>
+              <p className="mt-2 min-h-12 text-sm leading-6 text-muted-foreground">
+                Hide your profile from Discover. Your account and conversations stay saved, and you
+                can reactivate after signing in.
+              </p>
+              {deactivatedAt ? (
+                <Button
+                  type="button"
+                  className="mt-4"
+                  onClick={handleReactivate}
+                  disabled={accountBusy}
+                >
+                  {accountBusy ? <Loader2 className="size-4 animate-spin" /> : null}
+                  Reactivate account
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="mt-4"
+                  onClick={() => setAccountDialog("deactivate")}
+                >
+                  Deactivate temporarily
+                </Button>
+              )}
+            </div>
+
+            <div className="rounded-2xl border border-destructive/25 bg-destructive/[0.03] p-5">
+              <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+                <UserRoundX className="size-4 text-destructive" /> Permanently delete
+              </h2>
+              <p className="mt-2 min-h-12 text-sm leading-6 text-muted-foreground">
+                Delete your profile, photos, matches, messages, and account access. Completed
+                payment totals are retained for accounting with your account and M-Pesa number
+                removed.
+              </p>
+              <Button
+                type="button"
+                variant="destructive"
+                className="mt-4"
+                onClick={() => setAccountDialog("delete")}
+              >
+                Delete account permanently
+              </Button>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {!isSetup ? (
+        <AlertDialog
+          open={accountDialog !== null}
+          onOpenChange={(open) => {
+            if (!open && !accountBusy) {
+              setAccountDialog(null);
+              setDeleteConfirmation("");
+            }
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {accountDialog === "delete"
+                  ? "Permanently delete your account?"
+                  : "Temporarily deactivate your account?"}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {accountDialog === "delete"
+                  ? "This cannot be undone. Your profile, photos, matches, messages, and account access will be removed. Completed payment totals will be anonymized and retained for accounting."
+                  : "Your profile will be hidden from Discover and you’ll be signed out. Sign in again and reactivate whenever you want to return."}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            {accountDialog === "delete" ? (
+              <div className="grid gap-2">
+                <Label htmlFor="confirm-account-delete">Type DELETE to confirm</Label>
+                <Input
+                  id="confirm-account-delete"
+                  autoComplete="off"
+                  value={deleteConfirmation}
+                  onChange={(event) => setDeleteConfirmation(event.target.value)}
+                />
+              </div>
+            ) : null}
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={accountBusy}>Cancel</AlertDialogCancel>
+              <Button
+                type="button"
+                variant={accountDialog === "delete" ? "destructive" : "default"}
+                disabled={
+                  accountBusy || (accountDialog === "delete" && deleteConfirmation !== "DELETE")
+                }
+                onClick={handleAccountAction}
+              >
+                {accountBusy ? <Loader2 className="size-4 animate-spin" /> : null}
+                {accountDialog === "delete" ? "Delete permanently" : "Deactivate"}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      ) : null}
     </div>
   );
 }

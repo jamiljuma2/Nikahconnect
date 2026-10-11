@@ -307,15 +307,6 @@ function SettingsPage() {
   const completion = Math.round(
     (profileChecklist.filter((item) => item.complete).length / profileChecklist.length) * 100,
   );
-  const openSettingsSection = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
-    const sectionId = event.currentTarget.hash.slice(1);
-    document.getElementById(sectionId)?.scrollIntoView({
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-      block: "start",
-    });
-  };
-
   return (
     <div className={`settings-page ${isSetup ? "settings-page-setup" : ""}`}>
       <div className="settings-page-heading">
@@ -355,26 +346,26 @@ function SettingsPage() {
             </div>
             <nav className="settings-drawer-nav" aria-label="Settings sections">
               <SheetClose asChild>
-                <a href="#settings-photo-section" onClick={openSettingsSection}>
+                <a href="#settings-photo-section">
                   <Camera aria-hidden="true" />
                   <span>Profile photo</span>
                 </a>
               </SheetClose>
               <SheetClose asChild>
-                <a href="#settings-profile-section" onClick={openSettingsSection}>
+                <a href="#settings-profile-section">
                   <UserRound aria-hidden="true" />
                   <span>Profile</span>
                 </a>
               </SheetClose>
               <SheetClose asChild>
-                <a href="#settings-about-section" onClick={openSettingsSection}>
+                <a href="#settings-about-section">
                   <Check aria-hidden="true" />
                   <span>About you</span>
                 </a>
               </SheetClose>
               {!isSetup ? (
                 <SheetClose asChild>
-                  <a href="#settings-account-section" onClick={openSettingsSection}>
+                  <a href="#settings-account-section">
                     <ShieldAlert aria-hidden="true" />
                     <span>Account controls</span>
                   </a>

@@ -1438,7 +1438,7 @@
 .settings-drawer-nav a svg { width: 17px; height: 17px; color: #8a93a4; }
 .settings-drawer-nav a:hover, .settings-drawer-nav a:focus-visible { outline: none; background: #fff3f5; color: #a9364b; }
 .settings-drawer-nav a:hover svg, .settings-drawer-nav a:focus-visible svg { color: #c94d62; }
-.settings-page { scroll-behavior: smooth; }
+html:has(.settings-page) { scroll-behavior: smooth; }
 .settings-layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; align-items: start; gap: 18px; }
 .settings-main-column { display: grid; min-width: 0; gap: 16px; }
 .settings-card, .settings-progress-card { border: 1px solid #e8eaf0; border-radius: 17px; background: #fff; box-shadow: 0 4px 16px rgb(26 39 68 / 4%); }
@@ -1524,7 +1524,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .settings-page { scroll-behavior: auto; }
+  html:has(.settings-page) { scroll-behavior: auto; }
   .profile-avatar, .profile-upload span, .profile-field input, .profile-field textarea, .profile-save, .settings-drawer-nav a { transition: none; }
   .profile-upload-progress span { animation: none; width: 100%; }
 }

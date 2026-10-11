@@ -1510,6 +1510,7 @@ html:has(.settings-page) { scroll-behavior: smooth; }
   .settings-mobile-menu-trigger { min-height: 38px; gap: 8px; padding-inline: 12px; border-color: #e5e8ef; border-radius: 10px; color: #4f5b71; font-size: 11px; }
   .settings-page .settings-card[id] { scroll-margin-top: 82px; }
   .settings-page-setup .settings-card[id] { scroll-margin-top: 18px; }
+  .settings-page:has(#settings-account-section:target)::after { display: block; min-height: 65vh; min-height: 65svh; content: ""; }
   .settings-main-column { gap: 12px; }
   .profile-form { gap: 12px; }
   .settings-card, .settings-progress-card { border-radius: 14px; }

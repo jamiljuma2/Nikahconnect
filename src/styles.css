@@ -1442,6 +1442,12 @@ html:has(.settings-page) { scroll-behavior: smooth; }
 .settings-layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; align-items: start; gap: 18px; }
 .settings-main-column { display: grid; min-width: 0; gap: 16px; }
 .settings-card, .settings-progress-card { border: 1px solid #e8eaf0; border-radius: 17px; background: #fff; box-shadow: 0 4px 16px rgb(26 39 68 / 4%); }
+.settings-page .settings-card:target { animation: settings-section-arrive 480ms cubic-bezier(.2, .75, .25, 1) both; }
+@keyframes settings-section-arrive {
+  from { transform: translateY(8px); box-shadow: 0 0 0 0 rgb(231 95 114 / 0%), 0 4px 16px rgb(26 39 68 / 4%); }
+  60% { box-shadow: 0 0 0 4px rgb(231 95 114 / 12%), 0 4px 16px rgb(26 39 68 / 4%); }
+  to { transform: translateY(0); box-shadow: 0 4px 16px rgb(26 39 68 / 4%); }
+}
 .profile-form { display: grid; gap: 16px; }
 .profile-photo-section { display: flex; min-height: 170px; align-items: center; justify-content: space-between; gap: 24px; padding: 24px 28px; }
 .profile-photo-copy { max-width: 290px; min-width: 0; }
@@ -1526,5 +1532,6 @@ html:has(.settings-page) { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   html:has(.settings-page) { scroll-behavior: auto; }
   .profile-avatar, .profile-upload span, .profile-field input, .profile-field textarea, .profile-save, .settings-drawer-nav a { transition: none; }
+  .settings-page .settings-card:target { animation: none; }
   .profile-upload-progress span { animation: none; width: 100%; }
 }

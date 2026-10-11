@@ -1502,7 +1502,8 @@
   .settings-page-heading { margin-bottom: 17px; }
   .settings-mobile-menu { display: block; margin: -5px 0 14px; }
   .settings-mobile-menu-trigger { min-height: 38px; gap: 8px; padding-inline: 12px; border-color: #e5e8ef; border-radius: 10px; color: #4f5b71; font-size: 11px; }
-  .settings-page [id$="-heading"] { scroll-margin-top: 18px; }
+  .settings-page .settings-card[id] { scroll-margin-top: 82px; }
+  .settings-page-setup .settings-card[id] { scroll-margin-top: 18px; }
   .settings-main-column { gap: 12px; }
   .profile-form { gap: 12px; }
   .settings-card, .settings-progress-card { border-radius: 14px; }

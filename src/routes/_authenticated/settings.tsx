@@ -307,6 +307,14 @@ function SettingsPage() {
   const completion = Math.round(
     (profileChecklist.filter((item) => item.complete).length / profileChecklist.length) * 100,
   );
+  const openSettingsSection = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    const sectionId = event.currentTarget.hash.slice(1);
+    document.getElementById(sectionId)?.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      block: "start",
+    });
+  };
 
   return (
     <div className={`settings-page ${isSetup ? "settings-page-setup" : ""}`}>
@@ -347,26 +355,26 @@ function SettingsPage() {
             </div>
             <nav className="settings-drawer-nav" aria-label="Settings sections">
               <SheetClose asChild>
-                <a href="#photo-heading">
+                <a href="#settings-photo-section" onClick={openSettingsSection}>
                   <Camera aria-hidden="true" />
                   <span>Profile photo</span>
                 </a>
               </SheetClose>
               <SheetClose asChild>
-                <a href="#basic-info-heading">
+                <a href="#settings-profile-section" onClick={openSettingsSection}>
                   <UserRound aria-hidden="true" />
                   <span>Profile</span>
                 </a>
               </SheetClose>
               <SheetClose asChild>
-                <a href="#about-heading">
+                <a href="#settings-about-section" onClick={openSettingsSection}>
                   <Check aria-hidden="true" />
                   <span>About you</span>
                 </a>
               </SheetClose>
               {!isSetup ? (
                 <SheetClose asChild>
-                  <a href="#account-controls-heading">
+                  <a href="#settings-account-section" onClick={openSettingsSection}>
                     <ShieldAlert aria-hidden="true" />
                     <span>Account controls</span>
                   </a>
@@ -381,6 +389,7 @@ function SettingsPage() {
         <div className="settings-main-column">
           <form onSubmit={save} className="profile-form settings-profile-form">
             <section
+              id="settings-photo-section"
               className="profile-photo-section settings-card"
               aria-labelledby="photo-heading"
             >
@@ -455,7 +464,11 @@ function SettingsPage() {
               </div>
             </section>
 
-            <section className="profile-section settings-card" aria-labelledby="basic-info-heading">
+            <section
+              id="settings-profile-section"
+              className="profile-section settings-card"
+              aria-labelledby="basic-info-heading"
+            >
               <div className="profile-section-heading">
                 <p id="basic-info-heading" className="profile-section-label">
                   Profile
@@ -490,7 +503,11 @@ function SettingsPage() {
               </div>
             </section>
 
-            <section className="profile-section settings-card" aria-labelledby="about-heading">
+            <section
+              id="settings-about-section"
+              className="profile-section settings-card"
+              aria-labelledby="about-heading"
+            >
               <div className="profile-section-heading">
                 <p id="about-heading" className="profile-section-label">
                   About you
@@ -544,6 +561,7 @@ function SettingsPage() {
 
           {!isSetup ? (
             <section
+              id="settings-account-section"
               className="profile-section settings-card settings-account-card"
               aria-labelledby="account-controls-heading"
             >

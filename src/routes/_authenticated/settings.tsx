@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Camera, Check, Loader2, ShieldAlert, UserRoundX } from "lucide-react";
+import { Camera, Check, Loader2, Menu, ShieldAlert, UserRound, UserRoundX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { useServerFn } from "@tanstack/react-start";
@@ -17,6 +17,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { notifyUserError } from "@/lib/user-facing-errors";
 import { isProfileComplete } from "@/lib/profile-completion";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -311,12 +320,62 @@ function SettingsPage() {
         </p>
       </div>
 
-      <nav className="settings-mobile-nav" aria-label="Settings sections">
-        <a href="#photo-heading">Photo</a>
-        <a href="#basic-info-heading">Profile</a>
-        <a href="#about-heading">About you</a>
-        {!isSetup ? <a href="#account-controls-heading">Account</a> : null}
-      </nav>
+      <div className="settings-mobile-menu">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="outline" className="settings-mobile-menu-trigger">
+              <Menu className="size-4" aria-hidden="true" />
+              Settings sections
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="settings-mobile-drawer">
+            <SheetHeader className="settings-drawer-heading">
+              <SheetTitle>Settings</SheetTitle>
+              <SheetDescription>
+                {isSetup ? "Finish setting up your profile." : "Manage your profile and account."}
+              </SheetDescription>
+            </SheetHeader>
+            <div className="settings-drawer-profile">
+              {form.avatar_url ? (
+                <img src={form.avatar_url} alt="" className="settings-drawer-avatar" />
+              ) : (
+                <span className="settings-drawer-avatar settings-drawer-avatar-fallback">
+                  {form.full_name.charAt(0) || "?"}
+                </span>
+              )}
+              <span>{form.full_name || "Your profile"}</span>
+            </div>
+            <nav className="settings-drawer-nav" aria-label="Settings sections">
+              <SheetClose asChild>
+                <a href="#photo-heading">
+                  <Camera aria-hidden="true" />
+                  <span>Profile photo</span>
+                </a>
+              </SheetClose>
+              <SheetClose asChild>
+                <a href="#basic-info-heading">
+                  <UserRound aria-hidden="true" />
+                  <span>Profile</span>
+                </a>
+              </SheetClose>
+              <SheetClose asChild>
+                <a href="#about-heading">
+                  <Check aria-hidden="true" />
+                  <span>About you</span>
+                </a>
+              </SheetClose>
+              {!isSetup ? (
+                <SheetClose asChild>
+                  <a href="#account-controls-heading">
+                    <ShieldAlert aria-hidden="true" />
+                    <span>Account controls</span>
+                  </a>
+                </SheetClose>
+              ) : null}
+            </nav>
+          </SheetContent>
+        </Sheet>
+      </div>
 
       <div className="settings-layout">
         <div className="settings-main-column">

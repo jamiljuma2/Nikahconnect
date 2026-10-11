@@ -1425,7 +1425,19 @@
 .settings-page-heading .profile-kicker { margin: 0 0 7px; color: #b36b70; font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
 .settings-page-heading h1 { margin: 0; color: #20283a; font-family: var(--font-sans); font-size: clamp(25px, 3vw, 31px); font-weight: 700; letter-spacing: -.04em; line-height: 1.2; }
 .settings-page-heading > p:last-child { margin: 7px 0 0; color: #778095; font-size: 13px; }
-.settings-mobile-nav { display: none; }
+.settings-mobile-menu { display: none; }
+.settings-mobile-drawer { width: min(82vw, 320px); padding: 24px 18px; }
+.settings-drawer-heading { padding: 4px 34px 17px 2px; border-bottom: 1px solid #edf0f4; }
+.settings-drawer-heading h2 { color: #20283a; font-size: 20px; }
+.settings-drawer-heading p { margin: 0; color: #778095; font-size: 12px; }
+.settings-drawer-profile { display: flex; align-items: center; gap: 12px; padding: 18px 3px; border-bottom: 1px solid #edf0f4; color: #29364b; font-size: 13px; font-weight: 650; }
+.settings-drawer-avatar { width: 48px; height: 48px; flex: 0 0 auto; border: 2px solid #f2e7e9; border-radius: 50%; object-fit: cover; }
+.settings-drawer-avatar-fallback { display: grid; place-items: center; background: #fff0f2; color: #a9364b; font-size: 18px; }
+.settings-drawer-nav { display: grid; gap: 6px; padding-top: 14px; }
+.settings-drawer-nav a { display: flex; min-height: 46px; align-items: center; gap: 12px; padding: 0 12px; border-radius: 10px; color: #4f5b71; font-size: 13px; font-weight: 600; text-decoration: none; transition: background 160ms ease, color 160ms ease; }
+.settings-drawer-nav a svg { width: 17px; height: 17px; color: #8a93a4; }
+.settings-drawer-nav a:hover, .settings-drawer-nav a:focus-visible { outline: none; background: #fff3f5; color: #a9364b; }
+.settings-drawer-nav a:hover svg, .settings-drawer-nav a:focus-visible svg { color: #c94d62; }
 .settings-page { scroll-behavior: smooth; }
 .settings-layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; align-items: start; gap: 18px; }
 .settings-main-column { display: grid; min-width: 0; gap: 16px; }
@@ -1488,38 +1500,8 @@
 @media (max-width: 680px) {
   .settings-page { padding: 16px 0 32px; }
   .settings-page-heading { margin-bottom: 17px; }
-  .settings-mobile-nav {
-    position: relative;
-    display: flex;
-    gap: 7px;
-    overflow-x: auto;
-    margin: 0 -12px 14px;
-    padding: 2px 12px 7px;
-    overscroll-behavior-inline: contain;
-    scrollbar-width: none;
-    scroll-snap-type: x proximity;
-    -webkit-overflow-scrolling: touch;
-  }
-  .settings-mobile-nav::-webkit-scrollbar { display: none; }
-  .settings-mobile-nav a {
-    display: inline-flex;
-    min-height: 34px;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    padding: 0 13px;
-    border: 1px solid #e5e8ef;
-    border-radius: 999px;
-    background: #fff;
-    color: #59647a;
-    font-size: 11px;
-    font-weight: 650;
-    text-decoration: none;
-    scroll-snap-align: start;
-    transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
-  }
-  .settings-mobile-nav a:active,
-  .settings-mobile-nav a:focus-visible { border-color: #e75f72; background: #fff7f8; color: #a9364b; }
+  .settings-mobile-menu { display: block; margin: -5px 0 14px; }
+  .settings-mobile-menu-trigger { min-height: 38px; gap: 8px; padding-inline: 12px; border-color: #e5e8ef; border-radius: 10px; color: #4f5b71; font-size: 11px; }
   .settings-page [id$="-heading"] { scroll-margin-top: 18px; }
   .settings-main-column { gap: 12px; }
   .profile-form { gap: 12px; }
@@ -1542,6 +1524,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .settings-page { scroll-behavior: auto; }
-  .profile-avatar, .profile-upload span, .profile-field input, .profile-field textarea, .profile-save, .settings-mobile-nav a { transition: none; }
+  .profile-avatar, .profile-upload span, .profile-field input, .profile-field textarea, .profile-save, .settings-drawer-nav a { transition: none; }
   .profile-upload-progress span { animation: none; width: 100%; }
 }

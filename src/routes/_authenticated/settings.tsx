@@ -311,6 +311,13 @@ function SettingsPage() {
         </p>
       </div>
 
+      <nav className="settings-mobile-nav" aria-label="Settings sections">
+        <a href="#photo-heading">Photo</a>
+        <a href="#basic-info-heading">Profile</a>
+        <a href="#about-heading">About you</a>
+        {!isSetup ? <a href="#account-controls-heading">Account</a> : null}
+      </nav>
+
       <div className="settings-layout">
         <div className="settings-main-column">
           <form onSubmit={save} className="profile-form settings-profile-form">
@@ -462,7 +469,7 @@ function SettingsPage() {
             </section>
 
             <div className="profile-actions">
-              <Button type="submit" className="profile-save" disabled={busy}>
+              <Button type="submit" className="profile-save settings-action-button" disabled={busy}>
                 {busy ? (
                   <>
                     <Loader2 className="size-4 animate-spin" /> Saving…
@@ -509,7 +516,7 @@ function SettingsPage() {
                   {deactivatedAt ? (
                     <Button
                       type="button"
-                      className="mt-4"
+                      className="settings-account-action mt-4"
                       onClick={handleReactivate}
                       disabled={accountBusy}
                     >
@@ -520,7 +527,7 @@ function SettingsPage() {
                     <Button
                       type="button"
                       variant="outline"
-                      className="mt-4"
+                      className="settings-account-action mt-4"
                       onClick={() => setAccountDialog("deactivate")}
                     >
                       Deactivate temporarily
@@ -540,7 +547,7 @@ function SettingsPage() {
                   <Button
                     type="button"
                     variant="destructive"
-                    className="mt-4"
+                    className="settings-account-action mt-4"
                     onClick={() => setAccountDialog("delete")}
                   >
                     Delete account permanently

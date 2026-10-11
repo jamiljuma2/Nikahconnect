@@ -1425,6 +1425,8 @@
 .settings-page-heading .profile-kicker { margin: 0 0 7px; color: #b36b70; font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
 .settings-page-heading h1 { margin: 0; color: #20283a; font-family: var(--font-sans); font-size: clamp(25px, 3vw, 31px); font-weight: 700; letter-spacing: -.04em; line-height: 1.2; }
 .settings-page-heading > p:last-child { margin: 7px 0 0; color: #778095; font-size: 13px; }
+.settings-mobile-nav { display: none; }
+.settings-page { scroll-behavior: smooth; }
 .settings-layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; align-items: start; gap: 18px; }
 .settings-main-column { display: grid; min-width: 0; gap: 16px; }
 .settings-card, .settings-progress-card { border: 1px solid #e8eaf0; border-radius: 17px; background: #fff; box-shadow: 0 4px 16px rgb(26 39 68 / 4%); }
@@ -1486,6 +1488,39 @@
 @media (max-width: 680px) {
   .settings-page { padding: 16px 0 32px; }
   .settings-page-heading { margin-bottom: 17px; }
+  .settings-mobile-nav {
+    position: relative;
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    margin: 0 -12px 14px;
+    padding: 2px 12px 7px;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+  .settings-mobile-nav::-webkit-scrollbar { display: none; }
+  .settings-mobile-nav a {
+    display: inline-flex;
+    min-height: 34px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    padding: 0 13px;
+    border: 1px solid #e5e8ef;
+    border-radius: 999px;
+    background: #fff;
+    color: #59647a;
+    font-size: 11px;
+    font-weight: 650;
+    text-decoration: none;
+    scroll-snap-align: start;
+    transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+  }
+  .settings-mobile-nav a:active,
+  .settings-mobile-nav a:focus-visible { border-color: #e75f72; background: #fff7f8; color: #a9364b; }
+  .settings-page [id$="-heading"] { scroll-margin-top: 18px; }
   .settings-main-column { gap: 12px; }
   .profile-form { gap: 12px; }
   .settings-card, .settings-progress-card { border-radius: 14px; }
@@ -1498,13 +1533,15 @@
   .profile-section-heading .profile-section-hint { text-align: left; }
   .profile-fields-three, .settings-about-fields { grid-template-columns: minmax(0, 1fr); }
   .settings-about-fields .profile-field:last-child { grid-column: auto; }
-  .profile-actions { justify-content: stretch; }
-  .profile-save { width: 100%; justify-content: center; }
+  .profile-actions { justify-content: flex-end; }
+  .profile-save { width: auto; min-height: 40px; justify-content: center; padding-inline: 14px; font-size: 11px; }
+  .settings-account-action { min-height: 38px; max-width: 100%; padding-inline: 12px; font-size: 11px; white-space: normal; }
   .settings-progress-list { grid-template-columns: minmax(0, 1fr); }
   .settings-progress-card { padding: 18px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .profile-avatar, .profile-upload span, .profile-field input, .profile-field textarea, .profile-save { transition: none; }
+  .settings-page { scroll-behavior: auto; }
+  .profile-avatar, .profile-upload span, .profile-field input, .profile-field textarea, .profile-save, .settings-mobile-nav a { transition: none; }
   .profile-upload-progress span { animation: none; width: 100%; }
 }

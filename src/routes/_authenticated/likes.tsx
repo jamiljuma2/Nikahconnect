@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Heart, Loader2, MapPin, MessageCircle, Sparkles, LockKeyhole } from "lucide-react";
+import { Heart, MapPin, MessageCircle, Sparkles, LockKeyhole } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { AtomLoader } from "@/components/AtomLoader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { notifyUserError } from "@/lib/user-facing-errors";
@@ -116,7 +117,7 @@ function LikesPage() {
       </header>
 
       {planQ.isLoading ? (
-        <div className="likes-loading"><Loader2 className="animate-spin" size={20} /> Checking your plan…</div>
+        <AtomLoader className="likes-loading" label="Checking your plan…" size={30} />
       ) : planQ.isError ? (
         <div className="likes-empty-state">
           <p>Your plan couldn’t be checked right now.</p>
@@ -130,7 +131,7 @@ function LikesPage() {
           <Link to="/plans">View plans</Link>
         </div>
       ) : likesQ.isLoading ? (
-        <div className="likes-loading"><Loader2 className="animate-spin" size={20} /> Loading likes…</div>
+        <AtomLoader className="likes-loading" label="Loading likes…" size={30} />
       ) : likesQ.isError ? (
         <div className="likes-empty-state">
           <p>Likes couldn’t load right now.</p>

@@ -9,6 +9,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
 import { Button } from "@/components/ui/button";
+import { AtomLoader } from "@/components/AtomLoader";
 import { getMyBalance, revealPhone } from "@/lib/dating.functions";
 import { notifyUserError } from "@/lib/user-facing-errors";
 
@@ -387,14 +388,19 @@ function ProfileAvatar({ profile }: { profile: Profile }) {
   );
 }
 
-function Loader({ children }: { children: React.ReactNode }) {
+function Loader({ children }: { children: string }) {
   return (
     <div className="discover-page">
       <div className="discover-skeleton-search" />
       <div className="discover-skeleton-stories">
         {Array.from({ length: 6 }, (_, index) => <span key={index} />)}
       </div>
-      <p className="discover-loading-label">{children}</p>
+      <AtomLoader
+        className="discover-loading-status"
+        label={children}
+        color="var(--discover-pink)"
+        size={34}
+      />
       <div className="discover-grid discover-skeleton-grid">
         {Array.from({ length: 6 }, (_, index) => <div key={index} className="discover-skeleton-card" />)}
       </div>

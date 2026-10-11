@@ -1235,7 +1235,8 @@
 .discover-empty p { margin: 0; color: var(--discover-muted); font-size: 13px; line-height: 1.6; }
 .discover-empty-action { display: inline-flex; min-height: 42px; align-items: center; margin-top: 20px; padding: 0 19px; border-radius: 999px; background: var(--discover-pink); color: white; font-size: 12px; font-weight: 700; text-decoration: none; }
 .discover-filter-empty { padding: 50px 10px; color: var(--discover-muted); font-size: 13px; text-align: center; }
-.discover-loading-more, .discover-loading-label { color: var(--discover-muted); font-size: 12px; text-align: center; }
+.discover-loading-more, .discover-loading-status { color: var(--discover-muted); font-size: 12px; text-align: center; }
+.discover-loading-status { display: flex; margin: 16px 0; }
 
 /* Messages */
 .messages-layout { display: grid; grid-template-columns: minmax(280px, 350px) minmax(0, 1fr); min-height: min(720px, calc(100dvh - 11.5rem)); overflow: hidden; border: 1px solid #e5e8f0; border-radius: 24px; background: #f7f8fc; color: #25263a; box-shadow: 0 18px 55px rgb(42 49 86 / 8%); }
@@ -1439,6 +1440,7 @@
 .settings-drawer-nav a:hover, .settings-drawer-nav a:focus-visible { outline: none; background: #fff3f5; color: #a9364b; }
 .settings-drawer-nav a:hover svg, .settings-drawer-nav a:focus-visible svg { color: #c94d62; }
 html:has(.settings-page) { scroll-behavior: smooth; }
+.atom-loader { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
 .settings-layout { display: grid; grid-template-columns: minmax(0, 1fr) 280px; align-items: start; gap: 18px; }
 .settings-main-column { display: grid; min-width: 0; gap: 16px; }
 .settings-card, .settings-progress-card { border: 1px solid #e8eaf0; border-radius: 17px; background: #fff; box-shadow: 0 4px 16px rgb(26 39 68 / 4%); }

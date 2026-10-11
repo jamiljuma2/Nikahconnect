@@ -282,248 +282,299 @@ function SettingsPage() {
     }
   };
 
+  const profileChecklist = [
+    { label: "Profile photo", complete: Boolean(form.avatar_url) },
+    {
+      label: "Name and location",
+      complete: Boolean(form.full_name.trim() && form.location.trim()),
+    },
+    { label: "Occupation", complete: Boolean(form.occupation.trim()) },
+    { label: "Relationship goal", complete: Boolean(form.relationship_goal.trim()) },
+    {
+      label: "Interests",
+      complete: form.interests.split(",").some((interest) => interest.trim()),
+    },
+  ];
+  const completion = Math.round(
+    (profileChecklist.filter((item) => item.complete).length / profileChecklist.length) * 100,
+  );
+
   return (
-    <div className="profile-page">
-      <div className="profile-heading">
-        <p className="profile-kicker">
-          {isSetup ? "Welcome to MingleConnect" : "Your MingleConnect profile"}
-        </p>
-        <h1>{isSetup ? "Complete your profile" : "Your profile"}</h1>
+    <div className={`settings-page ${isSetup ? "settings-page-setup" : ""}`}>
+      <div className="settings-page-heading">
+        <p className="profile-kicker">{isSetup ? "Welcome to MingleConnect" : "Your account"}</p>
+        <h1>{isSetup ? "Complete your profile" : "Edit profile"}</h1>
         <p>
           {isSetup
             ? "Add a few details so people can get to know you."
-            : "Keep it honest. Keep it you."}
+            : "Manage your profile details and account."}
         </p>
       </div>
 
-      <form onSubmit={save} className="profile-form">
-        <section className="profile-photo-section" aria-labelledby="photo-heading">
-          <div className="profile-photo-copy">
-            <p id="photo-heading" className="profile-section-label">
-              Profile photo
-            </p>
-            <p className="profile-section-hint">
-              {isSetup
-                ? "Add a clear photo to finish setting up your profile. JPG, PNG, WebP, or AVIF · up to 5 MB."
-                : "A warm first impression goes a long way. JPG, PNG, WebP, or AVIF · up to 5 MB."}
-            </p>
-          </div>
-          <div className="profile-photo-upload-area">
-            <div className="profile-photo-control">
-              {photoPreview || form.avatar_url ? (
-                <img
-                  src={photoPreview ?? form.avatar_url}
-                  alt={photoPreview ? "Preview of your selected profile photo" : "Your profile"}
-                  className="profile-avatar"
-                />
-              ) : (
-                <div className="profile-avatar profile-avatar-fallback">
-                  {form.full_name.charAt(0) || "?"}
-                </div>
-              )}
-              <Label
-                className={`profile-upload cursor-pointer ${uploading || profileLoading ? "profile-upload-disabled" : ""}`}
-              >
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/avif"
-                  className="sr-only"
-                  aria-label="Upload a profile photo"
-                  disabled={uploading || profileLoading}
-                  onChange={onUpload}
-                />
-                <span>
-                  {uploading || profileLoading ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    <Camera className="size-4" />
-                  )}
-                  {profileLoading
-                    ? "Loading profile…"
-                    : uploading
-                      ? "Uploading photo…"
-                      : form.avatar_url
-                        ? "Change photo"
-                        : "Upload photo"}
-                </span>
-              </Label>
-            </div>
-            {uploading ? (
-              <div className="profile-upload-status" role="status">
-                <span>Uploading and saving your photo…</span>
-                <div
-                  className="profile-upload-progress"
-                  role="progressbar"
-                  aria-label="Photo upload progress"
-                  aria-valuetext="Upload in progress"
-                >
-                  <span />
-                </div>
+      <div className="settings-layout">
+        <div className="settings-main-column">
+          <form onSubmit={save} className="profile-form settings-profile-form">
+            <section
+              className="profile-photo-section settings-card"
+              aria-labelledby="photo-heading"
+            >
+              <div className="profile-photo-copy">
+                <p id="photo-heading" className="profile-section-label">
+                  Profile photo
+                </p>
+                <p className="profile-section-hint">
+                  {isSetup
+                    ? "Add a clear photo to finish setting up your profile. JPG, PNG, WebP, or AVIF · up to 5 MB."
+                    : "A warm first impression goes a long way. JPG, PNG, WebP, or AVIF · up to 5 MB."}
+                </p>
               </div>
-            ) : null}
-            {photoError ? (
-              <p className="profile-photo-error" role="alert">
-                {photoError}
-              </p>
-            ) : null}
-          </div>
-        </section>
+              <div className="profile-photo-upload-area">
+                <div className="profile-photo-control">
+                  {photoPreview || form.avatar_url ? (
+                    <img
+                      src={photoPreview ?? form.avatar_url}
+                      alt={photoPreview ? "Preview of your selected profile photo" : "Your profile"}
+                      className="profile-avatar"
+                    />
+                  ) : (
+                    <div className="profile-avatar profile-avatar-fallback">
+                      {form.full_name.charAt(0) || "?"}
+                    </div>
+                  )}
+                  <Label
+                    className={`profile-upload cursor-pointer ${uploading || profileLoading ? "profile-upload-disabled" : ""}`}
+                  >
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/avif"
+                      className="sr-only"
+                      aria-label="Upload a profile photo"
+                      disabled={uploading || profileLoading}
+                      onChange={onUpload}
+                    />
+                    <span>
+                      {uploading || profileLoading ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Camera className="size-4" />
+                      )}
+                      {profileLoading
+                        ? "Loading profile…"
+                        : uploading
+                          ? "Uploading photo…"
+                          : form.avatar_url
+                            ? "Change photo"
+                            : "Upload photo"}
+                    </span>
+                  </Label>
+                </div>
+                {uploading ? (
+                  <div className="profile-upload-status" role="status">
+                    <span>Uploading and saving your photo…</span>
+                    <div
+                      className="profile-upload-progress"
+                      role="progressbar"
+                      aria-label="Photo upload progress"
+                      aria-valuetext="Upload in progress"
+                    >
+                      <span />
+                    </div>
+                  </div>
+                ) : null}
+                {photoError ? (
+                  <p className="profile-photo-error" role="alert">
+                    {photoError}
+                  </p>
+                ) : null}
+              </div>
+            </section>
 
-        <section className="profile-section" aria-labelledby="basic-info-heading">
-          <div className="profile-section-heading">
-            <p id="basic-info-heading" className="profile-section-label">
-              Profile
-            </p>
-            <p className="profile-section-hint">The basics people notice first.</p>
-          </div>
-          <div className="profile-fields profile-fields-three">
-            <Field label="Full name" id="full-name">
-              <Input
-                id="full-name"
-                required={isSetup}
-                value={form.full_name}
-                onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-              />
-            </Field>
-            <Field label="Location" id="location">
-              <Input
-                id="location"
-                required={isSetup}
-                value={form.location}
-                onChange={(e) => setForm({ ...form, location: e.target.value })}
-              />
-            </Field>
-            <Field label="Occupation" id="occupation">
-              <Input
-                id="occupation"
-                required={isSetup}
-                value={form.occupation}
-                onChange={(e) => setForm({ ...form, occupation: e.target.value })}
-              />
-            </Field>
-          </div>
-        </section>
+            <section className="profile-section settings-card" aria-labelledby="basic-info-heading">
+              <div className="profile-section-heading">
+                <p id="basic-info-heading" className="profile-section-label">
+                  Profile
+                </p>
+                <p className="profile-section-hint">The basics people notice first.</p>
+              </div>
+              <div className="profile-fields profile-fields-three">
+                <Field label="Full name" id="full-name">
+                  <Input
+                    id="full-name"
+                    required={isSetup}
+                    value={form.full_name}
+                    onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                  />
+                </Field>
+                <Field label="Location" id="location">
+                  <Input
+                    id="location"
+                    required={isSetup}
+                    value={form.location}
+                    onChange={(e) => setForm({ ...form, location: e.target.value })}
+                  />
+                </Field>
+                <Field label="Occupation" id="occupation">
+                  <Input
+                    id="occupation"
+                    required={isSetup}
+                    value={form.occupation}
+                    onChange={(e) => setForm({ ...form, occupation: e.target.value })}
+                  />
+                </Field>
+              </div>
+            </section>
 
-        <section className="profile-section" aria-labelledby="about-heading">
-          <div className="profile-section-heading">
-            <p id="about-heading" className="profile-section-label">
-              About you
-            </p>
-            <p className="profile-section-hint">Share the details that make you, you.</p>
-          </div>
-          <div className="profile-fields">
-            <Field label="Relationship goal" id="relationship-goal">
-              <Input
-                id="relationship-goal"
-                required={isSetup}
-                placeholder="Long-term partner, friendship, dating…"
-                value={form.relationship_goal}
-                onChange={(e) => setForm({ ...form, relationship_goal: e.target.value })}
-              />
-            </Field>
-            <Field label="Interests (comma-separated)" id="interests">
-              <Input
-                id="interests"
-                required={isSetup}
-                placeholder="hiking, jazz, cooking"
-                value={form.interests}
-                onChange={(e) => setForm({ ...form, interests: e.target.value })}
-              />
-            </Field>
-            <Field label="Bio" id="bio">
-              <Textarea
-                id="bio"
-                rows={4}
-                value={form.bio}
-                onChange={(e) => setForm({ ...form, bio: e.target.value })}
-              />
-            </Field>
-          </div>
-        </section>
+            <section className="profile-section settings-card" aria-labelledby="about-heading">
+              <div className="profile-section-heading">
+                <p id="about-heading" className="profile-section-label">
+                  About you
+                </p>
+                <p className="profile-section-hint">Share the details that make you, you.</p>
+              </div>
+              <div className="profile-fields settings-about-fields">
+                <Field label="Relationship goal" id="relationship-goal">
+                  <Input
+                    id="relationship-goal"
+                    required={isSetup}
+                    placeholder="Long-term partner, friendship, dating…"
+                    value={form.relationship_goal}
+                    onChange={(e) => setForm({ ...form, relationship_goal: e.target.value })}
+                  />
+                </Field>
+                <Field label="Interests (comma-separated)" id="interests">
+                  <Input
+                    id="interests"
+                    required={isSetup}
+                    placeholder="hiking, jazz, cooking"
+                    value={form.interests}
+                    onChange={(e) => setForm({ ...form, interests: e.target.value })}
+                  />
+                </Field>
+                <Field label="Bio" id="bio">
+                  <Textarea
+                    id="bio"
+                    rows={4}
+                    value={form.bio}
+                    onChange={(e) => setForm({ ...form, bio: e.target.value })}
+                  />
+                </Field>
+              </div>
+            </section>
 
-        <div className="profile-actions">
-          <Button type="submit" className="profile-save" disabled={busy}>
-            {busy ? (
-              <>
-                <Loader2 className="size-4 animate-spin" /> Saving…
-              </>
-            ) : (
-              <>
-                <Check className="size-4" /> {isSetup ? "Complete setup" : "Save profile"}
-              </>
-            )}
-          </Button>
-        </div>
-      </form>
-
-      {!isSetup ? (
-        <section className="profile-section mt-8" aria-labelledby="account-controls-heading">
-          <div className="profile-section-heading">
-            <p id="account-controls-heading" className="profile-section-label">
-              Account controls
-            </p>
-            <p className="profile-section-hint">Take a break or remove your account and profile.</p>
-          </div>
-
-          {deactivatedAt ? (
-            <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
-              Your account is temporarily deactivated and hidden from Discover. Reactivate it
-              whenever you’re ready.
-            </div>
-          ) : null}
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-2xl border border-border/70 bg-white/70 p-5">
-              <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
-                <ShieldAlert className="size-4 text-primary" /> Temporarily deactivate
-              </h2>
-              <p className="mt-2 min-h-12 text-sm leading-6 text-muted-foreground">
-                Hide your profile from Discover. Your account and conversations stay saved, and you
-                can reactivate after signing in.
-              </p>
-              {deactivatedAt ? (
-                <Button
-                  type="button"
-                  className="mt-4"
-                  onClick={handleReactivate}
-                  disabled={accountBusy}
-                >
-                  {accountBusy ? <Loader2 className="size-4 animate-spin" /> : null}
-                  Reactivate account
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="mt-4"
-                  onClick={() => setAccountDialog("deactivate")}
-                >
-                  Deactivate temporarily
-                </Button>
-              )}
-            </div>
-
-            <div className="rounded-2xl border border-destructive/25 bg-destructive/[0.03] p-5">
-              <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
-                <UserRoundX className="size-4 text-destructive" /> Permanently delete
-              </h2>
-              <p className="mt-2 min-h-12 text-sm leading-6 text-muted-foreground">
-                Delete your profile, photos, matches, messages, and account access. Completed
-                payment totals are retained for accounting with your account and M-Pesa number
-                removed.
-              </p>
-              <Button
-                type="button"
-                variant="destructive"
-                className="mt-4"
-                onClick={() => setAccountDialog("delete")}
-              >
-                Delete account permanently
+            <div className="profile-actions">
+              <Button type="submit" className="profile-save" disabled={busy}>
+                {busy ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin" /> Saving…
+                  </>
+                ) : (
+                  <>
+                    <Check className="size-4" /> {isSetup ? "Complete setup" : "Save profile"}
+                  </>
+                )}
               </Button>
             </div>
+          </form>
+
+          {!isSetup ? (
+            <section
+              className="profile-section settings-card settings-account-card"
+              aria-labelledby="account-controls-heading"
+            >
+              <div className="profile-section-heading">
+                <p id="account-controls-heading" className="profile-section-label">
+                  Account controls
+                </p>
+                <p className="profile-section-hint">
+                  Take a break or remove your account and profile.
+                </p>
+              </div>
+
+              {deactivatedAt ? (
+                <div className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
+                  Your account is temporarily deactivated and hidden from Discover. Reactivate it
+                  whenever you’re ready.
+                </div>
+              ) : null}
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-2xl border border-border/70 bg-white/70 p-5">
+                  <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+                    <ShieldAlert className="size-4 text-primary" /> Temporarily deactivate
+                  </h2>
+                  <p className="mt-2 min-h-12 text-sm leading-6 text-muted-foreground">
+                    Hide your profile from Discover. Your account and conversations stay saved, and
+                    you can reactivate after signing in.
+                  </p>
+                  {deactivatedAt ? (
+                    <Button
+                      type="button"
+                      className="mt-4"
+                      onClick={handleReactivate}
+                      disabled={accountBusy}
+                    >
+                      {accountBusy ? <Loader2 className="size-4 animate-spin" /> : null}
+                      Reactivate account
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mt-4"
+                      onClick={() => setAccountDialog("deactivate")}
+                    >
+                      Deactivate temporarily
+                    </Button>
+                  )}
+                </div>
+
+                <div className="rounded-2xl border border-destructive/25 bg-destructive/[0.03] p-5">
+                  <h2 className="flex items-center gap-2 text-base font-semibold text-foreground">
+                    <UserRoundX className="size-4 text-destructive" /> Permanently delete
+                  </h2>
+                  <p className="mt-2 min-h-12 text-sm leading-6 text-muted-foreground">
+                    Delete your profile, photos, matches, messages, and account access. Completed
+                    payment totals are retained for accounting with your account and M-Pesa number
+                    removed.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className="mt-4"
+                    onClick={() => setAccountDialog("delete")}
+                  >
+                    Delete account permanently
+                  </Button>
+                </div>
+              </div>
+            </section>
+          ) : null}
+        </div>
+
+        <aside className="settings-progress-card" aria-labelledby="profile-progress-heading">
+          <h2 id="profile-progress-heading">Profile completion</h2>
+          <div
+            className="settings-progress-ring"
+            style={{
+              background: `conic-gradient(var(--color-primary) ${completion}%, var(--color-border) ${completion}% 100%)`,
+            }}
+            role="img"
+            aria-label={`Profile ${completion}% complete`}
+          >
+            <span>{completion}%</span>
           </div>
-        </section>
-      ) : null}
+          <ul className="settings-progress-list">
+            {profileChecklist.map((item) => (
+              <li key={item.label} className={item.complete ? "is-complete" : ""}>
+                <span className="settings-progress-mark" aria-hidden="true">
+                  {item.complete ? <Check className="size-3.5" /> : null}
+                </span>
+                <span>{item.label}</span>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      </div>
 
       {!isSetup ? (
         <AlertDialog

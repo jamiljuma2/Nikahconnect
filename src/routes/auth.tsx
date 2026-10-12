@@ -18,6 +18,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Eye, EyeOff, Check, X } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { notifyUserError } from "@/lib/user-facing-errors";
+import { CalendarDays } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
 
 const search = z.object({
   mode: z.enum(["login", "register", "forgot", "reset"]).default("login"),
@@ -361,9 +365,14 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
     confirm_password: "",
   });
   const [busy, setBusy] = useState(false);
+  const [birthDateOpen, setBirthDateOpen] = useState(false);
   const [pwFocused, setPwFocused] = useState(false);
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
+  const selectedBirthDate = form.dob ? new Date(`${form.dob}T12:00:00`) : undefined;
+  const today = new Date();
+  const latestBirthDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+  const earliestBirthDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
 
   const ruleState = useMemo(
     () => PASSWORD_RULES.map((r) => ({ ...r, ok: r.test(form.password) })),
@@ -450,12 +459,54 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
           </Select>
         </Field>
         <Field label="Date of birth">
-          <Input
-            type="date"
-            value={form.dob}
-            onChange={(e) => set("dob", e.target.value)}
-            required
-          />
+          <Popover open={birthDateOpen} onOpenChange={setBirthDateOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                className="auth-input w-full justify-start gap-2 px-4 text-left font-normal"
+                aria-label="Choose date of birth"
+                aria-haspopup="dialog"
+              >
+                <CalendarDays aria-hidden="true" className="h-4 w-4 shrink-0 opacity-75" />
+                <span className={selectedBirthDate ? "" : "text-muted-foreground"}>
+                  {selectedBirthDate ? format(selectedBirthDate, "PPP") : "Choose your date of birth"}
+                </span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="end"
+              side="bottom"
+              sideOffset={8}
+              collisionPadding={12}
+              className="w-[min(20rem,calc(100vw-1.5rem))] border-slate-200 bg-white p-3 text-slate-900 shadow-xl"
+            >
+              <Calendar
+                mode="single"
+                selected={selectedBirthDate}
+                disabled={{ before: earliestBirthDate, after: latestBirthDate }}
+                onSelect={(date) => {
+                  if (!date) return;
+                  const year = date.getFullYear();
+                  const month = String(date.getMonth() + 1).padStart(2, "0");
+                  const day = String(date.getDate()).padStart(2, "0");
+                  set("dob", `${year}-${month}-${day}`);
+                  setBirthDateOpen(false);
+                }}
+                defaultMonth={selectedBirthDate ?? latestBirthDate}
+                startMonth={earliestBirthDate}
+                endMonth={latestBirthDate}
+                captionLayout="dropdown"
+                className="mx-auto"
+                classNames={{
+                  day_button: "text-slate-900 hover:bg-rose-100",
+                  weekday: "text-slate-500",
+                  outside: "text-slate-400",
+                  disabled: "text-slate-300 opacity-50",
+                }}
+              />
+            </PopoverContent>
+          </Popover>
         </Field>
       </div>
       <Field label="Location" className="register-field">

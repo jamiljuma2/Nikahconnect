@@ -12,14 +12,43 @@ export const Route = createFileRoute("/")({
         content:
           "Find real connections, match with people near you, and reveal contacts when you're ready. MingleConnect is dating built for intention.",
       },
+      { property: "og:url", content: "https://www.mingleconnect.co.ke/" },
       { property: "og:title", content: "MingleConnect — Meaningful Dating" },
       {
         property: "og:description",
         content: "Find real connections and reveal contacts on your terms.",
       },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { name: "twitter:card", content: "summary_large_image" },
+      {
+        "script:ld+json": {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": "https://www.mingleconnect.co.ke/#organization",
+              name: "MingleConnect",
+              url: "https://www.mingleconnect.co.ke/",
+              logo: {
+                "@type": "ImageObject",
+                url: "https://www.mingleconnect.co.ke/icons/mingleconnect-512.png",
+                width: 512,
+                height: 512,
+              },
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://www.mingleconnect.co.ke/#website",
+              url: "https://www.mingleconnect.co.ke/",
+              name: "MingleConnect",
+              alternateName: "Mingle Connect",
+              publisher: { "@id": "https://www.mingleconnect.co.ke/#organization" },
+            },
+          ],
+        },
+      },
     ],
+    links: [{ rel: "canonical", href: "https://www.mingleconnect.co.ke/" }],
   }),
   component: Landing,
 });

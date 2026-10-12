@@ -17,7 +17,6 @@ import "@fontsource/inter/500.css";
 import "@fontsource/inter/600.css";
 
 import appCss from "../styles.css?url";
-import appIcon from "../assets/mingleconnect-icon.png";
 import { Toaster } from "@/components/ui/sonner";
 import { InstallAppBanner } from "@/components/InstallAppBanner";
 import { supabase } from "@/integrations/supabase/client";
@@ -90,12 +89,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "Discover, match, and chat with singles near you on MingleConnect.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "MingleConnect" },
+      { property: "og:image", content: "https://www.mingleconnect.co.ke/og/mingleconnect-social.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:type", content: "image/png" },
+      { property: "og:image:alt", content: "MingleConnect, meaningful connections made in Kenya" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "MingleConnect — Meaningful Dating in Kenya" },
+      {
+        name: "twitter:description",
+        content: "Discover, match, and chat with singles near you on MingleConnect.",
+      },
+      { name: "twitter:image", content: "https://www.mingleconnect.co.ke/og/mingleconnect-social.png" },
+      { name: "twitter:image:alt", content: "MingleConnect, meaningful connections made in Kenya" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", type: "image/png", href: appIcon },
+      { rel: "icon", href: "/favicon.ico", sizes: "any" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
     ],

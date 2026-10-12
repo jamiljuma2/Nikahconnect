@@ -1,26 +1,18 @@
 import tanstackServer from "../dist/server/server.js";
 
-function getPublicOrigin(req) {
-  const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL;
-  if (productionHost) return `https://${productionHost}`;
-
-  const protocol = req.headers["x-forwarded-proto"] ?? "https";
-  const host = req.headers["x-forwarded-host"] ?? req.headers.host ?? "localhost";
-  return new URL(`${protocol}://${host}`).origin;
-}
+const canonicalOrigin = "https://www.mingleconnect.co.ke";
 
 function serveSearchResource(req, res, pathname) {
   if (req.method !== "GET" && req.method !== "HEAD") return false;
 
-  const origin = getPublicOrigin(req);
   let body;
   let contentType;
 
   if (pathname === "/sitemap.xml") {
-    body = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${origin}/</loc></url></urlset>`;
+    body = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${canonicalOrigin}/</loc></url></urlset>`;
     contentType = "application/xml; charset=utf-8";
   } else if (pathname === "/robots.txt") {
-    body = `User-agent: *\nAllow: /\nDisallow: /discover\nDisallow: /matches\nDisallow: /likes\nDisallow: /chat/\nDisallow: /settings\nDisallow: /plans\nDisallow: /admin\nSitemap: ${origin}/sitemap.xml\n`;
+    body = `User-agent: *\nAllow: /\nDisallow: /discover\nDisallow: /matches\nDisallow: /likes\nDisallow: /chat/\nDisallow: /settings\nDisallow: /plans\nDisallow: /admin\nSitemap: ${canonicalOrigin}/sitemap.xml\n`;
     contentType = "text/plain; charset=utf-8";
   } else {
     return false;

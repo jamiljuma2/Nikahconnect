@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /discover
+Disallow: /matches
+Disallow: /likes
+Disallow: /chat/
+Disallow: /settings
+Disallow: /plans
+Disallow: /admin
+Sitemap: https://www.mingleconnect.co.ke/sitemap.xml

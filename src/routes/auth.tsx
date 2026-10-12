@@ -464,14 +464,12 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
               <Button
                 type="button"
                 variant="outline"
-                className="auth-input w-full justify-start gap-2 px-4 text-left font-normal"
+                className="auth-input w-full justify-center px-4"
                 aria-label="Choose date of birth"
                 aria-haspopup="dialog"
+                title={selectedBirthDate ? format(selectedBirthDate, "PPP") : "Choose date of birth"}
               >
                 <CalendarDays aria-hidden="true" className="h-4 w-4 shrink-0 opacity-75" />
-                <span className={selectedBirthDate ? "" : "text-muted-foreground"}>
-                  {selectedBirthDate ? format(selectedBirthDate, "PPP") : "Choose your date of birth"}
-                </span>
               </Button>
             </PopoverTrigger>
             <PopoverContent
@@ -500,7 +498,8 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
                 className="mx-auto"
                 classNames={{
                   day_button: "text-slate-900 hover:bg-rose-100",
-                  weekday: "text-slate-500",
+                  weekday:
+                    "flex-1 min-w-0 select-none px-0.5 pb-1 text-center text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-slate-500",
                   outside: "text-slate-400",
                   disabled: "text-slate-300 opacity-50",
                 }}

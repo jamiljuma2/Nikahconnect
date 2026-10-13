@@ -271,14 +271,14 @@ function Landing() {
             <p className="landing-section-kicker">Clear and simple</p>
             <h2>Start free. Choose extras only if you need them.</h2>
             <p>
-              Creating a profile, browsing, liking, and mutual-match messaging are free. Paid plans
-              currently add phone contact reveals.
+              Creating a profile, browsing, liking, and mutual-match messaging are free. Premium
+              adds access to incoming interests and five phone contact reveals for 30 days.
             </p>
           </div>
           <div className="landing-membership-note">
             <span>
-              <strong>Contact reveal plans</strong>
-              <small>One-time payments through M-Pesa · 30 days · no automatic renewal</small>
+              <strong>Premium Membership · KES 299/month</strong>
+              <small>Pay by M-Pesa manually each month · no automatic charges</small>
             </span>
             <Link to="/auth" search={{ mode: "register" } as never}>
               See plans after joining <ArrowRight size={16} />
@@ -306,8 +306,8 @@ function Landing() {
             <details>
               <summary>Is membership automatically renewed?</summary>
               <p>
-                No. Current contact reveal plans are one-time payments with a 30-day term. They do
-                not automatically renew.
+                Premium lasts 30 days. You choose whether to pay again; payments do not
+                automatically renew or charge your M-Pesa account.
               </p>
             </details>
             <details>

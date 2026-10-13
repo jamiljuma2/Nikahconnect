@@ -47,11 +47,10 @@ export const Route = createFileRoute("/terms")({
       <section>
         <h2>Payments</h2>
         <p>
-          Creating a profile and using basic discovery and messaging are free. Paid contact reveal
-          plans are one-time M-Pesa purchases, currently valid for 30 days, and do not automatically
-          renew. A successful payment is confirmed server-side with PayHero before an entitlement is
-          activated. Prices and reveal amounts are shown on the Plans page before purchase. Assisted
-          matchmaking is not currently offered.
+          Creating a profile and using basic discovery and messaging are free. Premium Membership
+          costs KES 299 for 30 days and is paid manually through M-Pesa; it does not automatically
+          renew or charge your account. A successful payment is confirmed server-side with PayHero
+          before access is activated. Assisted matchmaking is not currently offered.
         </p>
       </section>
       <section>

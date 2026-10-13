@@ -30,8 +30,9 @@ export const Route = createFileRoute("/about")({
         <h2>How the current service works</h2>
         <p>
           Adults can create profiles, browse other members, express interest, and message after
-          mutual interest. A free profile includes discovery and messaging. Paid plans currently add
-          contact reveals through a one-time M-Pesa payment.
+          mutual interest. A free profile includes discovery and messaging. Premium Membership is
+          KES 299 for 30 days and includes incoming-interest access and five contact reveals, paid
+          manually through M-Pesa.
         </p>
         <p>
           NikahConnect does not provide religious rulings, verify religious suitability, or

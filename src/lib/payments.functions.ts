@@ -4,7 +4,9 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { PLANS, type PlanId } from "@/lib/plans";
 
 const input = z.object({
-  planId: z.enum(["starter", "standard", "premium"]),
+  // Starter and unlimited premium bundles are retired from checkout. Keep their
+  // historical rows and webhook handling intact, but allow only this membership.
+  planId: z.literal("standard"),
   mpesaPhone: z
     .string()
     .min(10)

@@ -9,15 +9,15 @@ export const Route = createFileRoute("/membership")({
       {
         name: "description",
         content:
-          "Understand free membership and one-time M-Pesa contact reveal plans on NikahConnect.",
+          "Understand free membership and monthly Premium pricing on NikahConnect.",
       },
     ],
   }),
   component: () => (
     <PublicInfoPage
       eyebrow="Membership"
-      title="Start free. Pay only for contact reveals."
-      intro="Creating a profile, browsing, expressing interest, and messaging after a mutual match are free. Paid plans add a set number of phone contact reveals."
+      title="Start free. Upgrade when it suits you."
+      intro="Creating a profile, browsing, expressing interest, and messaging after a mutual match are free. Premium adds access to incoming interests and contact reveals."
     >
       <section>
         <h2>Free profile — KES 0</h2>
@@ -26,22 +26,23 @@ export const Route = createFileRoute("/membership")({
           interest.
         </p>
       </section>
-      <section className="public-info-plan-grid" aria-label="Paid contact reveal plans">
-        {Object.values(PLANS).map((plan) => (
+      <section className="public-info-plan-grid" aria-label="Premium membership">
+        {Object.values(PLANS).filter((plan) => plan.id === "standard").map((plan) => (
           <article className="public-info-plan" key={plan.id}>
-            <h2>{plan.name}</h2>
+            <h2>Premium Membership</h2>
             <p className="public-info-price">KES {plan.price.toLocaleString("en-KE")}</p>
-            <p>{plan.unlimited ? "Unlimited" : plan.reveals} contact reveals</p>
-            <p>One-time payment · valid for 30 days</p>
+            <p>Per month · 30 days of access</p>
+            <p>See incoming interests and get 5 contact reveals</p>
           </article>
         ))}
       </section>
       <section>
         <h2>Payments and renewals</h2>
         <p>
-          Payments use M-Pesa through PayHero. Plans are purchased manually and do not automatically
-          renew. Check the plan and amount shown at checkout before paying. No assisted matchmaking
-          service is currently offered.
+          Payments use M-Pesa through PayHero. Premium is paid monthly by starting a new payment
+          manually; there is no automatic charge or recurring payment authorization. Check the plan
+          and amount shown at checkout before paying. No assisted matchmaking service is currently
+          offered.
         </p>
         <p>
           For a payment that has not appeared, return to the Plans page while signed in so the

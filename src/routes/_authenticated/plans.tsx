@@ -16,7 +16,7 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { PLANS, type PlanId } from "@/lib/plans";
+import { AVAILABLE_PLANS } from "@/lib/plans";
 import { getMyPayments, initiatePayment, verifyAndActivatePayment } from "@/lib/payments.functions";
 import { getMyBalance } from "@/lib/dating.functions";
 import { notifyUserError } from "@/lib/user-facing-errors";
@@ -24,15 +24,15 @@ import { notifyUserError } from "@/lib/user-facing-errors";
 export const Route = createFileRoute("/_authenticated/plans")({
   head: () => ({
     meta: [
-      { title: "Contact Reveal Plans — NikahConnect" },
+      { title: "Premium Membership — NikahConnect" },
       {
         name: "description",
-        content: "Choose a one-time NikahConnect contact reveal plan with M-Pesa.",
+        content: "Get 30 days of NikahConnect Premium with M-Pesa.",
       },
-      { property: "og:title", content: "Contact Reveal Plans — NikahConnect" },
+      { property: "og:title", content: "Premium Membership — NikahConnect" },
       {
         property: "og:description",
-        content: "Choose a one-time NikahConnect contact reveal plan with M-Pesa.",
+        content: "Get 30 days of NikahConnect Premium with M-Pesa.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -47,7 +47,7 @@ function PlansPage() {
   const checkedPendingRef = useRef(false);
   const balanceQ = useQuery({ queryKey: ["balance"], queryFn: () => getMyBalance() });
   const paymentsQ = useQuery({ queryKey: ["payments"], queryFn: () => getMyPayments() });
-  const sub = balanceQ.data?.subscription;
+  const sub = balanceQ.data?.activeSubscription ?? balanceQ.data?.subscription;
 
   useEffect(() => {
     if (checkedPendingRef.current || sub || !paymentsQ.data?.payments?.length) return;
@@ -79,10 +79,10 @@ function PlansPage() {
         className="plans-heading"
       >
         <span className="plans-kicker">
-          NikahConnect contact reveal plans
+          NikahConnect membership
         </span>
-        <h1>Simple, transparent pricing</h1>
-        <p>Choose a one-time plan for phone contact reveals. Plans are valid for 30 days and do not automatically renew.</p>
+        <h1>Choose Premium, on your terms</h1>
+        <p>Premium costs KES 299 for 30 days. Renew manually whenever you choose; payments do not automatically repeat.</p>
       </motion.div>
 
       <AnimatePresence>
@@ -96,19 +96,24 @@ function PlansPage() {
           >
             <div>
               <p className="plans-current-label">Current plan</p>
-              <p className="plans-current-name">{sub.plan}</p>
+              <p className="plans-current-name">{sub.plan === "standard" ? "Premium Membership" : sub.plan}</p>
             </div>
             <p className="plans-current-balance">
               {sub.is_unlimited
                 ? "Unlimited reveals"
                 : `${sub.remaining_reveals} reveal${sub.remaining_reveals === 1 ? "" : "s"} remaining`}
             </p>
+            {sub.expiry_date && (
+              <p className="plans-current-balance">
+                Access through {new Date(sub.expiry_date).toLocaleDateString("en-KE")} · renew manually
+              </p>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
 
       <div className="plans-grid">
-        {(Object.values(PLANS) as (typeof PLANS)[PlanId][]).map((p, i) => (
+        {AVAILABLE_PLANS.map((p, i) => (
           <motion.div
             key={p.id}
             initial={{ opacity: 0, y: 24 }}
@@ -119,33 +124,34 @@ function PlansPage() {
           </motion.div>
         ))}
       </div>
+      <section className="plans-history" aria-labelledby="payment-history-title">
+        <h2 id="payment-history-title">Payment history</h2>
+        {!paymentsQ.data?.payments?.length ? (
+          <p>No payments yet.</p>
+        ) : (
+          <ul>
+            {paymentsQ.data.payments.map((payment) => (
+              <li key={payment.id}>
+                <span>{payment.amount === 299 ? "Premium Membership" : `${payment.plan_type} contact plan`}</span>
+                {payment.transaction_id && <span>Ref: {payment.transaction_id}</span>}
+                <span>KES {payment.amount.toLocaleString("en-KE")}</span>
+                <span>{payment.status}</span>
+                <time dateTime={payment.created_at}>{new Date(payment.created_at).toLocaleDateString("en-KE")}</time>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }
 
-function PlanCard({ plan }: { plan: (typeof PLANS)[PlanId] }) {
-  const popular = plan.id === "standard";
+function PlanCard({ plan }: { plan: (typeof AVAILABLE_PLANS)[number] }) {
   return (
     <motion.article
       whileHover={{ y: -6, transition: { duration: 0.25 } }}
-      className={
-        "plans-card group relative flex h-full flex-col " +
-        (popular ? "plans-card-popular" : "")
-      }
+      className="plans-card group relative flex h-full flex-col"
     >
-      {popular && (
-        <>
-          <motion.div
-            aria-hidden
-            className="plans-card-glow pointer-events-none absolute"
-            animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <span className="plans-popular-badge">
-            Most popular · Best value
-          </span>
-        </>
-      )}
       <div className="plans-card-top relative">
         <p className="plans-card-tagline">{plan.tagline}</p>
         <h3>{plan.name}</h3>
@@ -153,7 +159,7 @@ function PlanCard({ plan }: { plan: (typeof PLANS)[PlanId] }) {
           <span>KES</span>
           <strong>{plan.price.toLocaleString("en-KE")}</strong>
         </div>
-        <p className="plans-duration">30-day access · {plan.unlimited ? "Unlimited reveals" : `${plan.reveals} reveals`}</p>
+        <p className="plans-duration">KES {plan.price} · 30 days · manual renewal</p>
         <p className="plans-condition">
           {plan.unlimited ? (
             <>
@@ -185,7 +191,7 @@ function PlanCard({ plan }: { plan: (typeof PLANS)[PlanId] }) {
   );
 }
 
-function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
+function PayDialog({ plan }: { plan: (typeof AVAILABLE_PLANS)[number] }) {
   const initiate = useServerFn(initiatePayment);
   const verify = useServerFn(verifyAndActivatePayment);
   const qc = useQueryClient();
@@ -309,9 +315,9 @@ function PayDialog({ plan }: { plan: (typeof PLANS)[PlanId] }) {
               <span className="font-medium">{plan.name}</span>
             </div>
             <div className="mt-2 flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Reveals</span>
+              <span className="text-muted-foreground">Included</span>
               <span className="font-medium">
-                {plan.unlimited ? "Unlimited" : plan.reveals}
+                {plan.reveals} contact reveals · 30 days
               </span>
             </div>
             <div className="mpesa-total-row">

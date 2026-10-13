@@ -1021,10 +1021,11 @@
 .public-info-content section h2 { margin: 0 0 8px; color: #294a38; font-family: var(--font-display); font-size: 24px; font-weight: 600; }
 .public-info-content section p { margin: 0 0 10px; color: #5f6e64; font-size: 13px; line-height: 1.8; }
 .public-info-action a { display: inline-flex; padding: 12px 18px; border-radius: 999px; background: #145c48; color: white; font-size: 12px; font-weight: 600; text-decoration: none; }
-.public-info-plan-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.public-info-plan-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .public-info-content .public-info-plan { margin: 0; padding: 18px; border: 1px solid #e3e7dc; border-radius: 15px; background: white; }
 .public-info-plan h2 { font-size: 20px !important; }
 .public-info-plan .public-info-price { margin: 8px 0; color: #145c48; font-size: 20px; font-weight: 700; }
+.public-info-plan .plans-card-tagline { color: #647468; }
 .public-info-plan p { font-size: 11px !important; }
 .public-info-footer { align-items: flex-end; border-top: 1px solid #e3e7dc; }
 .public-info-footer-logo { width: 130px; height: auto; }
@@ -1266,7 +1267,7 @@
   display: grid;
   max-width: 1060px;
   margin: 39px auto 0;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
   gap: 16px;
 }
@@ -1287,6 +1288,7 @@
   background: linear-gradient(155deg, rgb(34 44 94 / 96%), rgb(16 22 55 / 95%));
   box-shadow: 0 23px 55px rgb(1 5 18 / 44%), 0 0 30px rgb(74 80 188 / 13%);
 }
+
 
 .plans-card-popular {
   border-color: rgb(139 126 255 / 70%);

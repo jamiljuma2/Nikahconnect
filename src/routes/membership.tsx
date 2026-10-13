@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PublicInfoPage } from "@/components/PublicInfoPage";
-import { PLANS } from "@/lib/plans";
+import { AVAILABLE_PLANS } from "@/lib/plans";
 
 export const Route = createFileRoute("/membership")({
   head: () => ({
@@ -26,13 +26,13 @@ export const Route = createFileRoute("/membership")({
           interest.
         </p>
       </section>
-      <section className="public-info-plan-grid" aria-label="Premium membership">
-        {Object.values(PLANS).filter((plan) => plan.id === "standard").map((plan) => (
+      <section className="public-info-plan-grid" aria-label="Premium membership plans">
+        {AVAILABLE_PLANS.map((plan) => (
           <article className="public-info-plan" key={plan.id}>
-            <h2>Premium Membership</h2>
+            <h2>{plan.name}</h2>
             <p className="public-info-price">KES {plan.price.toLocaleString("en-KE")}</p>
             <p>Per month · 30 days of access</p>
-            <p>See incoming interests and get 5 contact reveals</p>
+            <p>{plan.unlimited ? "See incoming interests and reveal unlimited contacts" : "See incoming interests and get 5 contact reveals"}</p>
           </article>
         ))}
       </section>

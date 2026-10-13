@@ -82,7 +82,7 @@ function PlansPage() {
           NikahConnect membership
         </span>
         <h1>Choose Premium, on your terms</h1>
-        <p>Premium costs KES 299 for 30 days. Renew manually whenever you choose; payments do not automatically repeat.</p>
+        <p>Choose a 30-day plan from KES 299. Renew manually whenever you choose; payments do not automatically repeat.</p>
       </motion.div>
 
       <AnimatePresence>
@@ -96,7 +96,13 @@ function PlansPage() {
           >
             <div>
               <p className="plans-current-label">Current plan</p>
-              <p className="plans-current-name">{sub.plan === "standard" ? "Premium Membership" : sub.plan}</p>
+              <p className="plans-current-name">
+                {sub.plan === "standard"
+                  ? "Premium Membership"
+                  : sub.plan === "premium"
+                    ? "Premium Unlimited"
+                    : sub.plan}
+              </p>
             </div>
             <p className="plans-current-balance">
               {sub.is_unlimited
@@ -132,7 +138,13 @@ function PlansPage() {
           <ul>
             {paymentsQ.data.payments.map((payment) => (
               <li key={payment.id}>
-                <span>{payment.amount === 299 ? "Premium Membership" : `${payment.plan_type} contact plan`}</span>
+                <span>
+                  {payment.amount === 299
+                    ? "Premium Membership"
+                    : payment.amount === 999
+                      ? "Premium Unlimited"
+                      : `${payment.plan_type} contact plan`}
+                </span>
                 {payment.transaction_id && <span>Ref: {payment.transaction_id}</span>}
                 <span>KES {payment.amount.toLocaleString("en-KE")}</span>
                 <span>{payment.status}</span>
@@ -317,7 +329,7 @@ function PayDialog({ plan }: { plan: (typeof AVAILABLE_PLANS)[number] }) {
             <div className="mt-2 flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Included</span>
               <span className="font-medium">
-                {plan.reveals} contact reveals · 30 days
+                {plan.unlimited ? "Unlimited contact reveals · 30 days" : `${plan.reveals} contact reveals · 30 days`}
               </span>
             </div>
             <div className="mpesa-total-row">

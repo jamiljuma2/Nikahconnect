@@ -6,7 +6,7 @@ import { PLANS, type PlanId } from "@/lib/plans";
 const input = z.object({
   // Starter and unlimited premium bundles are retired from checkout. Keep their
   // historical rows and webhook handling intact, but allow only this membership.
-  planId: z.literal("standard"),
+  planId: z.enum(["standard", "premium"]),
   mpesaPhone: z
     .string()
     .min(10)

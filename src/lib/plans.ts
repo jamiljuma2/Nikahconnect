@@ -10,8 +10,8 @@ export interface Plan {
   features: string[];
 }
 
-// Existing plan IDs remain stable so historical payments and subscriptions keep
-// their meaning. Only the standard tier is offered for new purchases.
+// Plan IDs remain stable for historical payments. Standard and premium are
+// currently available for new purchases; starter remains legacy-only.
 export const PLANS: Record<PlanId, Plan> = {
   starter: {
     id: "starter",
@@ -33,20 +33,20 @@ export const PLANS: Record<PlanId, Plan> = {
   },
   premium: {
     id: "premium",
-    name: "Premium",
-    price: 1200,
+    name: "Premium Unlimited",
+    price: 999,
     reveals: Number.POSITIVE_INFINITY,
     unlimited: true,
-    tagline: "No limits",
-    features: ["Unlimited contact reveals", "Unlimited matches & chats"],
+    tagline: "Unlimited contact reveals",
+    features: ["Unlimited contact reveals", "See incoming interests", "30 days of premium access"],
   },
 };
 
-export const AVAILABLE_PLANS: Plan[] = [PLANS.standard];
+export const AVAILABLE_PLANS: Plan[] = [PLANS.standard, PLANS.premium];
 
 export const planForAmount = (amount: number): PlanId | null => {
   if (amount === 249) return "starter";
   if (amount === 299 || amount === 499) return "standard";
-  if (amount === 1200) return "premium";
+  if (amount === 999 || amount === 1200) return "premium";
   return null;
 };

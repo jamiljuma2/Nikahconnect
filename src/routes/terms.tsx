@@ -47,10 +47,11 @@ export const Route = createFileRoute("/terms")({
       <section>
         <h2>Payments</h2>
         <p>
-          Creating a profile and using basic discovery and messaging are free. Premium Membership
-          costs KES 299 for 30 days and is paid manually through M-Pesa; it does not automatically
-          renew or charge your account. A successful payment is confirmed server-side with PayHero
-          before access is activated. Assisted matchmaking is not currently offered.
+          Creating a profile and using basic discovery and messaging are free. Premium plans start
+          at KES 299 for 30 days; Premium Unlimited costs KES 999 for 30 days and includes unlimited
+          contact reveals. Plans are paid manually through M-Pesa and do not automatically renew or
+          charge your account. A successful payment is confirmed server-side with PayHero before
+          access is activated. Assisted matchmaking is not currently offered.
         </p>
       </section>
       <section>

@@ -272,12 +272,12 @@ function Landing() {
             <h2>Start free. Choose extras only if you need them.</h2>
             <p>
               Creating a profile, browsing, liking, and mutual-match messaging are free. Premium
-              adds access to incoming interests and five phone contact reveals for 30 days.
+              adds access to incoming interests and five or unlimited phone contact reveals for 30 days.
             </p>
           </div>
           <div className="landing-membership-note">
             <span>
-              <strong>Premium Membership · KES 299/month</strong>
+              <strong>Premium from KES 299/month · Unlimited reveals KES 999</strong>
               <small>Pay by M-Pesa manually each month · no automatic charges</small>
             </span>
             <Link to="/auth" search={{ mode: "register" } as never}>

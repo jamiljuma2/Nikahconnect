@@ -1780,7 +1780,16 @@ html:has(.settings-page) { scroll-behavior: smooth; }
 .landing-value-icon { background: #eaf0e8; color: #145c48; }
 .landing-value strong { color: #314a3d; }
 .landing-value small { color: #66756a; }
-.landing-invitation h2, .landing-section-heading h2, .landing-trust h2, .landing-family h2, .landing-final-cta h2 { color: #183d32; }
+.landing-invitation h2, .landing-section-heading h2, .landing-trust h2, .landing-family h2 { color: #183d32; }
+.landing-final-cta h2 { color: #fbfaf4; }
+.landing-final-cta .landing-cta,
+.landing-final-cta .landing-cta:hover,
+.landing-final-cta .landing-cta:active,
+.landing-final-cta .landing-cta:focus-visible { background: #e3d3a5; color: #193f32; }
+.landing-final-cta .landing-cta:hover { filter: brightness(1.04); }
+.landing-final-cta .landing-cta:active { transform: scale(.98); filter: brightness(.97); }
+.landing-final-cta .landing-cta:focus-visible { outline-color: #fbfaf4; }
+.landing-final-cta .landing-cta { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 .landing-family-art { border-color: #dce5d8; background: linear-gradient(145deg, #eff3eb, #e5eee5); color: #34725a; }
 .landing-family-art span { color: #536d5c; }
 .landing-footer { color: #66756a; }

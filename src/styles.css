@@ -955,6 +955,10 @@
 .landing-arabic-values > span { display: flex; align-items: center; gap: 9px; border: 1px solid #e0e8dc; border-radius: 999px; padding: 8px 13px; background: rgb(255 255 255 / 70%); }
 .landing-arabic-values b { color: #145c48; font-family: "Noto Naskh Arabic", "Amiri", "Scheherazade New", serif; font-size: 16px; font-weight: 600; }
 .landing-arabic-values small { color: #68766b; font-size: 10px; }
+.landing-hadith { margin: 28px 0 0; border-top: 1px solid #e1e7dc; padding: 22px 8px 0; }
+.landing-hadith-arabic { margin: 0; color: #145c48; font-family: "Noto Naskh Arabic", "Amiri", "Scheherazade New", serif; font-size: clamp(20px, 3.8vw, 30px); line-height: 1.8; }
+.landing-hadith > p:not(.landing-hadith-arabic) { margin: 7px 0 10px; color: #425b4c; font-size: 13px; line-height: 1.6; }
+.landing-hadith footer a { color: #68766b; font-size: 11px; text-underline-offset: 3px; }
 .landing-section { width: min(1080px, 100%); margin: 0 auto; padding: 84px clamp(20px, 5vw, 68px); }
 .landing-section-heading { max-width: 640px; margin: 0 auto 35px; text-align: center; }
 .landing-section-kicker { margin: 0 0 12px; font-size: 10px; }
@@ -1104,6 +1108,7 @@
 .landing-actions { display: flex; align-items: flex-start; flex-direction: column; gap: 11px; }
 .landing-cta, .landing-bottom-cta { display: inline-flex; width: fit-content; min-height: 52px; align-items: center; justify-content: center; gap: 11px; padding: 0 23px; border-radius: 999px; background: var(--landing-pink); color: white; font-size: 12px; font-weight: 700; letter-spacing: .01em; text-decoration: none; text-transform: none; box-shadow: 0 9px 23px rgb(199 44 89 / 16%); transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease; }
 .landing-cta svg, .landing-bottom-cta svg { width: 16px; height: 16px; }
+.landing-cta-arabic { border-inline-start: 1px solid currentColor; padding-inline-start: 10px; font-family: "Noto Naskh Arabic", "Amiri", "Scheherazade New", serif; font-size: 13px; font-weight: 600; white-space: nowrap; }
 .landing-cta:hover, .landing-bottom-cta:hover { transform: translateY(-2px); background: #ae244d; box-shadow: 0 12px 27px rgb(199 44 89 / 22%); }
 .landing-cta:active, .landing-bottom-cta:active { transform: scale(.98); }
 .landing-join-note { color: #a0959a; font-size: 10px; }

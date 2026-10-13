@@ -196,6 +196,17 @@ function Landing() {
               <small>Raḥmah · mercy</small>
             </span>
           </div>
+          <blockquote className="landing-hadith">
+            <p className="landing-hadith-arabic" lang="ar" dir="rtl">
+              يَا مَعْشَرَ الشَّبَابِ، مَنِ اسْتَطَاعَ مِنْكُمُ الْبَاءَةَ فَلْيَتَزَوَّجْ
+            </p>
+            <p>“O young people, whoever among you is able to marry should marry.”</p>
+            <footer>
+              <a href="https://sunnah.com/bukhari:5066" target="_blank" rel="noreferrer">
+                Prophet Muhammad ﷺ · Sahih al-Bukhari 5066 <span aria-hidden="true">↗</span>
+              </a>
+            </footer>
+          </blockquote>
         </section>
 
         <section className="landing-section landing-how" id="how-it-works">
@@ -349,7 +360,11 @@ function Landing() {
             Marriage with Purpose.
           </h2>
           <Link to="/auth" search={{ mode: "register" } as never} className="landing-cta">
-            Create Your Profile <ArrowRight aria-hidden="true" />
+            Create Your Profile{" "}
+            <span className="landing-cta-arabic" lang="ar" dir="rtl">
+              بداية مباركة
+            </span>{" "}
+            <ArrowRight aria-hidden="true" />
           </Link>
         </section>
       </main>

@@ -2,7 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Heart, Loader2, MapPin, MessageCircle, MessageCircleHeart, Phone, Search } from "lucide-react";
+import {
+  Heart,
+  Loader2,
+  MapPin,
+  MessageCircle,
+  MessageCircleHeart,
+  Phone,
+  Search,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
@@ -17,9 +25,15 @@ export const Route = createFileRoute("/_authenticated/discover")({
   head: () => ({
     meta: [
       { title: "Discover — NikahConnect" },
-      { name: "description", content: "Discover members on NikahConnect who are open to marriage-minded introductions." },
+      {
+        name: "description",
+        content: "Discover members on NikahConnect who are open to marriage-minded introductions.",
+      },
       { property: "og:title", content: "Discover — NikahConnect" },
-      { property: "og:description", content: "Discover members who are open to marriage-minded introductions." },
+      {
+        property: "og:description",
+        content: "Discover members who are open to marriage-minded introductions.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -52,25 +66,31 @@ function Discover() {
     enabled: !!user,
   });
   const subscription = balanceQ.data?.subscription;
-  const canRevealNumbers = !!subscription && (subscription.is_unlimited || subscription.remaining_reveals > 0);
+  const canRevealNumbers =
+    !!subscription && (subscription.is_unlimited || subscription.remaining_reveals > 0);
   const [passed, setPassed] = useState<string[]>([]);
   const [likedLocal, setLikedLocal] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [genderFilter, setGenderFilter] = useState<"all" | "female" | "male" | "other">("all");
 
-  const profilesQ = useInfiniteQuery<Profile[], Error, { pages: Profile[][]; pageParams: number[] }, readonly unknown[], number>({
+  const profilesQ = useInfiniteQuery<
+    Profile[],
+    Error,
+    { pages: Profile[][]; pageParams: number[] },
+    readonly unknown[],
+    number
+  >({
     queryKey: ["discover", user?.id],
     enabled: !!user,
     initialPageParam: 0,
-    getNextPageParam: (last, all) =>
-      last.length < PAGE_SIZE ? undefined : all.length * PAGE_SIZE,
+    getNextPageParam: (last, all) => (last.length < PAGE_SIZE ? undefined : all.length * PAGE_SIZE),
     queryFn: async ({ pageParam }) => {
       const { data: liked } = await supabase
         .from("likes")
         .select("receiver_id")
         .eq("sender_id", user!.id);
       const excludeIds = [user!.id, ...(liked ?? []).map((l) => l.receiver_id)];
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("public_profiles")
         .select(
           "id, full_name, age, gender, location, bio, avatar_url, interests, occupation, relationship_goal",
@@ -106,10 +126,12 @@ function Discover() {
     const term = searchTerm.trim().toLowerCase();
     return allProfiles.filter((profile) => {
       const matchesGender = genderFilter === "all" || profile.gender === genderFilter;
-      const matchesSearch = !term || [profile.full_name, profile.location, ...(profile.interests ?? [])]
-        .join(" ")
-        .toLowerCase()
-        .includes(term);
+      const matchesSearch =
+        !term ||
+        [profile.full_name, profile.location, ...(profile.interests ?? [])]
+          .join(" ")
+          .toLowerCase()
+          .includes(term);
       return matchesGender && matchesSearch;
     });
   }, [allProfiles, genderFilter, searchTerm]);
@@ -125,15 +147,12 @@ function Discover() {
   }, [allProfiles]);
 
   // Load more before running out
+  const { fetchNextPage, hasNextPage, isFetchingNextPage } = profilesQ;
   useEffect(() => {
-    if (
-      allProfiles.length <= PREFETCH_THRESHOLD &&
-      profilesQ.hasNextPage &&
-      !profilesQ.isFetchingNextPage
-    ) {
-      profilesQ.fetchNextPage();
+    if (allProfiles.length <= PREFETCH_THRESHOLD && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
-  }, [profiles.length, profilesQ]);
+  }, [allProfiles.length, fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const handleLike = async (p: Profile) => {
     if (likedLocal.includes(p.id) || likeM.isPending) return;
@@ -153,7 +172,9 @@ function Discover() {
       <div className="discover-empty">
         <h2>You're all caught up</h2>
         <p>New profiles join every day. Check back soon or explore your matches.</p>
-        <Link to="/matches" className="discover-empty-action">View matches</Link>
+        <Link to="/matches" className="discover-empty-action">
+          View matches
+        </Link>
       </div>
     );
   }
@@ -172,7 +193,12 @@ function Discover() {
 
       <div className="discover-story-row" aria-label="Profile categories">
         {allProfiles.slice(0, 8).map((profile) => (
-          <button key={profile.id} type="button" className="discover-story" onClick={() => setSearchTerm(profile.full_name)}>
+          <button
+            key={profile.id}
+            type="button"
+            className="discover-story"
+            onClick={() => setSearchTerm(profile.full_name)}
+          >
             <span className="discover-story-image">
               <ProfileAvatar profile={profile} />
             </span>
@@ -189,7 +215,13 @@ function Discover() {
             onClick={() => setGenderFilter(filter)}
             className={genderFilter === filter ? "discover-filter active" : "discover-filter"}
           >
-            {filter === "all" ? "All profiles" : filter === "female" ? "Women" : filter === "male" ? "Men" : "Other"}
+            {filter === "all"
+              ? "All profiles"
+              : filter === "female"
+                ? "Women"
+                : filter === "male"
+                  ? "Men"
+                  : "Other"}
           </button>
         ))}
       </div>
@@ -224,7 +256,9 @@ function Discover() {
           ))}
         </div>
       )}
-      {profilesQ.isFetchingNextPage && <p className="discover-loading-more">Finding more people…</p>}
+      {profilesQ.isFetchingNextPage && (
+        <p className="discover-loading-more">Finding more people…</p>
+      )}
     </div>
   );
 }
@@ -255,7 +289,12 @@ function ProfileGridCard({
       <div className="discover-profile-meta">
         <div className="min-w-0">
           <h2>{profile.full_name}</h2>
-          <p><span>{profile.age} yrs</span><span className="discover-meta-dot">·</span><MapPin className="size-3" />{profile.location}</p>
+          <p>
+            <span>{profile.age} yrs</span>
+            <span className="discover-meta-dot">·</span>
+            <MapPin className="size-3" />
+            {profile.location}
+          </p>
         </div>
         <button
           type="button"
@@ -266,6 +305,19 @@ function ProfileGridCard({
         >
           <Heart className="size-5" fill={liked ? "currentColor" : "none"} />
         </button>
+      </div>
+      <div className="discover-profile-details">
+        {profile.relationship_goal && (
+          <p className="discover-profile-goal">{profile.relationship_goal}</p>
+        )}
+        {profile.bio && <p className="discover-profile-bio">{profile.bio}</p>}
+        {!!profile.interests?.length && (
+          <div className="discover-profile-interests" aria-label="Interests">
+            {profile.interests.slice(0, 3).map((interest) => (
+              <span key={interest}>{interest}</span>
+            ))}
+          </div>
+        )}
       </div>
     </article>
   );
@@ -327,8 +379,14 @@ function DiscoverRevealButton({
       <button
         type="button"
         className="discover-reveal-indicator is-locked"
-        aria-label={checkingRevealAccess ? "Checking reveal access" : "Unlock number with a paid plan"}
-        title={checkingRevealAccess ? "Checking your plan" : "A successful payment is required to reveal numbers"}
+        aria-label={
+          checkingRevealAccess ? "Checking reveal access" : "Unlock number with a paid plan"
+        }
+        title={
+          checkingRevealAccess
+            ? "Checking your plan"
+            : "A successful payment is required to reveal numbers"
+        }
         disabled={checkingRevealAccess}
         onClick={(event) => {
           event.stopPropagation();
@@ -382,7 +440,10 @@ function ProfileAvatar({ profile }: { profile: Profile }) {
       draggable={false}
     />
   ) : (
-    <div className="discover-avatar-fallback" aria-label={`${profile.full_name} profile placeholder`}>
+    <div
+      className="discover-avatar-fallback"
+      aria-label={`${profile.full_name} profile placeholder`}
+    >
       {profile.full_name.charAt(0)}
     </div>
   );
@@ -393,7 +454,9 @@ function Loader({ children }: { children: string }) {
     <div className="discover-page">
       <div className="discover-skeleton-search" />
       <div className="discover-skeleton-stories">
-        {Array.from({ length: 6 }, (_, index) => <span key={index} />)}
+        {Array.from({ length: 6 }, (_, index) => (
+          <span key={index} />
+        ))}
       </div>
       <AtomLoader
         className="discover-loading-status"
@@ -402,7 +465,9 @@ function Loader({ children }: { children: string }) {
         size={34}
       />
       <div className="discover-grid discover-skeleton-grid">
-        {Array.from({ length: 6 }, (_, index) => <div key={index} className="discover-skeleton-card" />)}
+        {Array.from({ length: 6 }, (_, index) => (
+          <div key={index} className="discover-skeleton-card" />
+        ))}
       </div>
     </div>
   );

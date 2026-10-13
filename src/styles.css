@@ -1750,3 +1750,85 @@ html:has(.settings-page) { scroll-behavior: smooth; }
   .settings-page .settings-card:target { animation: none; }
   .profile-upload-progress span { animation: none; width: 100%; }
 }
+
+/* Match the visual system across the public landing page and member discovery. */
+.landing-page {
+  --landing-pink: #145c48;
+  --landing-coral: #b18a47;
+  background: #f8f6ee;
+  color: #223b30;
+}
+.landing-nav { border-bottom: 1px solid rgb(229 230 218 / 70%); }
+.landing-nav-links a, .landing-sign-in { color: #53695c; }
+.landing-copy h1 { color: #183d32; }
+.landing-subtitle { color: #5f6e64; }
+.landing-eyebrow { color: #657b69; }
+.landing-join-note { color: #66756a; }
+.landing-cta, .landing-bottom-cta { background: #145c48; box-shadow: 0 9px 23px rgb(20 92 72 / 16%); }
+.landing-cta:hover, .landing-bottom-cta:hover { background: #0f4939; box-shadow: 0 12px 27px rgb(20 92 72 / 22%); }
+.landing-visual::before { border-color: #d4c49b; }
+.landing-arch-art { border-color: #e2dfcf; background: radial-gradient(circle at 50% 25%, #fffdf8 0, #eef2e9 67%, #e4ece4 100%); }
+.landing-art-sun { background: #e8debd; }
+.landing-art-star { color: #a5813d; }
+.landing-art-caption { border-color: #e4e6d9; background: rgb(255 254 250 / 96%); }
+.landing-art-icon { background: #eaf0e8; color: #145c48; }
+.landing-art-caption strong { color: #234538; }
+.landing-art-caption small { color: #68766b; }
+.landing-values { border-color: #e5e6da; }
+.landing-value + .landing-value { border-left-color: #e5e6da; }
+.landing-value-icon { background: #eaf0e8; color: #145c48; }
+.landing-value strong { color: #314a3d; }
+.landing-value small { color: #66756a; }
+.landing-invitation h2, .landing-section-heading h2, .landing-trust h2, .landing-family h2, .landing-final-cta h2 { color: #183d32; }
+.landing-family-art { border-color: #dce5d8; background: linear-gradient(145deg, #eff3eb, #e5eee5); color: #34725a; }
+.landing-family-art span { color: #536d5c; }
+.landing-footer { color: #66756a; }
+.landing-footer nav a, .public-info-footer nav a { color: #53695a; }
+.landing-page a:focus-visible { outline-color: rgb(20 92 72 / 45%); }
+
+.discover-page {
+  --discover-pink: #145c48;
+  --discover-muted: #68766b;
+  overflow: visible;
+  border: 1px solid #e5e6da;
+  border-radius: 22px;
+  background: #f8f6ee;
+  color: #223b30;
+}
+.discover-search { border: 1px solid #e3e7dd; background: #fffefa; box-shadow: 0 8px 24px rgb(32 62 50 / 7%); }
+.discover-search input { color: #263b30; }
+.discover-search input::placeholder { color: #79857b; }
+.discover-story { color: #40574a; }
+.discover-story-image { border-color: #d3bf8b; background: #e8eee5; }
+.discover-story:hover .discover-story-image { box-shadow: 0 0 0 4px rgb(20 92 72 / 12%); }
+.discover-filter { border: 1px solid #e1e6dc; background: #fffefa; color: #53695a; }
+.discover-filter:hover { color: #145c48; }
+.discover-filter.active { border-color: #145c48; background: #145c48; color: #fff; }
+.discover-section-heading h1 { color: #183d32; }
+.discover-section-heading > span { color: #66756a; }
+.discover-profile-card { border-color: #e4e6d9; border-radius: 18px; background: #fffefa; box-shadow: 0 10px 28px rgb(32 62 50 / 8%); }
+.discover-profile-card:hover { border-color: #b7cbb9; box-shadow: 0 16px 34px rgb(32 62 50 / 13%); }
+.discover-profile-image { background: #e9eee7; }
+.discover-profile-meta h2 { color: #234538; }
+.discover-profile-meta p { color: #68766b; }
+.discover-like { border-color: #d8c394; color: #145c48; }
+.discover-like:hover { background: #edf3eb; }
+.discover-like.liked { background: #145c48; color: #fff; }
+.discover-avatar-fallback { background: linear-gradient(145deg, #edf3eb, #dce8dd); color: #145c48; }
+.discover-empty h2 { color: #183d32; }
+.discover-empty-action { background: #145c48; }
+.discover-filter-empty, .discover-loading-more, .discover-loading-status { color: #68766b; }
+.discover-skeleton-search, .discover-skeleton-stories span { background: #e6ece4; }
+.discover-skeleton-card { background: linear-gradient(110deg, #e6ece4 30%, #f7f8f3 45%, #e6ece4 60%); }
+.discover-profile-details { display: grid; gap: 8px; padding: 0 14px 14px; }
+.discover-profile-goal { width: fit-content; max-width: 100%; overflow: hidden; margin: 0; border-radius: 999px; padding: 5px 9px; background: #edf3eb; color: #315b49; font-size: 10px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.discover-profile-bio { display: -webkit-box; overflow: hidden; margin: 0; color: #53695a; font-size: 11px; line-height: 1.5; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.discover-profile-interests { display: flex; flex-wrap: wrap; gap: 5px; }
+.discover-profile-interests span { overflow: hidden; max-width: 100%; border: 1px solid #e3e8df; border-radius: 999px; padding: 4px 8px; color: #617267; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 620px) {
+  .landing-nav { border-bottom: 0; }
+  .landing-verse { margin-top: 32px; }
+  .discover-page { border-radius: 18px; }
+  .discover-profile-details { padding-inline: 10px; }
+}

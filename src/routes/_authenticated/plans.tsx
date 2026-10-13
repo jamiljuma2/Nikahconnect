@@ -130,30 +130,6 @@ function PlansPage() {
           </motion.div>
         ))}
       </div>
-      <section className="plans-history" aria-labelledby="payment-history-title">
-        <h2 id="payment-history-title">Payment history</h2>
-        {!paymentsQ.data?.payments?.length ? (
-          <p>No payments yet.</p>
-        ) : (
-          <ul>
-            {paymentsQ.data.payments.map((payment) => (
-              <li key={payment.id}>
-                <span>
-                  {payment.amount === 299
-                    ? "Premium Membership"
-                    : payment.amount === 999
-                      ? "Premium Unlimited"
-                      : `${payment.plan_type} contact plan`}
-                </span>
-                {payment.transaction_id && <span>Ref: {payment.transaction_id}</span>}
-                <span>KES {payment.amount.toLocaleString("en-KE")}</span>
-                <span>{payment.status}</span>
-                <time dateTime={payment.created_at}>{new Date(payment.created_at).toLocaleDateString("en-KE")}</time>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
     </div>
   );
 }

@@ -1256,13 +1256,6 @@
 .plans-current-label { margin: 0; color: #9e9cce; font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
 .plans-current-name { margin: 4px 0 0; color: white; font-size: 16px; font-weight: 700; text-transform: capitalize; }
 .plans-current-balance { margin: 0; color: #c6c8ec; font-size: 13px; }
-.plans-history { width: min(100%, 880px); margin: 42px auto 0; border: 1px solid rgb(255 255 255 / 10%); border-radius: 18px; padding: 22px; background: rgb(255 255 255 / 4%); color: #f8f7ff; }
-.plans-history h2 { margin: 0 0 14px; font-size: 18px; }
-.plans-history p { margin: 0; color: #c6c8ec; font-size: 13px; }
-.plans-history ul { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
-.plans-history li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 18px; border-top: 1px solid rgb(255 255 255 / 9%); padding-top: 10px; color: #d8d8eb; font-size: 12px; }
-.plans-history time { color: #aaa8c5; }
-
 .plans-grid {
   display: grid;
   max-width: 1060px;

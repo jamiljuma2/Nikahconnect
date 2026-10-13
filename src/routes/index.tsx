@@ -91,23 +91,44 @@ function Landing() {
             <p className="landing-join-note">For adults 18 and over · Start with a free profile</p>
           </div>
 
-          <div className="landing-visual" aria-label="A thoughtful start to a new chapter">
-            <div className="landing-arch-art" aria-hidden="true">
-              <div className="landing-art-sun" />
-              <div className="landing-art-arch">
-                <div />
-              </div>
-              <span className="landing-art-star landing-art-star-one">✦</span>
-              <span className="landing-art-star landing-art-star-two">✧</span>
-              <div className="landing-art-caption">
-                <span className="landing-art-icon">
-                  <HeartHandshake size={19} />
-                </span>
-                <span>
-                  <strong>Start with shared values</strong>
-                  <small>Move at a pace that feels right</small>
-                </span>
-              </div>
+          <div className="landing-visual">
+            <div className="landing-photo-collage" role="group" aria-label="Wedding inspiration">
+              <figure className="landing-photo-main">
+                <img
+                  src="/images/wedding-arch-hero.jpeg"
+                  alt="A bride and groom in white wedding attire beneath an ornate arch."
+                  fetchPriority="high"
+                  decoding="async"
+                />
+              </figure>
+              <figure className="landing-photo-detail landing-photo-detail-couple">
+                <img
+                  src="/images/wedding-couple-detail.jpeg"
+                  alt="A couple in wedding attire sharing a quiet moment."
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
+              <figure className="landing-photo-detail landing-photo-detail-nikkah">
+                <img
+                  src="/images/nikkah-signing-detail.jpeg"
+                  alt="Henna-decorated hands signing a nikah document."
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
+              <span className="landing-photo-sparkle" aria-hidden="true">
+                ✦
+              </span>
+            </div>
+            <div className="landing-photo-caption">
+              <span className="landing-art-icon" aria-hidden="true">
+                <HeartHandshake size={19} />
+              </span>
+              <span>
+                <strong>Start with shared values</strong>
+                <small>Move at a pace that feels right</small>
+              </span>
             </div>
           </div>
         </section>

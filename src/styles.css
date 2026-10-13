@@ -1826,9 +1826,35 @@ html:has(.settings-page) { scroll-behavior: smooth; }
 .discover-profile-interests { display: flex; flex-wrap: wrap; gap: 5px; }
 .discover-profile-interests span { overflow: hidden; max-width: 100%; border: 1px solid #e3e8df; border-radius: 999px; padding: 4px 8px; color: #617267; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
 
+.landing-visual { max-width: 500px; padding: 0 0 12px; }
+.landing-photo-collage { position: relative; width: 100%; height: clamp(440px, 48vw, 570px); isolation: isolate; }
+.landing-photo-main { position: absolute; inset: 10px 36px 22px 20px; overflow: hidden; margin: 0; border: 8px solid #fffefa; border-radius: 46% 46% 24px 24px; background: #e9eee7; box-shadow: 0 22px 50px rgb(35 58 43 / 17%); }
+.landing-photo-main > img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 32%; }
+.landing-visual { display: flex; flex-direction: column; }
+.landing-photo-caption { position: relative; z-index: 4; display: flex; width: min(340px, calc(100% - 72px)); min-height: 70px; align-items: center; gap: 11px; margin: 14px 6px 0 auto; border: 1px solid #e4e6d9; border-radius: 15px; padding: 12px 14px; background: #fffefa; box-shadow: 0 8px 24px rgb(32 62 50 / 10%); }
+.landing-photo-caption strong, .landing-photo-caption small { display: block; }
+.landing-photo-caption strong { color: #234538; font-size: 12px; }
+.landing-photo-caption small { margin-top: 4px; color: #68766b; font-size: 10px; }
+.landing-photo-detail { position: absolute; z-index: 2; overflow: hidden; margin: 0; border: 6px solid #fffefa; border-radius: 17px; background: #eef2e9; box-shadow: 0 12px 30px rgb(35 58 43 / 20%); }
+.landing-photo-detail img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.landing-photo-detail-couple { top: 32px; right: 0; width: 41%; height: 31%; transform: rotate(3deg); }
+.landing-photo-detail-couple img { object-position: center 38%; }
+.landing-photo-detail-nikkah { bottom: 2px; left: 0; width: 41%; height: 25%; transform: rotate(-3deg); }
+.landing-photo-detail-nikkah img { object-position: center 43%; }
+.landing-photo-sparkle { position: absolute; z-index: 3; top: 3px; left: 15%; color: #a5813d; font-size: 29px; text-shadow: 0 2px 8px rgb(255 255 255 / 75%); }
+
 @media (max-width: 620px) {
   .landing-nav { border-bottom: 0; }
   .landing-verse { margin-top: 32px; }
+  .landing-visual { width: min(100% - 16px, 430px); align-self: center; }
+  .landing-photo-collage { height: clamp(390px, 105vw, 490px); }
+  .landing-photo-main { inset: 8px 27px 18px 14px; border-width: 6px; }
+  .landing-photo-caption { width: min(340px, calc(100% - 48px)); min-height: 66px; margin: 12px 4px 0 auto; padding: 10px; }
+  .landing-photo-caption strong { font-size: 11px; }
+  .landing-photo-caption small { font-size: 9px; }
+  .landing-photo-detail { border-width: 4px; border-radius: 14px; }
+  .landing-photo-detail-couple { top: 27px; right: -2px; }
+  .landing-photo-detail-nikkah { bottom: 1px; left: -1px; }
   .discover-page { border-radius: 18px; }
   .discover-profile-details { padding-inline: 10px; }
 }

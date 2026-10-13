@@ -39,10 +39,11 @@ export const Route = createFileRoute("/auth")({
   validateSearch: (s) => search.parse(s),
   head: () => ({
     meta: [
-      { title: "Sign in — MingleConnect" },
-      { name: "description", content: "Sign in or create your MingleConnect account." },
-      { property: "og:title", content: "Sign in — MingleConnect" },
-      { property: "og:description", content: "Sign in or create your MingleConnect account." },
+      { title: "Sign in — NikahConnect" },
+      { name: "description", content: "Sign in or create your NikahConnect account." },
+      { name: "robots", content: "noindex, nofollow" },
+      { property: "og:title", content: "Sign in — NikahConnect" },
+      { property: "og:description", content: "Meaningful Connections. Marriage with Purpose." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -78,20 +79,24 @@ function AuthPage() {
       <div className="auth-outline auth-outline-one" aria-hidden="true" />
       <div className="auth-outline auth-outline-two" aria-hidden="true" />
 
-      <main className={`auth-frame ${mode === "register" ? "auth-frame-register" : "auth-frame-login"}`}>
+      <main
+        className={`auth-frame ${mode === "register" ? "auth-frame-register" : "auth-frame-login"}`}
+      >
         {mode === "register" && (
           <section className="auth-intro">
-            <Link to="/" className="auth-brand" aria-label="MingleConnect home">
+            <Link to="/" className="auth-brand" aria-label="NikahConnect home">
               <BrandLogo className="auth-brand-logo" />
             </Link>
             <div className="auth-intro-copy">
-              <p className="auth-kicker">Your next chapter starts here</p>
-              <h1>Welcome!</h1>
+              <p className="auth-kicker">Marriage with purpose</p>
+              <h1>Begin with what matters.</h1>
               <span className="auth-rule" aria-hidden="true" />
               <p className="auth-message">
-                Meet someone who matches your energy, your interests, and your story.
+                Share your values and the kind of future you hope to build.
               </p>
-              <Link to="/" className="auth-discover">Discover More</Link>
+              <Link to="/" className="auth-discover">
+                Learn about NikahConnect
+              </Link>
             </div>
             <p className="auth-footer-note">Meaningful connections, made at your pace.</p>
           </section>
@@ -100,14 +105,20 @@ function AuthPage() {
         <section className="auth-form-shell" aria-labelledby="auth-title">
           <div className="auth-form-panel">
             <div className="auth-form-heading">
-              <span className="auth-form-eyebrow">MingleConnect</span>
+              <span className="auth-form-eyebrow">NikahConnect</span>
               <h2 id="auth-title">
-                {mode === "register" ? "Create account" : mode === "forgot" ? "Reset your password" : mode === "reset" ? "Choose a new password" : "Sign in"}
+                {mode === "register"
+                  ? "Create account"
+                  : mode === "forgot"
+                    ? "Reset your password"
+                    : mode === "reset"
+                      ? "Choose a new password"
+                      : "Sign in"}
               </h2>
               <span className="auth-rule auth-rule-center" aria-hidden="true" />
               <p>
                 {mode === "register"
-                  ? "It only takes a minute to begin."
+                  ? "Create an account to begin your profile."
                   : mode === "forgot"
                     ? "We’ll email you a secure link to get back into your account."
                     : mode === "reset"
@@ -118,18 +129,31 @@ function AuthPage() {
 
             {(mode === "login" || mode === "register") && (
               <div className="auth-mode-tabs" aria-label="Authentication mode">
-                <ModeTab to="login" current={mode}>Sign in</ModeTab>
-                <ModeTab to="register" current={mode}>Register</ModeTab>
+                <ModeTab to="login" current={mode}>
+                  Sign in
+                </ModeTab>
+                <ModeTab to="register" current={mode}>
+                  Register
+                </ModeTab>
               </div>
             )}
 
             <div className="auth-form-content">
               {mode === "register" ? (
-                <RegisterForm onDone={() => router.navigate({ to: "/auth", search: { mode: "login", next: "/settings?setup=1" } })} />
+                <RegisterForm
+                  onDone={() =>
+                    router.navigate({
+                      to: "/auth",
+                      search: { mode: "login", next: "/settings?setup=1" },
+                    })
+                  }
+                />
               ) : mode === "forgot" ? (
                 <ForgotPasswordForm />
               ) : mode === "reset" ? (
-                <ResetPasswordForm onDone={() => router.navigate({ to: "/auth", search: { mode: "login" } })} />
+                <ResetPasswordForm
+                  onDone={() => router.navigate({ to: "/auth", search: { mode: "login" } })}
+                />
               ) : (
                 <LoginForm onDone={goNext} />
               )}
@@ -210,7 +234,10 @@ function LoginForm({ onDone }: { onDone: (isAdmin: boolean) => void }) {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
-    const { data: signInData, error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
+    const { data: signInData, error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    });
     setBusy(false);
     if (error) return notifyUserError(error, "We couldn’t sign you in. Please try again.");
     toast.success("Welcome back!");
@@ -224,14 +251,23 @@ function LoginForm({ onDone }: { onDone: (isAdmin: boolean) => void }) {
     onDone((roles ?? []).some((role) => role.role === "admin"));
   };
   return (
-    <form onSubmit={submit} className="auth-fields">
+    <form onSubmit={submit} className="auth-fields" aria-busy={busy}>
       <Field label="Email or Username">
-        <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" className="auth-input" />
+        <Input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+          className="auth-input"
+        />
       </Field>
       <Field label="Password">
         <PasswordInput value={password} onChange={setPassword} autoComplete="current-password" />
       </Field>
-      <Link className="auth-forgot-link" to="/auth" search={{ mode: "forgot" }}>Forgot password?</Link>
+      <Link className="auth-forgot-link" to="/auth" search={{ mode: "forgot" }}>
+        Forgot password?
+      </Link>
       <Button type="submit" className="auth-submit w-full" disabled={busy}>
         {busy ? "Signing in…" : "Sign in"}
       </Button>
@@ -251,28 +287,43 @@ function ForgotPasswordForm() {
       redirectTo: `${window.location.origin}/auth?mode=reset`,
     });
     setBusy(false);
-    if (error) return notifyUserError(error, "We couldn’t send a reset link. Please try again shortly.");
+    if (error)
+      return notifyUserError(error, "We couldn’t send a reset link. Please try again shortly.");
     setSent(true);
   };
 
   if (sent) {
     return (
       <div className="auth-fields">
-        <p className="auth-reset-note">If an account exists for that email, a password reset link is on its way. Check your inbox and spam folder.</p>
-        <Link className="auth-back-link" to="/auth" search={{ mode: "login" }}>Back to sign in</Link>
+        <p className="auth-reset-note">
+          If an account exists for that email, a password reset link is on its way. Check your inbox
+          and spam folder.
+        </p>
+        <Link className="auth-back-link" to="/auth" search={{ mode: "login" }}>
+          Back to sign in
+        </Link>
       </div>
     );
   }
 
   return (
-    <form onSubmit={submit} className="auth-fields">
+    <form onSubmit={submit} className="auth-fields" aria-busy={busy}>
       <Field label="Email">
-        <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" className="auth-input" />
+        <Input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
+          className="auth-input"
+        />
       </Field>
       <Button type="submit" className="auth-submit w-full" disabled={busy}>
         {busy ? "Sending link…" : "Send reset link"}
       </Button>
-      <Link className="auth-back-link" to="/auth" search={{ mode: "login" }}>Back to sign in</Link>
+      <Link className="auth-back-link" to="/auth" search={{ mode: "login" }}>
+        Back to sign in
+      </Link>
     </form>
   );
 }
@@ -285,30 +336,41 @@ function ResetPasswordForm({ onDone }: { onDone: () => void }) {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsed = strongPassword.safeParse(password);
-    if (!parsed.success) return toast.error(parsed.error.issues[0]?.message ?? "Please choose a stronger password.");
+    if (!parsed.success)
+      return toast.error(parsed.error.issues[0]?.message ?? "Please choose a stronger password.");
     if (password !== confirmPassword) return toast.error("Passwords do not match.");
 
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
-    if (error) return notifyUserError(error, "We couldn’t update your password. Request a new reset link and try again.");
+    if (error)
+      return notifyUserError(
+        error,
+        "We couldn’t update your password. Request a new reset link and try again.",
+      );
     toast.success("Your password has been updated. You can now sign in.");
     await supabase.auth.signOut();
     onDone();
   };
 
   return (
-    <form onSubmit={submit} className="auth-fields">
+    <form onSubmit={submit} className="auth-fields" aria-busy={busy}>
       <Field label="New password">
         <PasswordInput value={password} onChange={setPassword} autoComplete="new-password" />
       </Field>
       <Field label="Confirm new password">
-        <PasswordInput value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" />
+        <PasswordInput
+          value={confirmPassword}
+          onChange={setConfirmPassword}
+          autoComplete="new-password"
+        />
       </Field>
       <Button type="submit" className="auth-submit w-full" disabled={busy}>
         {busy ? "Updating password…" : "Update password"}
       </Button>
-      <Link className="auth-back-link" to="/auth" search={{ mode: "login" }}>Back to sign in</Link>
+      <Link className="auth-back-link" to="/auth" search={{ mode: "login" }}>
+        Back to sign in
+      </Link>
     </form>
   );
 }
@@ -334,7 +396,10 @@ const registerSchema = z
   .object({
     full_name: z.string().trim().min(2).max(80),
     email: z.string().trim().email().max(255),
-    phone_number: z.string().trim().regex(/^\+?[0-9]{9,15}$/, "Use 9–15 digits, optional + prefix"),
+    phone_number: z
+      .string()
+      .trim()
+      .regex(/^\+?[0-9]{9,15}$/, "Use 9–15 digits, optional + prefix"),
     gender: z.enum(["male", "female", "other"]),
     dob: z.string().refine((v) => {
       const d = new Date(v);
@@ -344,6 +409,7 @@ const registerSchema = z
     }, "You must be 18 or older"),
     location: z.string().trim().min(2).max(80),
     bio: z.string().max(500).optional(),
+    consent: z.literal(true),
     password: strongPassword,
     confirm_password: z.string(),
   })
@@ -357,10 +423,11 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
     full_name: "",
     email: "",
     phone_number: "",
-    gender: "female" as "male" | "female" | "other",
+    gender: "" as "" | "male" | "female" | "other",
     dob: "",
     location: "",
     bio: "",
+    consent: false,
     password: "",
     confirm_password: "",
   });
@@ -401,6 +468,9 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
           dob: parsed.data.dob,
           location: parsed.data.location,
           bio: parsed.data.bio ?? "",
+          terms_accepted: true,
+          profile_visibility_accepted: true,
+          terms_version: "2026-10-13",
         },
       },
     });
@@ -410,11 +480,17 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
     }
     if (!data.session) {
       setBusy(false);
-      return toast.error("Your account was created. Please check your email to finish setting it up.");
+      return toast.error(
+        "Your account was created. Please check your email to finish setting it up.",
+      );
     }
     const { error: signOutError } = await supabase.auth.signOut();
     setBusy(false);
-    if (signOutError) return notifyUserError(signOutError, "Your account was created, but we couldn’t finish signing you out. Please sign in to continue.");
+    if (signOutError)
+      return notifyUserError(
+        signOutError,
+        "Your account was created, but we couldn’t finish signing you out. Please sign in to continue.",
+      );
     toast.success("Account created. Sign in to complete your profile.");
     onDone();
   };
@@ -444,12 +520,9 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
       </Field>
       <div className="register-field-wide register-pair">
         <Field label="Gender">
-          <Select
-            value={form.gender}
-            onValueChange={(v) => set("gender", v as typeof form.gender)}
-          >
+          <Select value={form.gender} onValueChange={(v) => set("gender", v as typeof form.gender)}>
             <SelectTrigger>
-              <SelectValue />
+              <SelectValue placeholder="Choose your gender" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="female">Female</SelectItem>
@@ -467,11 +540,15 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
                 className="auth-input w-full min-w-0 justify-start gap-3 overflow-hidden px-4 text-left"
                 aria-label="Choose date of birth"
                 aria-haspopup="dialog"
-                title={selectedBirthDate ? format(selectedBirthDate, "PPP") : "Choose date of birth"}
+                title={
+                  selectedBirthDate ? format(selectedBirthDate, "PPP") : "Choose date of birth"
+                }
               >
                 <CalendarDays aria-hidden="true" className="h-4 w-4 shrink-0 opacity-75" />
                 <span className="min-w-0 truncate">
-                  {selectedBirthDate ? format(selectedBirthDate, "dd/MM/yyyy") : "Choose date of birth"}
+                  {selectedBirthDate
+                    ? format(selectedBirthDate, "dd/MM/yyyy")
+                    : "Choose date of birth"}
                 </span>
               </Button>
             </PopoverTrigger>
@@ -527,6 +604,30 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
           placeholder="A line about you…"
         />
       </Field>
+      <div className="register-consent register-field-wide">
+        <input
+          id="register-consent"
+          type="checkbox"
+          checked={form.consent}
+          onChange={(event) => set("consent", event.target.checked)}
+          required
+        />
+        <div>
+          <label htmlFor="register-consent">
+            I confirm that I am 18 or older and understand that my profile is visible to signed-in
+            members.
+          </label>
+          <p>
+            By creating an account, you agree to our <Link to="/terms">Terms</Link> and acknowledge
+            our <Link to="/privacy">Privacy Notice</Link>.
+          </p>
+        </div>
+      </div>
+      <p className="register-privacy-note register-field-wide">
+        Your birth date is used to confirm adult eligibility and calculate your displayed age; it is
+        not shown as your birthday. Your phone number is stored separately and shared only if you
+        choose a paid contact reveal.
+      </p>
       <Field label="Password" className="register-field">
         <div onFocus={() => setPwFocused(true)}>
           <PasswordInput
@@ -604,14 +705,27 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
           )}
         </AnimatePresence>
       </Field>
-      <Button type="submit" className="register-submit w-full gradient-romance text-primary-foreground" disabled={busy}>
+      <Button
+        type="submit"
+        className="register-submit w-full gradient-romance text-primary-foreground"
+        disabled={busy}
+        aria-busy={busy}
+      >
         {busy ? "Creating account…" : "Create account"}
       </Button>
     </form>
   );
 }
 
-function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
+function Field({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <div className={`space-y-1.5 ${className ?? ""}`}>
       <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">

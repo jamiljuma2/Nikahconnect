@@ -1,4 +1,4 @@
--- MingleConnect final Supabase schema
+-- NikahConnect final Supabase schema
 -- Paste into the Supabase SQL Editor for a fresh project.
 -- This schema reflects the final state of the ordered migrations.
 
@@ -40,6 +40,8 @@ create table if not exists public.profiles (
   occupation text default '',
   relationship_goal text default '',
   suspended boolean not null default false,
+  deactivated_at timestamptz,
+  last_seen_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -92,6 +94,8 @@ create table if not exists public.messages (
   sender_id uuid not null references public.profiles(id) on delete cascade,
   content text not null,
   read_at timestamptz,
+  reply_to_message_id uuid references public.messages(id) on delete set null,
+  deleted_at timestamptz,
   created_at timestamptz not null default now(),
   constraint messages_no_digits check (content !~ '[0-9]'),
   constraint messages_not_empty check (length(btrim(content)) > 0)
@@ -119,7 +123,7 @@ create table if not exists public.number_reveals (
 
 create table if not exists public.payments (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null references public.profiles(id) on delete cascade,
+  user_id uuid references public.profiles(id) on delete set null,
   transaction_id text unique,
   amount int not null,
   status public.payment_status not null default 'pending',
@@ -179,7 +183,8 @@ returns table (
   relationship_goal text,
   age int,
   suspended boolean,
-  created_at timestamptz
+  created_at timestamptz,
+  last_seen_at timestamptz
 )
 language sql stable security definer set search_path = public
 as $$
@@ -195,9 +200,16 @@ as $$
     p.relationship_goal,
     extract(year from age(p.dob))::int,
     p.suspended,
-    p.created_at
+    p.created_at,
+    p.last_seen_at
   from public.profiles p
-  where p.suspended = false and auth.uid() is not null
+  where p.suspended = false
+    and p.deactivated_at is null
+    and auth.uid() is not null
+    and not exists (
+      select 1 from public.user_roles r
+      where r.user_id = p.id and r.role = 'admin'::public.app_role
+    )
 $$;
 
 revoke all on function private.get_public_profiles() from public, anon, authenticated;
@@ -208,6 +220,18 @@ create view public.public_profiles with (security_invoker = true) as
 select * from private.get_public_profiles();
 grant select on public.public_profiles to authenticated;
 
+create table if not exists public.user_consents (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  consent_type text not null check (consent_type in ('terms', 'profile_visibility')),
+  consent_version text not null,
+  consented_at timestamptz not null default now(),
+  unique (user_id, consent_type, consent_version)
+);
+alter table public.user_consents enable row level security;
+revoke all on public.user_consents from public, anon, authenticated;
+grant all on public.user_consents to service_role;
+
 -- ============================================================
 -- Application functions and triggers
 -- ============================================================
@@ -215,18 +239,37 @@ create or replace function public.handle_new_user()
 returns trigger
 language plpgsql security definer set search_path = public
 as $$
+declare
+  v_dob date;
+  v_terms_version text;
 begin
+  if new.raw_user_meta_data->>'terms_accepted' is distinct from 'true'
+     or new.raw_user_meta_data->>'profile_visibility_accepted' is distinct from 'true' then
+    raise exception 'registration_requires_consent';
+  end if;
+  v_terms_version := new.raw_user_meta_data->>'terms_version';
+  if v_terms_version is distinct from '2026-10-13' then
+    raise exception 'registration_requires_current_terms';
+  end if;
+  v_dob := (new.raw_user_meta_data->>'dob')::date;
+  if v_dob > (current_date - interval '18 years')::date then
+    raise exception 'registration_requires_adult';
+  end if;
   insert into public.profiles (id, full_name, gender, dob, location)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'full_name', ''),
     coalesce((new.raw_user_meta_data->>'gender')::public.gender_type, 'other'),
-    coalesce((new.raw_user_meta_data->>'dob')::date, '2000-01-01'::date),
+    v_dob,
     coalesce(new.raw_user_meta_data->>'location', '')
   );
   insert into public.user_contacts (user_id, email, phone_number)
   values (new.id, new.email, coalesce(new.raw_user_meta_data->>'phone_number', ''));
   insert into public.user_roles (user_id, role) values (new.id, 'user');
+  insert into public.user_consents (user_id, consent_type, consent_version)
+  values
+    (new.id, 'terms', v_terms_version),
+    (new.id, 'profile_visibility', v_terms_version);
   return new;
 end;
 $$;
@@ -275,6 +318,19 @@ $$;
 drop trigger if exists profiles_touch on public.profiles;
 create trigger profiles_touch before update on public.profiles
   for each row execute function public.touch_updated_at();
+
+create or replace function private.require_adult_profile()
+returns trigger language plpgsql set search_path = public as $$
+begin
+  if new.dob is null or new.dob > (current_date - interval '18 years')::date then
+    raise exception 'registration_requires_adult';
+  end if;
+  return new;
+end;
+$$;
+create trigger profiles_require_adult before insert or update of dob on public.profiles
+  for each row execute function private.require_adult_profile();
+
 drop trigger if exists user_contacts_touch_updated_at on public.user_contacts;
 create trigger user_contacts_touch_updated_at before update on public.user_contacts
   for each row execute function public.touch_updated_at();
@@ -393,28 +449,30 @@ alter table public.number_reveals enable row level security;
 alter table public.payments enable row level security;
 alter table public.payment_settings enable row level security;
 
-grant select, insert, update, delete on public.profiles to authenticated;
+grant select (id, full_name, gender, dob, location, bio, avatar_url, interests,
+  occupation, relationship_goal, deactivated_at, last_seen_at, created_at, updated_at)
+  on public.profiles to authenticated;
+grant update (full_name, location, bio, occupation, relationship_goal, interests,
+  avatar_url, last_seen_at) on public.profiles to authenticated;
 grant select on public.user_contacts to authenticated;
 grant select, insert, update, delete on public.profile_photos to authenticated;
 grant select on public.user_roles to authenticated;
 grant select, insert, delete on public.likes to authenticated;
 grant select, delete on public.matches to authenticated;
-grant select, insert, update on public.messages to authenticated;
+grant select, insert on public.messages to authenticated;
+grant update (read_at) on public.messages to authenticated;
 grant select on public.subscriptions to authenticated;
 grant select on public.number_reveals to authenticated;
 grant select on public.payments to authenticated;
 grant all on all tables in schema public to service_role;
 
 -- Profiles
-create policy "Authenticated can view non-suspended or own profiles"
+create policy "Members view own profile and admins view profiles"
   on public.profiles for select to authenticated
-  using (id = auth.uid() or private.has_role(auth.uid(), 'admin') or suspended is not true);
+  using (id = auth.uid() or private.has_role(auth.uid(), 'admin'));
 create policy "Users update own profile"
   on public.profiles for update to authenticated
   using (id = auth.uid()) with check (id = auth.uid());
-create policy "Users insert own profile"
-  on public.profiles for insert to authenticated
-  with check (id = auth.uid());
 create policy "Admins delete profiles"
   on public.profiles for delete to authenticated
   using (private.has_role(auth.uid(), 'admin'));
@@ -468,7 +526,8 @@ create policy "Users send messages in their matches"
   with check (sender_id = auth.uid() and exists (select 1 from public.matches m where m.id = match_id and (m.user_one = auth.uid() or m.user_two = auth.uid())));
 create policy "Recipients mark messages as read"
   on public.messages for update to authenticated
-  using (exists (select 1 from public.matches m where m.id = match_id and (m.user_one = auth.uid() or m.user_two = auth.uid())) and sender_id <> auth.uid());
+  using (exists (select 1 from public.matches m where m.id = match_id and (m.user_one = auth.uid() or m.user_two = auth.uid())) and sender_id <> auth.uid())
+  with check (exists (select 1 from public.matches m where m.id = match_id and (m.user_one = auth.uid() or m.user_two = auth.uid())) and sender_id <> auth.uid());
 
 -- Paid plans and reveals
 create policy "Users view own subscriptions"

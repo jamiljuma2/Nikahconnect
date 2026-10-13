@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Download, X } from "lucide-react";
-import appIcon from "@/assets/mingleconnect-icon.png";
+const appIcon = "/icons/nikahconnect-192.png";
 
 type InstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -55,10 +55,10 @@ export function InstallAppBanner() {
 
   return (
     <>
-      <aside className="install-app-banner" aria-label="Install MingleConnect">
+      <aside className="install-app-banner" aria-label="Install NikahConnect">
         <img className="install-app-icon" src={appIcon} alt="" />
         <div className="install-app-copy">
-          <p className="install-app-title">Get MingleConnect</p>
+          <p className="install-app-title">Get NikahConnect</p>
           <p className="install-app-subtitle">Add it to your home screen for quick access.</p>
         </div>
         <button className="install-app-action" type="button" onClick={install}>
@@ -93,11 +93,11 @@ export function InstallAppBanner() {
               <X size={18} />
             </button>
             <img className="install-help-icon" src={appIcon} alt="" />
-            <h2 id="install-help-title">Install MingleConnect</h2>
+            <h2 id="install-help-title">Install NikahConnect</h2>
             {isIOS ? (
               <p>In Safari, tap the Share button, then choose “Add to Home Screen.”</p>
             ) : (
-              <p>Open your browser menu and choose “Install app” or “Add to Home Screen” to keep MingleConnect close by.</p>
+              <p>Open your browser menu and choose “Install app” or “Add to Home Screen” to keep NikahConnect close by.</p>
             )}
             <button className="install-help-done" type="button" onClick={() => setShowInstructions(false)}>
               Got it

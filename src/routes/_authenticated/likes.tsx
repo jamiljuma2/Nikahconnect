@@ -12,7 +12,7 @@ import { getMyBalance } from "@/lib/dating.functions";
 export const Route = createFileRoute("/_authenticated/likes")({
   head: () => ({
     meta: [
-      { title: "Likes — MingleConnect" },
+      { title: "Likes — NikahConnect" },
       { name: "description", content: "See the people who are interested in meeting you." },
     ],
   }),

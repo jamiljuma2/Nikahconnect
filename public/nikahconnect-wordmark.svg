@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 150" role="img" aria-label="NikahConnect — Meaningful Connections. Marriage with Purpose.">
+  <rect x="0" y="9" width="132" height="132" rx="30" fill="#f8f6ee"/>
+  <path d="M24 113V66a42 42 0 0 1 84 0v47H94V66a28 28 0 0 0-56 0v47z" fill="#145c48"/>
+  <path d="M44 113V67a22 22 0 0 1 44 0v46H73V67a7 7 0 0 0-14 0v46z" fill="#f8f6ee"/>
+  <path d="M64 60c10-1 18-9 19-19 8 11 6 26-3 35-9 9-24 10-34 2 10-1 18-8 18-18z" fill="#b18a47"/>
+  <circle cx="94" cy="42" r="3" fill="#b18a47"/>
+  <text x="158" y="77" fill="#145c48" font-family="Georgia, 'Times New Roman', serif" font-size="48" font-weight="700" letter-spacing="-1.6">NikahConnect</text>
+</svg>

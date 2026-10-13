@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="NikahConnect mark">
+  <rect width="128" height="128" rx="30" fill="#f8f6ee"/>
+  <path d="M24 104V57a40 40 0 0 1 80 0v47h-13V57a27 27 0 0 0-54 0v47z" fill="#145c48"/>
+  <path d="M43 104V58a21 21 0 0 1 42 0v46H72V58a8 8 0 0 0-16 0v46z" fill="#f8f6ee"/>
+  <path d="M64 52c10-1 18-9 19-19 8 11 6 26-3 35-9 9-24 10-34 2 10-1 18-8 18-18z" fill="#b18a47"/>
+  <circle cx="94" cy="34" r="3" fill="#b18a47"/>
+</svg>

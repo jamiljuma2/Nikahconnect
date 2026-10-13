@@ -7,4 +7,6 @@ Disallow: /chat/
 Disallow: /settings
 Disallow: /plans
 Disallow: /admin
+Disallow: /auth
+Disallow: /api/
 Sitemap: https://www.mingleconnect.co.ke/sitemap.xml

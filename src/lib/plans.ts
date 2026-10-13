@@ -36,7 +36,7 @@ export const PLANS: Record<PlanId, Plan> = {
     reveals: Number.POSITIVE_INFINITY,
     unlimited: true,
     tagline: "No limits",
-    features: ["Unlimited contact reveals", "Unlimited matches & chats", "Premium badge"],
+    features: ["Unlimited contact reveals", "Unlimited matches & chats"],
   },
 };
 

@@ -22,10 +22,10 @@ import { notifyUserError } from "@/lib/user-facing-errors";
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
-      { title: "Admin — MingleConnect" },
-      { name: "description", content: "Manage MingleConnect users, activity, and platform safety." },
-      { property: "og:title", content: "Admin — MingleConnect" },
-      { property: "og:description", content: "Manage MingleConnect users, activity, and platform safety." },
+      { title: "Admin — NikahConnect" },
+      { name: "description", content: "Manage NikahConnect member accounts, activity, and payments." },
+      { property: "og:title", content: "Admin — NikahConnect" },
+      { property: "og:description", content: "Manage member accounts, activity, and payments." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

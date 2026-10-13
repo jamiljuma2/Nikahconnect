@@ -45,12 +45,12 @@ export const Route = createFileRoute("/_authenticated/settings")({
       .parse(search),
   head: () => ({
     meta: [
-      { title: "Settings — MingleConnect" },
-      { name: "description", content: "Update your MingleConnect dating profile and preferences." },
-      { property: "og:title", content: "Settings — MingleConnect" },
+      { title: "Settings — NikahConnect" },
+      { name: "description", content: "Manage your NikahConnect profile and account settings." },
+      { property: "og:title", content: "Settings — NikahConnect" },
       {
         property: "og:description",
-        content: "Update your MingleConnect dating profile and preferences.",
+        content: "Manage your NikahConnect profile and account settings.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -200,7 +200,7 @@ function SettingsPage() {
     setBusy(false);
     if (error) notifyUserError(error, "We couldn’t save your profile. Please try again.");
     else if (isSetup) {
-      toast.success("Profile complete. Welcome to MingleConnect!");
+      toast.success("Profile complete. Welcome to NikahConnect.");
       navigate({ to: "/discover" });
     } else toast.success("Profile saved");
   };
@@ -298,7 +298,7 @@ function SettingsPage() {
       complete: Boolean(form.full_name.trim() && form.location.trim()),
     },
     { label: "Occupation", complete: Boolean(form.occupation.trim()) },
-    { label: "Relationship goal", complete: Boolean(form.relationship_goal.trim()) },
+    { label: "Marriage intention", complete: Boolean(form.relationship_goal.trim()) },
     {
       label: "Interests",
       complete: form.interests.split(",").some((interest) => interest.trim()),
@@ -310,7 +310,7 @@ function SettingsPage() {
   return (
     <div className={`settings-page ${isSetup ? "settings-page-setup" : ""}`}>
       <div className="settings-page-heading">
-        <p className="profile-kicker">{isSetup ? "Welcome to MingleConnect" : "Your account"}</p>
+        <p className="profile-kicker">{isSetup ? "Welcome to NikahConnect" : "Your account"}</p>
         <h1>{isSetup ? "Complete your profile" : "Edit profile"}</h1>
         <p>
           {isSetup
@@ -506,11 +506,11 @@ function SettingsPage() {
                 <p className="profile-section-hint">Share the details that make you, you.</p>
               </div>
               <div className="profile-fields settings-about-fields">
-                <Field label="Relationship goal" id="relationship-goal">
+                <Field label="Marriage intention" id="relationship-goal">
                   <Input
                     id="relationship-goal"
                     required={isSetup}
-                    placeholder="Long-term partner, friendship, dating…"
+                    placeholder="Marriage intentions and preferred timeline…"
                     value={form.relationship_goal}
                     onChange={(e) => setForm({ ...form, relationship_goal: e.target.value })}
                   />

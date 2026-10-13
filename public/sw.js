@@ -1,9 +1,12 @@
-const CACHE_NAME = "mingleconnect-offline-v1";
+const CACHE_NAME = "nikahconnect-offline-v1";
 const OFFLINE_PAGE = "/offline.html";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.add(OFFLINE_PAGE)).then(() => self.skipWaiting()),
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.add(OFFLINE_PAGE))
+      .then(() => self.skipWaiting()),
   );
 });
 
@@ -14,7 +17,12 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key.startsWith("mingleconnect-offline-") && key !== CACHE_NAME)
+            .filter(
+              (key) =>
+                (key.startsWith("mingleconnect-offline-") ||
+                  key.startsWith("nikahconnect-offline-")) &&
+                key !== CACHE_NAME,
+            )
             .map((key) => caches.delete(key)),
         ),
       )

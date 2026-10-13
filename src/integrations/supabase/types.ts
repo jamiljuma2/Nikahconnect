@@ -449,6 +449,7 @@ export type Database = {
           id: string | null
           interests: string[] | null
           location: string | null
+          last_seen_at: string | null
           occupation: string | null
           relationship_goal: string | null
           suspended: boolean | null

@@ -1,310 +1,37 @@
-# Spark Connect
+# NikahConnect
 
-Build a Full Dating & Matchmaking Platform
+**Meaningful Connections. Marriage with Purpose.**
 
-Create a modern, mobile-first dating website called MingleConnect where users can create profiles, discover matches, chat, and reveal contact numbers through paid subscriptions.
+NikahConnect is a Kenya-first Muslim marriage and matchmaking platform for adults aged 18 and over. The current application supports profile setup, member discovery, mutual likes and matches, private conversations, account controls, an administrator dashboard, and one-time PayHero/M-Pesa contact reveal plans.
 
-Tech Stack
+## Current service details
 
-Frontend: Next.js 15 + TypeScript + Tailwind CSS + ShadCN UI
+- Creating a profile, browsing, liking, and messaging after mutual interest are free.
+- Contact reveal plans are one-time purchases. They are valid for 30 days and do not automatically renew.
+- PayHero transaction status is checked server-side before a paid entitlement is activated.
+- Identity and phone verification, in-app wali or chaperone participation, in-app reporting/blocking, and assisted matchmaking are not currently available.
+- Profile photos use public storage URLs. A person with a photo URL may be able to view the photo outside the signed-in application.
+- Email confirmation is currently disabled in Supabase Auth configuration.
 
-Backend: Supabase
+## Stack
 
-Database: PostgreSQL (Supabase)
+- TanStack Start, React, TypeScript, and Vite
+- Supabase Auth, PostgreSQL, Row Level Security, Storage, and Realtime
+- PayHero M-Pesa STK Push and transaction status API
+- Vercel deployment configuration
 
-Authentication: Supabase Auth
+## Local development
 
-Storage: Supabase Storage for profile images
+Use Node.js and npm, then install dependencies and start the Vite development server:
 
-Real-time Chat: Supabase Realtime
+```sh
+npm install
+npm run dev
+```
 
-Payments: Lipana API (M-Pesa STK Push)
+Set the following variables in a local `.env` file. Never commit `.env` or expose the service-role key in browser code.
 
-Deployment: Vercel
-
-User Roles
-
-Regular User
-
-Can:
-
-Register/Login
-
-Upload profile photos
-
-Edit profile
-
-Browse available profiles
-
-Like profiles
-
-Match with other users
-
-Chat with matched users
-
-Purchase subscription plans
-
-Reveal phone numbers after subscription
-
-Authentication
-
-Users should register using:
-
-Full Name
-
-Email Address
-
-Phone Number
-
-Gender
-
-Date of Birth
-
-Location
-
-Password
-
-Email verification required.
-
-Profile Features
-
-Each profile should display:
-
-Profile Picture
-
-Full Name
-
-Age
-
-Gender
-
-Location
-
-Bio
-
-Interests
-
-Occupation
-
-Relationship Goal
-
-Allow multiple image uploads.
-
-Store images in Supabase Storage.
-
-Match Discovery
-
-Create a Tinder-style discovery page.
-
-Features:
-
-Browse profiles
-
-Like profile
-
-Pass profile
-
-View profile details
-
-When two users like each other:
-
-Create a Match
-
-Enable Chat
-
-Chat System
-
-Matched users can chat in real time.
-
-Use Supabase Realtime.
-
-Chat features:
-
-Send messages
-
-Read receipts
-
-Online status
-
-Typing indicator
-
-IMPORTANT CHAT RESTRICTION
-
-The platform business model depends on paid phone number reveals.
-
-Implement a strict message filter.
-
-When a user sends a message:
-
-Scan message content.
-
-Detect any numerical digit.
-
-Blocked characters:
-
-0 1 2 3 4 5 6 7 8 9
-
-If any digit exists:
-
-Do NOT save the message.
-
-Do NOT display the message.
-
-Return error.
-
-Error Message:
-
-"Phone numbers, codes, and numerical characters are not allowed in chats. Please use the Number Reveal feature to access contact details."
-
-Examples:
-
-Blocked:
-
-My number is 0712345678
-
-Call me on 254712345678
-
-Meet me at 5pm
-
-My age is 24
-
-Allowed:
-
-Hello
-
-WhatsApp me
-
-Nice meeting you
-
-Let's connect
-
-Validation must happen:
-
-Frontend
-
-Backend
-
-Database API layer
-
-This prevents bypassing.
-
-Phone Number Reveal System
-
-Each user profile card must contain:
-
-[ Reveal Contact Number ]
-
-button.
-
-When clicked:
-
-Check subscription balance.
-
-If user has remaining reveals:
-
-Deduct one reveal.
-
-Show full phone number.
-
-Example:
-
-+254712345678
-
-Store reveal history.
-
-A user should not be charged twice for the same profile.
-
-If already revealed before:
-
-Show immediately.
-
-Subscription Plans
-
-Plan 1
-
-Name:
-Starter
-
-Price:
-KES 150
-
-Benefits:
-3 Number Reveals
-
-Plan 2
-
-Name:
-Standard
-
-Price:
-KES 250
-
-Benefits:
-5 Number Reveals
-
-Plan 3
-
-Name:
-Premium
-
-Price:
-KES 500
-
-Benefits:
-Unlimited Number Reveals
-
-Subscription Rules
-
-Starter:
-
-remainingReveals = 3
-
-Standard:
-
-remainingReveals = 5
-
-Premium:
-
-remainingReveals = Unlimited
-
-When remainingReveals reaches zero:
-
-Disable reveal button.
-
-Show:
-
-"Your reveal balance is exhausted. Purchase a subscription plan to continue."
-
-Users may purchase another plan anytime.
-
-New purchase resets according to purchased package.
-
-Payment Integration (PayHero)
-
-Use PayHero M-Pesa STK Push.
-
-Create payment flow:
-
-User selects plan.
-
-User enters M-Pesa number.
-
-Trigger STK Push.
-
-User enters M-Pesa PIN.
-
-Await webhook confirmation.
-
-Activate subscription.
-
-Plans:
-
-KES 150 → Starter
-KES 250 → Standard
-KES 500 → Premium
-
-Environment Variables:
-
+```dotenv
 SUPABASE_URL=
 SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
@@ -315,263 +42,50 @@ VITE_SUPABASE_PROJECT_ID=
 PAYHERO_API_USERNAME=
 PAYHERO_API_PASSWORD=
 PAYHERO_CHANNEL_ID=
-PAYHERO_CALLBACK_URL=https://<project-ref>.supabase.co/functions/v1/payhero-webhook
-
-PayHero credentials can also be configured and verified at `/admin/payments`.
-
-Deploy the payment webhook with:
-
-```sh
-supabase functions deploy payhero-webhook --no-verify-jwt
+PAYHERO_CALLBACK_URL=
 ```
 
-The Edge Function reads `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and the
-PayHero credentials from the Supabase project secrets. Set `PAYHERO_CALLBACK_URL`
-only when the default Supabase function URL is not the desired callback.
+PayHero credentials may also be managed from `/admin/payments`. `PAYHERO_CALLBACK_URL` defaults to `${SUPABASE_URL}/functions/v1/payhero-webhook`; preserve the current project URL and callback when deploying.
 
-Webhook Handling
+## Supabase CLI and migrations
 
-Create:
+The Supabase CLI is installed as a project dev dependency. Run it with `npx supabase` from this directory. The local project reference in `supabase/config.toml` is `gwxivtjwibhsucarojlx`.
 
-/api/public/webhooks/payhero
-
-Verify:
-
-X-Lipana-Signature
-
-using HMAC SHA256 and LIPANA_WEBHOOK_SECRET.
-
-When event:
-
-payment.success
-
-Update subscription table.
-
-Activate purchased plan.
-
-Grant reveal credits.
-
-Record:
-
-transactionId
-
-amount
-
-userId
-
-planType
-
-status
-
-Prevent duplicate processing using transaction ID.
-
-Database Tables
-
-users
-
-id
-
-full_name
-
-email
-
-phone_number
-
-gender
-
-location
-
-bio
-
-avatar_url
-
-created_at
-
-profiles
-
-id
-
-user_id
-
-interests
-
-occupation
-
-relationship_goal
-
-matches
-
-id
-
-user_one
-
-user_two
-
-created_at
-
-messages
-
-id
-
-match_id
-
-sender_id
-
-message
-
-created_at
-
-subscriptions
-
-id
-
-user_id
-
-plan
-
-remaining_reveals
-
-is_unlimited
-
-start_date
-
-expiry_date
-
-number_reveals
-
-id
-
-viewer_id
-
-profile_owner_id
-
-revealed_at
-
-payments
-
-id
-
-user_id
-
-transaction_id
-
-amount
-
-status
-
-plan_type
-
-created_at
-
-likes
-
-id
-
-sender_id
-
-receiver_id
-
-created_at
-
-Admin Dashboard
-
-Admin can:
-
-View users
-
-View matches
-
-View chats
-
-View subscriptions
-
-View payments
-
-View number reveals
-
-Suspend users
-
-Delete accounts
-
-Moderate reports
-
-UI Pages
-
-Landing Page
-
-Login
-
-Register
-
-User Dashboard
-
-Discover Profiles
-
-Profile Details
-
-Matches
-
-Chat
-
-Subscription Plans
-
-Payment Checkout
-
-Settings
-
-Admin Dashboard
-
-Design Requirements
-
-Modern dating app design
-
-Mobile-first responsive UI
-
-Dark Mode
-
-Light Mode
-
-Elegant animations
-
-Clean card-based layout
-
-Attractive profile cards
-
-Fast loading
-
-SEO optimized
-
-Security Requirements
-
-Row Level Security (RLS)
-
-Rate limiting
-
-CSRF protection
-
-XSS protection
-
-Secure image uploads
-
-Secure webhook verification
-
-Input sanitization
-
-Prevent reveal abuse
-
-Prevent duplicate payments
-
-Prevent duplicate number reveals
-
-Generate complete production-ready code, database schema, Supabase migrations, API routes, authentication flows, payment integration, webhook handlers, and responsive UI screens.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+After signing in to the CLI and linking the project, review pending migrations before applying them to the hosted database:
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+npx supabase login
+npx supabase link --project-ref gwxivtjwibhsucarojlx
+npx supabase migration list
 ```
+
+The `20261013120000_nikahconnect_privacy_age_consent.sql` migration adds database-side adult eligibility and signup consent checks, narrows direct profile and message access, and keeps discovery fields in the `public_profiles` projection. Apply and review this migration in a non-production environment before production deployment. It does not drop or rename existing tables.
+
+Deploy the PayHero webhook after setting the needed Supabase function secrets:
+
+```sh
+npx supabase secrets set PAYHERO_API_USERNAME=... PAYHERO_API_PASSWORD=... PAYHERO_CHANNEL_ID=...
+npx supabase functions deploy payhero-webhook --no-verify-jwt
+```
+
+The webhook accepts the provider callback without a Supabase user JWT, looks up the pending payment by its idempotency reference, checks the transaction status with PayHero, and creates at most one subscription per payment.
+
+## Application checks
+
+```sh
+npm run lint
+npm run build
+```
+
+There is no dedicated test script in `package.json` at present.
+
+## Public routes
+
+- `/` — service overview and FAQ
+- `/about` — matchmaking approach and current feature limits
+- `/membership` — free access and paid contact reveal pricing
+- `/privacy` — current data use and privacy notice
+- `/terms` — service terms
+- `/community-guidelines` — respectful use guidance
+
+The public legal pages still need the operator’s legal name and a support/privacy contact before they can serve as final legal notices.

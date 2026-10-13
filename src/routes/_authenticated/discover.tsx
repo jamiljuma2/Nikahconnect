@@ -16,10 +16,10 @@ import { notifyUserError } from "@/lib/user-facing-errors";
 export const Route = createFileRoute("/_authenticated/discover")({
   head: () => ({
     meta: [
-      { title: "Discover — MingleConnect" },
-      { name: "description", content: "Swipe through MingleConnect profiles and find meaningful matches nearby." },
-      { property: "og:title", content: "Discover — MingleConnect" },
-      { property: "og:description", content: "Swipe through MingleConnect profiles and find meaningful matches nearby." },
+      { title: "Discover — NikahConnect" },
+      { name: "description", content: "Discover members on NikahConnect who are open to marriage-minded introductions." },
+      { property: "og:title", content: "Discover — NikahConnect" },
+      { property: "og:description", content: "Discover members who are open to marriage-minded introductions." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

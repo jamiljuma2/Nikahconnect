@@ -7,6 +7,7 @@ import { useAppNotifications } from "@/hooks/use-app-notifications";
 import { isProfileComplete } from "@/lib/profile-completion";
 
 export const Route = createFileRoute("/_authenticated")({
+  head: () => ({ meta: [{ name: "robots", content: "noindex, nofollow" }] }),
   ssr: false,
   beforeLoad: async ({ location }) => {
     let user = null;

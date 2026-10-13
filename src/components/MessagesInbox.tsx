@@ -52,7 +52,7 @@ export function MessagesInbox({ selectedMatchId, onProfileActivity }: {
       const otherIds = rows.map((match) => match.user_one === user!.id ? match.user_two : match.user_one);
       const matchIds = rows.map((match) => match.id);
       const [{ data: profiles }, { data: messages }] = await Promise.all([
-        supabase.from("profiles").select("id, full_name, avatar_url, last_seen_at").in("id", otherIds),
+        supabase.from("public_profiles").select("id, full_name, avatar_url, last_seen_at").in("id", otherIds),
         supabase.from("messages").select("id, match_id, sender_id, content, created_at, read_at, deleted_at")
           .in("match_id", matchIds).order("created_at", { ascending: false }),
       ]);
@@ -112,7 +112,7 @@ export function MessagesInbox({ selectedMatchId, onProfileActivity }: {
     <aside className="messages-inbox">
       <div className="messages-inbox-heading">
         <div>
-          <p className="messages-eyebrow">YOUR CONNECTIONS</p>
+          <p className="messages-eyebrow">MUTUAL INTEREST</p>
           <h1>Messages</h1>
         </div>
         <span className="messages-total">{inboxQ.data?.length ?? 0}</span>
@@ -130,7 +130,7 @@ export function MessagesInbox({ selectedMatchId, onProfileActivity }: {
       ) : !conversations.length ? (
         <div className="messages-list-empty">
           <span><MessageCircle className="size-5" /></span>
-          <p>{search ? "No conversations found" : "Your next lovely conversation starts with a match."}</p>
+          <p>{search ? "No conversations found" : "A conversation opens after you both express interest."}</p>
           {!search && <Link to="/discover">Meet someone new</Link>}
         </div>
       ) : (

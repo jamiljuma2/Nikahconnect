@@ -14,9 +14,9 @@ import { notifyUserError } from "@/lib/user-facing-errors";
 export const Route = createFileRoute("/_authenticated/admin/payments")({
   head: () => ({
     meta: [
-      { title: "Payment settings — MingleConnect" },
+      { title: "Payment settings — NikahConnect" },
       { name: "description", content: "Connect and verify your PayHero M-Pesa account." },
-      { property: "og:title", content: "Payment settings — MingleConnect" },
+      { property: "og:title", content: "Payment settings — NikahConnect" },
       { property: "og:description", content: "Connect and verify your PayHero M-Pesa account." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

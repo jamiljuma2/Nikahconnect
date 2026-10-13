@@ -14,10 +14,13 @@ import { notifyUserError } from "@/lib/user-facing-errors";
 export const Route = createFileRoute("/_authenticated/chat/$matchId")({
   head: () => ({
     meta: [
-      { title: "Chat — MingleConnect" },
-      { name: "description", content: "Continue a private MingleConnect conversation with your match." },
-      { property: "og:title", content: "Chat — MingleConnect" },
-      { property: "og:description", content: "Continue a private MingleConnect conversation with your match." },
+      { title: "Chat — NikahConnect" },
+      {
+        name: "description",
+        content: "Continue a private, marriage-minded conversation on NikahConnect.",
+      },
+      { property: "og:title", content: "Chat — NikahConnect" },
+      { property: "og:description", content: "Continue a private conversation on NikahConnect." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -55,14 +58,20 @@ function ChatPage() {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [other, setOther] = useState<MiniProfile | null>(null);
-  const [otherActivity, setOtherActivity] = useState<ProfileActivity>({ online: false, lastSeenAt: null });
+  const [otherActivity, setOtherActivity] = useState<ProfileActivity>({
+    online: false,
+    lastSeenAt: null,
+  });
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [replyTarget, setReplyTarget] = useState<Message | null>(null);
   const deleteMessageFn = useServerFn(deleteMessage);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const handleProfileActivity = useCallback((activity: ProfileActivity) => setOtherActivity(activity), []);
+  const handleProfileActivity = useCallback(
+    (activity: ProfileActivity) => setOtherActivity(activity),
+    [],
+  );
 
   // Load match + messages + subscribe
   useEffect(() => {
@@ -78,7 +87,7 @@ function ChatPage() {
       if (!alive || !match) return;
       const otherId = match.user_one === user.id ? match.user_two : match.user_one;
       const { data: p } = await supabase
-        .from("profiles")
+        .from("public_profiles")
         .select("id, full_name, avatar_url")
         .eq("id", otherId)
         .single();
@@ -109,7 +118,9 @@ function ChatPage() {
           const message = payload.new as Message;
           const [withReply] = await attachReplyPreviews([message]);
           if (!alive) return;
-          setMessages((current) => current.some((item) => item.id === message.id) ? current : [...current, withReply]);
+          setMessages((current) =>
+            current.some((item) => item.id === message.id) ? current : [...current, withReply],
+          );
           if (message.sender_id !== user.id && !message.read_at) {
             void supabase
               .from("messages")
@@ -125,12 +136,26 @@ function ChatPage() {
         async (payload) => {
           const updated = payload.new as Message;
           const [withReply] = await attachReplyPreviews([updated]);
-          setMessages((current) => current.map((item) => item.id === updated.id
-            ? { ...withReply, reply: item.reply }
-            : item.reply_to_message_id === updated.id
-              ? { ...item, reply: { id: updated.id, sender_id: updated.sender_id, content: updated.content, deleted_at: updated.deleted_at } }
-              : item));
-          setReplyTarget((current) => current?.id === updated.id ? { ...current, ...updated } : current);
+          setMessages((current) =>
+            current.map((item) =>
+              item.id === updated.id
+                ? { ...withReply, reply: item.reply }
+                : item.reply_to_message_id === updated.id
+                  ? {
+                      ...item,
+                      reply: {
+                        id: updated.id,
+                        sender_id: updated.sender_id,
+                        content: updated.content,
+                        deleted_at: updated.deleted_at,
+                      },
+                    }
+                  : item,
+            ),
+          );
+          setReplyTarget((current) =>
+            current?.id === updated.id ? { ...current, ...updated } : current,
+          );
         },
       )
       .subscribe();
@@ -142,11 +167,21 @@ function ChatPage() {
   }, [matchId, user]);
 
   async function attachReplyPreviews(rows: Message[]): Promise<Message[]> {
-    const ids = [...new Set(rows.map((message) => message.reply_to_message_id).filter((id): id is string => !!id))];
+    const ids = [
+      ...new Set(
+        rows.map((message) => message.reply_to_message_id).filter((id): id is string => !!id),
+      ),
+    ];
     if (!ids.length) return rows.map((message) => ({ ...message, reply: null }));
-    const { data } = await supabase.from("messages").select("id, sender_id, content, deleted_at").in("id", ids);
+    const { data } = await supabase
+      .from("messages")
+      .select("id, sender_id, content, deleted_at")
+      .in("id", ids);
     const previews = new Map((data ?? []).map((item) => [item.id, item as ReplyPreview]));
-    return rows.map((message) => ({ ...message, reply: previews.get(message.reply_to_message_id!) ?? null }));
+    return rows.map((message) => ({
+      ...message,
+      reply: previews.get(message.reply_to_message_id!) ?? null,
+    }));
   }
 
   useEffect(() => {
@@ -180,13 +215,15 @@ function ChatPage() {
       return;
     }
     setSending(true);
-    const { error } = await supabase
-      .from("messages")
-      .insert({ match_id: matchId, sender_id: user.id, content, reply_to_message_id: replyTarget?.id ?? null });
+    const { error } = await supabase.from("messages").insert({
+      match_id: matchId,
+      sender_id: user.id,
+      content,
+      reply_to_message_id: replyTarget?.id ?? null,
+    });
     setSending(false);
     if (error) {
-      if (error.message.toLowerCase().includes("messages_no_digits"))
-        toast.error(CHAT_DIGIT_ERROR);
+      if (error.message.toLowerCase().includes("messages_no_digits")) toast.error(CHAT_DIGIT_ERROR);
       else notifyUserError(error, "We couldn’t send your message. Please try again.");
       return;
     }
@@ -196,16 +233,37 @@ function ChatPage() {
 
   const removeMessage = async (message: Message) => {
     if (message.deleted_at || deletingId) return;
-    if (!window.confirm("Delete this message for everyone? The conversation will show that it was deleted.")) return;
+    if (
+      !window.confirm(
+        "Delete this message for everyone? The conversation will show that it was deleted.",
+      )
+    )
+      return;
     setDeletingId(message.id);
     try {
       await deleteMessageFn({ data: { messageId: message.id } });
-      setMessages((current) => current.map((item) => item.id === message.id
-        ? { ...item, content: "[Message deleted]", deleted_at: new Date().toISOString() }
-        : item.reply_to_message_id === message.id
-          ? { ...item, reply: { id: message.id, sender_id: message.sender_id, content: "[Message deleted]", deleted_at: new Date().toISOString() } }
-          : item));
-      setReplyTarget((current) => current?.id === message.id ? { ...current, content: "[Message deleted]", deleted_at: new Date().toISOString() } : current);
+      setMessages((current) =>
+        current.map((item) =>
+          item.id === message.id
+            ? { ...item, content: "[Message deleted]", deleted_at: new Date().toISOString() }
+            : item.reply_to_message_id === message.id
+              ? {
+                  ...item,
+                  reply: {
+                    id: message.id,
+                    sender_id: message.sender_id,
+                    content: "[Message deleted]",
+                    deleted_at: new Date().toISOString(),
+                  },
+                }
+              : item,
+        ),
+      );
+      setReplyTarget((current) =>
+        current?.id === message.id
+          ? { ...current, content: "[Message deleted]", deleted_at: new Date().toISOString() }
+          : current,
+      );
     } catch (error) {
       notifyUserError(error, "We couldn’t delete that message. Please try again.");
     } finally {
@@ -223,33 +281,116 @@ function ChatPage() {
           </Link>
           {other ? (
             <>
-              {other.avatar_url ? <img src={other.avatar_url} alt="" className="messages-header-avatar" /> : <span className="messages-header-fallback">{other.full_name.charAt(0)}</span>}
-              <div className="min-w-0"><h1>{other.full_name}</h1><p className={`messages-header-activity${otherActivity.online ? " is-online" : ""}`}><span aria-hidden="true" />{otherActivity.online ? "Online" : formatLastSeen(otherActivity.lastSeenAt)}</p></div>
+              {other.avatar_url ? (
+                <img src={other.avatar_url} alt="" className="messages-header-avatar" />
+              ) : (
+                <span className="messages-header-fallback">{other.full_name.charAt(0)}</span>
+              )}
+              <div className="min-w-0">
+                <h1>{other.full_name}</h1>
+                <p
+                  className={`messages-header-activity${otherActivity.online ? " is-online" : ""}`}
+                >
+                  <span aria-hidden="true" />
+                  {otherActivity.online ? "Online" : formatLastSeen(otherActivity.lastSeenAt)}
+                </p>
+              </div>
             </>
-          ) : <div className="messages-header-skeleton" />}
+          ) : (
+            <div className="messages-header-skeleton" />
+          )}
         </header>
 
         <div ref={scrollRef} className="messages-thread">
           {messages.length === 0 ? (
-            <div className="messages-first-note"><span>✦</span><p>Say hello and see where the conversation goes.</p><small>Just remember — no numbers allowed in chat.</small></div>
+            <div className="messages-first-note">
+              <span aria-hidden="true">✦</span>
+              <p>Start by learning what matters to one another.</p>
+              <small>For privacy, messages currently do not allow number characters.</small>
+              <div className="messages-starter-list" aria-label="Conversation starter ideas">
+                {[
+                  "What are you hoping to build in marriage?",
+                  "Which values shape your daily life?",
+                  "How would you like family to be involved?",
+                  "What future goals matter most to you?",
+                  "What feels important when discussing finances?",
+                  "What helps you feel heard in a conversation?",
+                  "What does religious practice mean to you?",
+                ].map((prompt) => (
+                  <button key={prompt} type="button" onClick={() => setText(prompt)}>
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            </div>
           ) : (
             messages.map((message, index) => {
               const mine = message.sender_id === user?.id;
               const currentDay = new Date(message.created_at).toDateString();
-              const previousDay = index > 0 ? new Date(messages[index - 1].created_at).toDateString() : null;
+              const previousDay =
+                index > 0 ? new Date(messages[index - 1].created_at).toDateString() : null;
               return (
                 <div key={message.id}>
-                  {currentDay !== previousDay && <div className="messages-day-divider"><span>{new Date(message.created_at).toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}</span></div>}
+                  {currentDay !== previousDay && (
+                    <div className="messages-day-divider">
+                      <span>
+                        {new Date(message.created_at).toLocaleDateString([], {
+                          weekday: "long",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </span>
+                    </div>
+                  )}
                   <div className={`messages-bubble-row${mine ? " mine" : ""}`}>
                     <div className="messages-bubble-actions">
-                      {!message.deleted_at && <button type="button" onClick={() => setReplyTarget(message)} aria-label="Reply to message" title="Reply"><Reply className="size-4" /></button>}
-                      {mine && !message.deleted_at && <button type="button" onClick={() => void removeMessage(message)} disabled={deletingId === message.id} aria-label="Delete message" title="Delete"><Trash2 className="size-4" /></button>}
+                      {!message.deleted_at && (
+                        <button
+                          type="button"
+                          onClick={() => setReplyTarget(message)}
+                          aria-label="Reply to message"
+                          title="Reply"
+                        >
+                          <Reply className="size-4" />
+                        </button>
+                      )}
+                      {mine && !message.deleted_at && (
+                        <button
+                          type="button"
+                          onClick={() => void removeMessage(message)}
+                          disabled={deletingId === message.id}
+                          aria-label="Delete message"
+                          title="Delete"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      )}
                     </div>
-                    <div className={`messages-bubble${mine ? " sent" : " received"}${message.deleted_at ? " deleted" : ""}`}>
-                      {message.reply_to_message_id && message.reply && <div className="messages-reply-quote"><strong>{message.reply.sender_id === user?.id ? "You" : other?.full_name ?? "Your match"}</strong><span>{message.reply.deleted_at ? "This message was deleted" : message.reply.content}</span></div>}
+                    <div
+                      className={`messages-bubble${mine ? " sent" : " received"}${message.deleted_at ? " deleted" : ""}`}
+                    >
+                      {message.reply_to_message_id && message.reply && (
+                        <div className="messages-reply-quote">
+                          <strong>
+                            {message.reply.sender_id === user?.id
+                              ? "You"
+                              : (other?.full_name ?? "Your match")}
+                          </strong>
+                          <span>
+                            {message.reply.deleted_at
+                              ? "This message was deleted"
+                              : message.reply.content}
+                          </span>
+                        </div>
+                      )}
                       <p>{message.deleted_at ? "This message was deleted" : message.content}</p>
                       <div className="messages-bubble-meta">
-                        <time>{new Date(message.created_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</time>
+                        <time>
+                          {new Date(message.created_at).toLocaleTimeString([], {
+                            hour: "numeric",
+                            minute: "2-digit",
+                          })}
+                        </time>
                         {mine && <span>{message.read_at ? "Read" : "Sent"}</span>}
                       </div>
                     </div>
@@ -260,7 +401,24 @@ function ChatPage() {
           )}
         </div>
 
-        {replyTarget && <div className="messages-replying"><div><strong>Replying to {replyTarget.sender_id === user?.id ? "yourself" : other?.full_name ?? "your match"}</strong><span>{replyTarget.deleted_at ? "This message was deleted" : replyTarget.content}</span></div><button type="button" onClick={() => setReplyTarget(null)} aria-label="Cancel reply"><X className="size-4" /></button></div>}
+        {replyTarget && (
+          <div className="messages-replying">
+            <div>
+              <strong>
+                Replying to{" "}
+                {replyTarget.sender_id === user?.id
+                  ? "yourself"
+                  : (other?.full_name ?? "your match")}
+              </strong>
+              <span>
+                {replyTarget.deleted_at ? "This message was deleted" : replyTarget.content}
+              </span>
+            </div>
+            <button type="button" onClick={() => setReplyTarget(null)} aria-label="Cancel reply">
+              <X className="size-4" />
+            </button>
+          </div>
+        )}
         <form onSubmit={send} className="messages-composer">
           <textarea
             value={text}
@@ -271,7 +429,7 @@ function ChatPage() {
                 event.currentTarget.form?.requestSubmit();
               }
             }}
-            placeholder="Write a message…"
+            placeholder="Write a thoughtful message…"
             aria-label="Write a message"
             maxLength={1000}
             rows={1}

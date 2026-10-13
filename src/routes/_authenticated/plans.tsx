@@ -24,15 +24,15 @@ import { notifyUserError } from "@/lib/user-facing-errors";
 export const Route = createFileRoute("/_authenticated/plans")({
   head: () => ({
     meta: [
-      { title: "Reveal Plans — MingleConnect" },
+      { title: "Contact Reveal Plans — NikahConnect" },
       {
         name: "description",
-        content: "Choose a MingleConnect reveal plan and activate phone number reveals with M-Pesa.",
+        content: "Choose a one-time NikahConnect contact reveal plan with M-Pesa.",
       },
-      { property: "og:title", content: "Reveal Plans — MingleConnect" },
+      { property: "og:title", content: "Contact Reveal Plans — NikahConnect" },
       {
         property: "og:description",
-        content: "Choose a MingleConnect reveal plan and activate phone number reveals with M-Pesa.",
+        content: "Choose a one-time NikahConnect contact reveal plan with M-Pesa.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -79,10 +79,10 @@ function PlansPage() {
         className="plans-heading"
       >
         <span className="plans-kicker">
-          MingleConnect membership
+          NikahConnect contact reveal plans
         </span>
         <h1>Simple, transparent pricing</h1>
-        <p>Choose the reveal plan that fits your pace. Every plan includes secure M-Pesa checkout.</p>
+        <p>Choose a one-time plan for phone contact reveals. Plans are valid for 30 days and do not automatically renew.</p>
       </motion.div>
 
       <AnimatePresence>

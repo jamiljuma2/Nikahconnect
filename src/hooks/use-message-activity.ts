@@ -123,7 +123,7 @@ export function useMessageActivity(profileIds: string[]) {
     if (!user || !idsKey) return;
     let alive = true;
     const ids = idsKey.split(",");
-    void supabase.from("profiles").select("id, last_seen_at").in("id", ids).then(({ data }) => {
+    void supabase.from("public_profiles").select("id, last_seen_at").in("id", ids).then(({ data }) => {
       if (!alive) return;
       setLastSeenById((current) => ({
         ...current,

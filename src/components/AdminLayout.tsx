@@ -30,7 +30,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
-        <Link to="/admin" className="admin-brand" aria-label="MingleConnect admin dashboard">
+        <Link to="/admin" className="admin-brand" aria-label="NikahConnect admin dashboard">
           <BrandLogo className="admin-brand-logo" />
         </Link>
 
@@ -92,7 +92,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </SheetContent>
           </Sheet>
           <div className="admin-page-heading">
-            <span className="admin-eyebrow">MingleConnect · Admin</span>
+            <span className="admin-eyebrow">NikahConnect · Admin</span>
             <p>{date}</p>
           </div>
           <div className="admin-topbar-user">

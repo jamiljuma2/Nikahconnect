@@ -135,6 +135,48 @@ function Landing() {
           />
         </section>
 
+        <section className="landing-verse" aria-labelledby="landing-verse-title">
+          <p className="landing-section-kicker" id="landing-verse-title">
+            Words to guide the journey
+          </p>
+          <blockquote>
+            <p className="landing-verse-arabic" lang="ar" dir="rtl">
+              وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً
+            </p>
+            <p className="landing-verse-translation">
+              “And He placed between you affection and mercy.”
+            </p>
+            <footer>
+              <a href="https://quran.com/30/21" target="_blank" rel="noreferrer">
+                Qur’an · Ar-Rum 30:21 <span aria-hidden="true">↗</span>
+              </a>
+            </footer>
+          </blockquote>
+          <div
+            className="landing-arabic-values"
+            aria-label="Values: tranquility, affection, and mercy"
+          >
+            <span>
+              <b lang="ar" dir="rtl">
+                سَكِينَة
+              </b>
+              <small>Sakīnah · tranquility</small>
+            </span>
+            <span>
+              <b lang="ar" dir="rtl">
+                مَوَدَّة
+              </b>
+              <small>Mawaddah · affection</small>
+            </span>
+            <span>
+              <b lang="ar" dir="rtl">
+                رَحْمَة
+              </b>
+              <small>Raḥmah · mercy</small>
+            </span>
+          </div>
+        </section>
+
         <section className="landing-section landing-how" id="how-it-works">
           <div className="landing-section-heading">
             <p className="landing-section-kicker">A thoughtful way to meet</p>

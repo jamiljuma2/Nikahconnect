@@ -945,6 +945,16 @@
 .landing-value-icon { background: #eaf0e8; color: #145c48; }
 .landing-value strong { color: #314a3d; }
 .landing-value small { color: #6e7a70; }
+.landing-verse { width: min(1000px, calc(100% - 40px)); margin: 56px auto 20px; padding: clamp(24px, 5vw, 46px); border: 1px solid #e5e6da; border-radius: 24px; background: linear-gradient(145deg, #fffefa, #f0f4ed); text-align: center; }
+.landing-verse .landing-section-kicker { margin: 0 0 16px; }
+.landing-verse blockquote { margin: 0; }
+.landing-verse-arabic { margin: 0; color: #145c48; font-family: "Noto Naskh Arabic", "Amiri", "Scheherazade New", serif; font-size: clamp(28px, 5vw, 42px); line-height: 1.8; }
+.landing-verse-translation { margin: 10px 0; color: #314a3d; font-family: var(--font-display); font-size: clamp(20px, 3vw, 27px); line-height: 1.4; }
+.landing-verse blockquote footer a { color: #68766b; font-size: 12px; text-underline-offset: 3px; }
+.landing-arabic-values { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
+.landing-arabic-values > span { display: flex; align-items: center; gap: 9px; border: 1px solid #e0e8dc; border-radius: 999px; padding: 8px 13px; background: rgb(255 255 255 / 70%); }
+.landing-arabic-values b { color: #145c48; font-family: "Noto Naskh Arabic", "Amiri", "Scheherazade New", serif; font-size: 16px; font-weight: 600; }
+.landing-arabic-values small { color: #68766b; font-size: 10px; }
 .landing-section { width: min(1080px, 100%); margin: 0 auto; padding: 84px clamp(20px, 5vw, 68px); }
 .landing-section-heading { max-width: 640px; margin: 0 auto 35px; text-align: center; }
 .landing-section-kicker { margin: 0 0 12px; font-size: 10px; }

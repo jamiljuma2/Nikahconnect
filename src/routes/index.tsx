@@ -42,7 +42,7 @@ export const Route = createFileRoute("/")({
           "@type": "Organization",
           name: "NikahConnect",
           url: `${siteUrl}/`,
-          logo: `${siteUrl}/nikahconnect-logo.webp`,
+          logo: `${siteUrl}/nikahconnect-logo.png`,
           description,
         },
       },

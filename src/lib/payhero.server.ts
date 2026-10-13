@@ -1,6 +1,9 @@
 import { PLANS, type PlanId } from "@/lib/plans";
 
 const BASE = "https://backend.payhero.co.ke/api/v2";
+const credentialValue = (value: string, label: "api username" | "api password") =>
+  value.trim().replace(new RegExp(`^${label}\\s*:\\s*`, "i"), "").trim();
+
 export const PAYHERO_CALLBACK_URL =
   process.env.PAYHERO_CALLBACK_URL ||
   `${process.env.SUPABASE_URL ?? ""}/functions/v1/payhero-webhook`;
@@ -13,8 +16,10 @@ export async function payheroAuth() {
     .eq("provider", "payhero")
     .maybeSingle();
   const row = data as null | { api_username: string; api_password: string; channel_id: string };
-  const user = row?.api_username ?? process.env.PAYHERO_API_USERNAME;
-  const pass = row?.api_password ?? process.env.PAYHERO_API_PASSWORD;
+  const userValue = row?.api_username ?? process.env.PAYHERO_API_USERNAME;
+  const passValue = row?.api_password ?? process.env.PAYHERO_API_PASSWORD;
+  const user = userValue ? credentialValue(userValue, "api username") : undefined;
+  const pass = passValue ? credentialValue(passValue, "api password") : undefined;
   const channel = row?.channel_id ?? process.env.PAYHERO_CHANNEL_ID;
   if (!user || !pass || !channel) throw new Error("Payments are not configured.");
   return { header: "Basic " + btoa(`${user}:${pass}`), channelId: Number(channel) };
@@ -40,8 +45,8 @@ export async function payheroStkPush(opts: { phone: string; amount: number; exte
   let body: Record<string, unknown> = {};
   try { body = JSON.parse(raw); } catch { /* ignore */ }
   if (!res.ok || body.success === false) {
-    console.error("PayHero STK failed", res.status, raw);
     const msg = (body.error_message ?? body.message ?? body.error) as string | undefined;
+    console.error("PayHero STK failed", { status: res.status, message: msg ?? "Provider returned an error." });
     throw new Error(msg ? `PayHero: ${msg}` : `Payment provider error (${res.status}).`);
   }
   return {

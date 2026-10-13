@@ -15,6 +15,8 @@ async function assertAdmin(userId: string) {
 }
 
 const mask = (s: string) => (s.length <= 4 ? "••••" : `${s.slice(0, 2)}••••${s.slice(-2)}`);
+const cleanCredential = (value: string, label: "api username" | "api password") =>
+  value.trim().replace(new RegExp(`^${label}\\s*:\\s*`, "i"), "").trim();
 
 export const getPayheroSettings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -49,7 +51,9 @@ export const savePayheroSettings = createServerFn({ method: "POST" })
   .validator((d) => input.parse(d))
   .handler(async ({ data, context }) => {
     const admin = await assertAdmin(context.userId);
-    const auth = "Basic " + btoa(`${data.apiUsername}:${data.apiPassword}`);
+    const apiUsername = cleanCredential(data.apiUsername, "api username");
+    const apiPassword = cleanCredential(data.apiPassword, "api password");
+    const auth = "Basic " + btoa(`${apiUsername}:${apiPassword}`);
 
     const res = await fetch("https://backend.payhero.co.ke/api/v2/payment_channels", {
       headers: { Authorization: auth },
@@ -73,8 +77,8 @@ export const savePayheroSettings = createServerFn({ method: "POST" })
     const now = new Date().toISOString();
     const { error } = await admin.from("payment_settings" as never).upsert({
       provider: "payhero",
-      api_username: data.apiUsername,
-      api_password: data.apiPassword,
+      api_username: apiUsername,
+      api_password: apiPassword,
       channel_id: data.channelId,
       verified_at: now,
       updated_by: context.userId,

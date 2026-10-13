@@ -1,6 +1,8 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const PAYHERO_BASE = "https://backend.payhero.co.ke/api/v2";
+const credentialValue = (value: string, label: "api username" | "api password") =>
+  value.trim().replace(new RegExp(`^${label}\\s*:\\s*`, "i"), "").trim();
 const PLANS = {
   starter: { reveals: 3, unlimited: false },
   standard: { reveals: 5, unlimited: false },
@@ -36,8 +38,10 @@ async function payheroAuth() {
     .eq("provider", "payhero")
     .maybeSingle();
 
-  const username = settings?.api_username ?? Deno.env.get("PAYHERO_API_USERNAME");
-  const password = settings?.api_password ?? Deno.env.get("PAYHERO_API_PASSWORD");
+  const usernameValue = settings?.api_username ?? Deno.env.get("PAYHERO_API_USERNAME");
+  const passwordValue = settings?.api_password ?? Deno.env.get("PAYHERO_API_PASSWORD");
+  const username = usernameValue ? credentialValue(usernameValue, "api username") : undefined;
+  const password = passwordValue ? credentialValue(passwordValue, "api password") : undefined;
   const channelId = settings?.channel_id ?? Deno.env.get("PAYHERO_CHANNEL_ID");
   if (!username || !password || !channelId) throw new Error("PayHero is not configured.");
 

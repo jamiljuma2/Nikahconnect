@@ -75,7 +75,7 @@ function Landing() {
             <p className="landing-eyebrow">
               <span /> MARRIAGE WITH PURPOSE
             </p>
-            <h1 id="landing-title">Find a Partner Who Shares Your Values.</h1>
+            <h1 id="landing-title">Find a Halal Partner Who Shares Your Values.</h1>
             <p className="landing-subtitle">
               Discover meaningful Muslim connections built around compatibility, trust, and marriage
               intentions.

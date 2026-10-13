@@ -277,7 +277,7 @@ function Landing() {
           </div>
           <div className="landing-membership-note">
             <span>
-              <strong>Premium from KES 299/month · Unlimited reveals KES 999</strong>
+              <strong>Premium from KES 299/month · Unlimited reveals KES 799</strong>
               <small>Pay by M-Pesa manually each month · no automatic charges</small>
             </span>
             <Link to="/auth" search={{ mode: "register" } as never}>

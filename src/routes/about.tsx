@@ -31,7 +31,7 @@ export const Route = createFileRoute("/about")({
         <p>
           Adults can create profiles, browse other members, express interest, and message after
           mutual interest. A free profile includes discovery and messaging. Premium starts at KES
-          299 for 30 days, with a KES 999 option for unlimited contact reveals. Both include
+          299 for 30 days, with a KES 799 option for unlimited contact reveals. Both include
           incoming-interest access and are paid manually through M-Pesa.
         </p>
         <p>

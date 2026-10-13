@@ -34,7 +34,7 @@ export const PLANS: Record<PlanId, Plan> = {
   premium: {
     id: "premium",
     name: "Premium Unlimited",
-    price: 999,
+    price: 799,
     reveals: Number.POSITIVE_INFINITY,
     unlimited: true,
     tagline: "Unlimited contact reveals",
@@ -47,6 +47,6 @@ export const AVAILABLE_PLANS: Plan[] = [PLANS.standard, PLANS.premium];
 export const planForAmount = (amount: number): PlanId | null => {
   if (amount === 249) return "starter";
   if (amount === 299 || amount === 499) return "standard";
-  if (amount === 999 || amount === 1200) return "premium";
+  if (amount === 799 || amount === 999 || amount === 1200) return "premium";
   return null;
 };

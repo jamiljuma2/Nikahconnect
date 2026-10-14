@@ -1795,8 +1795,8 @@ html:has(.settings-page) { scroll-behavior: smooth; }
 .landing-final-cta .landing-cta:active { transform: scale(.98); filter: brightness(.97); }
 .landing-final-cta .landing-cta:focus-visible { outline-color: #fbfaf4; }
 .landing-final-cta .landing-cta { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-.landing-family-art { border-color: #dce5d8; background: linear-gradient(145deg, #eff3eb, #e5eee5); color: #34725a; }
-.landing-family-art span { color: #536d5c; }
+.landing-family-art { border-color: #d8c89f; background: linear-gradient(135deg, rgb(13 54 42 / 76%), rgb(17 65 49 / 48%)), url("/images/wedding-family-card.jpeg") center 42% / cover; color: #fffdf7; }
+.landing-family-art span { color: #fffdf7; text-shadow: 0 1px 8px rgb(0 0 0 / 28%); }
 .landing-footer { color: #66756a; }
 .landing-footer nav a, .public-info-footer nav a { color: #53695a; }
 .landing-page a:focus-visible { outline-color: rgb(20 92 72 / 45%); }

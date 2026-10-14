@@ -4,7 +4,11 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Search, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/use-auth";
-import { formatLastSeen, useMessageActivity, type ProfileActivity } from "@/hooks/use-message-activity";
+import {
+  formatLastSeen,
+  useMessageActivity,
+  type ProfileActivity,
+} from "@/hooks/use-message-activity";
 
 interface Conversation {
   id: string;
@@ -16,7 +20,15 @@ interface Conversation {
   timestamp: string | null;
   unread: number;
 }
-type InboxMessage = { id: string; match_id: string; sender_id: string; content: string; created_at: string; read_at: string | null; deleted_at: string | null };
+type InboxMessage = {
+  id: string;
+  match_id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+  read_at: string | null;
+  deleted_at: string | null;
+};
 
 function shortTime(timestamp: string | null) {
   if (!timestamp) return "";
@@ -27,14 +39,17 @@ function shortTime(timestamp: string | null) {
     : date.toLocaleDateString([], { month: "short", day: "numeric" });
 }
 
-export function MessagesInbox({ selectedMatchId, onProfileActivity }: {
+export function MessagesInbox({
+  selectedMatchId,
+  onProfileActivity,
+}: {
   selectedMatchId?: string;
   onProfileActivity?: (activity: ProfileActivity) => void;
 }) {
   const { user } = useAuth();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
-  const queryKey = ["message-inbox", user?.id];
+  const queryKey = useMemo(() => ["message-inbox", user?.id] as const, [user?.id]);
 
   const inboxQ = useQuery({
     queryKey,
@@ -49,12 +64,20 @@ export function MessagesInbox({ selectedMatchId, onProfileActivity }: {
       const rows = matches ?? [];
       if (!rows.length) return [] as Conversation[];
 
-      const otherIds = rows.map((match) => match.user_one === user!.id ? match.user_two : match.user_one);
+      const otherIds = rows.map((match) =>
+        match.user_one === user!.id ? match.user_two : match.user_one,
+      );
       const matchIds = rows.map((match) => match.id);
       const [{ data: profiles }, { data: messages }] = await Promise.all([
-        supabase.from("public_profiles").select("id, full_name, avatar_url, last_seen_at").in("id", otherIds),
-        supabase.from("messages").select("id, match_id, sender_id, content, created_at, read_at, deleted_at")
-          .in("match_id", matchIds).order("created_at", { ascending: false }),
+        supabase
+          .from("public_profiles")
+          .select("id, full_name, avatar_url, last_seen_at")
+          .in("id", otherIds),
+        supabase
+          .from("messages")
+          .select("id, match_id, sender_id, content, created_at, read_at, deleted_at")
+          .in("match_id", matchIds)
+          .order("created_at", { ascending: false }),
       ]);
       const profileMap = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
       const latestByMatch = new Map<string, InboxMessage>();
@@ -65,46 +88,66 @@ export function MessagesInbox({ selectedMatchId, onProfileActivity }: {
           unreadByMatch.set(message.match_id, (unreadByMatch.get(message.match_id) ?? 0) + 1);
         }
       }
-      return rows.map((match) => {
-        const otherId = match.user_one === user!.id ? match.user_two : match.user_one;
-        const profile = profileMap.get(otherId);
-        const latest = latestByMatch.get(match.id);
-        return {
-          id: match.id,
-          otherId,
-          name: profile?.full_name ?? "Your match",
-          avatar: profile?.avatar_url ?? null,
-          lastSeenAt: profile?.last_seen_at ?? null,
-          preview: latest?.deleted_at ? "Message deleted" : latest?.content ?? "Start a conversation",
-          timestamp: latest?.created_at ?? match.created_at,
-          unread: unreadByMatch.get(match.id) ?? 0,
-        };
-      }).sort((a, b) => new Date(b.timestamp ?? 0).getTime() - new Date(a.timestamp ?? 0).getTime());
+      return rows
+        .map((match) => {
+          const otherId = match.user_one === user!.id ? match.user_two : match.user_one;
+          const profile = profileMap.get(otherId);
+          const latest = latestByMatch.get(match.id);
+          return {
+            id: match.id,
+            otherId,
+            name: profile?.full_name ?? "Your match",
+            avatar: profile?.avatar_url ?? null,
+            lastSeenAt: profile?.last_seen_at ?? null,
+            preview: latest?.deleted_at
+              ? "Message deleted"
+              : (latest?.content ?? "Start a conversation"),
+            timestamp: latest?.created_at ?? match.created_at,
+            unread: unreadByMatch.get(match.id) ?? 0,
+          };
+        })
+        .sort(
+          (a, b) => new Date(b.timestamp ?? 0).getTime() - new Date(a.timestamp ?? 0).getTime(),
+        );
     },
   });
 
-  const getActivity = useMessageActivity(inboxQ.data?.map((conversation) => conversation.otherId) ?? []);
-  const selectedConversation = inboxQ.data?.find((conversation) => conversation.id === selectedMatchId);
-  const selectedActivity = selectedConversation ? getActivity(selectedConversation.otherId) : null;
+  const getActivity = useMessageActivity(
+    inboxQ.data?.map((conversation) => conversation.otherId) ?? [],
+  );
+  const selectedConversation = inboxQ.data?.find(
+    (conversation) => conversation.id === selectedMatchId,
+  );
+  const selectedOtherId = selectedConversation?.otherId;
+  const selectedActivity = selectedOtherId ? getActivity(selectedOtherId) : null;
+  const selectedOnline = selectedActivity?.online;
+  const selectedLastSeenAt = selectedActivity?.lastSeenAt;
 
   useEffect(() => {
-    if (selectedActivity) onProfileActivity?.(selectedActivity);
-  }, [onProfileActivity, selectedActivity?.online, selectedActivity?.lastSeenAt]);
+    if (selectedOtherId && selectedOnline !== undefined && selectedLastSeenAt !== undefined) {
+      onProfileActivity?.({ online: selectedOnline, lastSeenAt: selectedLastSeenAt });
+    }
+  }, [onProfileActivity, selectedOtherId, selectedOnline, selectedLastSeenAt]);
 
   useEffect(() => {
-    if (!user) return;
-    const channel = supabase.channel(`inbox:${user.id}`)
+    const userId = user?.id;
+    if (!userId) return;
+    const channel = supabase
+      .channel(`inbox:${userId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => {
         void qc.invalidateQueries({ queryKey });
       })
       .subscribe();
-    return () => { void supabase.removeChannel(channel); };
-  }, [user, qc]);
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [user?.id, qc, queryKey]);
 
   const conversations = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return (inboxQ.data ?? []).filter((conversation) =>
-      !term || `${conversation.name} ${conversation.preview}`.toLowerCase().includes(term),
+    return (inboxQ.data ?? []).filter(
+      (conversation) =>
+        !term || `${conversation.name} ${conversation.preview}`.toLowerCase().includes(term),
     );
   }, [inboxQ.data, search]);
 
@@ -118,42 +161,77 @@ export function MessagesInbox({ selectedMatchId, onProfileActivity }: {
       </div>
       <label className="messages-search">
         <Search className="size-4" aria-hidden="true" />
-        <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search conversations" aria-label="Search conversations" />
+        <input
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          placeholder="Search conversations"
+          aria-label="Search conversations"
+        />
       </label>
       {inboxQ.isLoading ? (
         <div className="messages-conversation-list" aria-label="Loading conversations">
-          {Array.from({ length: 5 }, (_, index) => <div className="messages-skeleton" key={index} />)}
+          {Array.from({ length: 5 }, (_, index) => (
+            <div className="messages-skeleton" key={index} />
+          ))}
         </div>
       ) : inboxQ.isError ? (
         <p className="messages-list-note">Your conversations couldn’t load. Please refresh.</p>
       ) : !conversations.length ? (
         <div className="messages-list-empty">
-          <span><MessageCircle className="size-5" /></span>
-          <p>{search ? "No conversations found" : "A conversation opens after you both express interest."}</p>
+          <span>
+            <MessageCircle className="size-5" />
+          </span>
+          <p>
+            {search
+              ? "No conversations found"
+              : "A conversation opens after you both express interest."}
+          </p>
           {!search && <Link to="/discover">Meet someone new</Link>}
         </div>
       ) : (
         <nav className="messages-conversation-list" aria-label="Conversations">
           {conversations.map((conversation) => {
             const activity = getActivity(conversation.otherId);
-            return <Link
-              key={conversation.id}
-              to="/chat/$matchId"
-              params={{ matchId: conversation.id }}
-              className={`messages-conversation${selectedMatchId === conversation.id ? " selected" : ""}`}
-              aria-current={selectedMatchId === conversation.id ? "page" : undefined}
-            >
-              <span className="messages-avatar-wrap">
-                {conversation.avatar ? <img src={conversation.avatar} alt="" className="messages-avatar" /> : <span className="messages-avatar-fallback">{conversation.name.charAt(0)}</span>}
-              </span>
-              <span className="messages-conversation-copy">
-                <span className="messages-conversation-top"><strong>{conversation.name}</strong><time>{shortTime(conversation.timestamp)}</time></span>
-                <span className="messages-conversation-bottom"><span className="messages-preview">{conversation.preview}</span>{conversation.unread > 0 && <span className="messages-unread" aria-label={`${conversation.unread} unread messages`}>{conversation.unread}</span>}</span>
-                <span className={`messages-activity${activity.online ? " is-online" : ""}`}>
-                  <span aria-hidden="true" />{activity.online ? "Online" : formatLastSeen(activity.lastSeenAt ?? conversation.lastSeenAt)}
+            return (
+              <Link
+                key={conversation.id}
+                to="/chat/$matchId"
+                params={{ matchId: conversation.id }}
+                className={`messages-conversation${selectedMatchId === conversation.id ? " selected" : ""}`}
+                aria-current={selectedMatchId === conversation.id ? "page" : undefined}
+              >
+                <span className="messages-avatar-wrap">
+                  {conversation.avatar ? (
+                    <img src={conversation.avatar} alt="" className="messages-avatar" />
+                  ) : (
+                    <span className="messages-avatar-fallback">{conversation.name.charAt(0)}</span>
+                  )}
                 </span>
-              </span>
-            </Link>
+                <span className="messages-conversation-copy">
+                  <span className="messages-conversation-top">
+                    <strong>{conversation.name}</strong>
+                    <time>{shortTime(conversation.timestamp)}</time>
+                  </span>
+                  <span className="messages-conversation-bottom">
+                    <span className="messages-preview">{conversation.preview}</span>
+                    {conversation.unread > 0 && (
+                      <span
+                        className="messages-unread"
+                        aria-label={`${conversation.unread} unread messages`}
+                      >
+                        {conversation.unread}
+                      </span>
+                    )}
+                  </span>
+                  <span className={`messages-activity${activity.online ? " is-online" : ""}`}>
+                    <span aria-hidden="true" />
+                    {activity.online
+                      ? "Online"
+                      : formatLastSeen(activity.lastSeenAt ?? conversation.lastSeenAt)}
+                  </span>
+                </span>
+              </Link>
+            );
           })}
         </nav>
       )}

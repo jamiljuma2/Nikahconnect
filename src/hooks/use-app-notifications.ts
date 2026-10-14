@@ -26,20 +26,23 @@ export function useAppNotifications() {
       if (outgoingLikes.error) throw outgoingLikes.error;
       if (unreadMessages.error) throw unreadMessages.error;
       const alreadyLiked = new Set((outgoingLikes.data ?? []).map((like) => like.receiver_id));
-      const likes = (incomingLikes.data ?? []).filter((like) => !alreadyLiked.has(like.sender_id)).length;
+      const likes = (incomingLikes.data ?? []).filter(
+        (like) => !alreadyLiked.has(like.sender_id),
+      ).length;
       return { likes, unreadMessages: unreadMessages.count ?? 0 };
     },
   });
 
   useEffect(() => {
-    if (!user) return;
+    const userId = user?.id;
+    if (!userId) return;
     const channel = supabase
-      .channel(`app-notifications:${user.id}`)
+      .channel(`app-notifications:${userId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "likes" }, () => {
-        void queryClient.invalidateQueries({ queryKey: ["app-notifications", user.id] });
+        void queryClient.invalidateQueries({ queryKey: ["app-notifications", userId] });
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, () => {
-        void queryClient.invalidateQueries({ queryKey: ["app-notifications", user.id] });
+        void queryClient.invalidateQueries({ queryKey: ["app-notifications", userId] });
       })
       .subscribe();
 

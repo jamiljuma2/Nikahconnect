@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Eye, Heart, MoreHorizontal, Search, ShieldCheck, ShieldOff, UserRoundCheck, UserRoundX, UsersRound } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Eye, Flag, Heart, MoreHorizontal, Search, ShieldCheck, ShieldOff, UserRoundCheck, UserRoundX, UsersRound } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import {
   getAdminDashboardStats,
+  listUserReportsForAdmin,
   listUsersForAdmin,
+  setUserReportStatus,
   setUserAdminRole,
   setUserSuspended,
 } from "@/lib/admin.functions";
@@ -49,6 +51,9 @@ function AdminPage() {
   const getStats = useServerFn(getAdminDashboardStats);
   const setSuspended = useServerFn(setUserSuspended);
   const setRole = useServerFn(setUserAdminRole);
+  const getReports = useServerFn(listUserReportsForAdmin);
+  const updateReportStatus = useServerFn(setUserReportStatus);
+  const [updatingReportId, setUpdatingReportId] = useState<string | null>(null);
 
   const stats = useQuery({
     queryKey: ["admin-stats"],
@@ -84,6 +89,24 @@ function AdminPage() {
     },
     placeholderData: (previous) => previous,
   });
+
+  const reportsQ = useQuery({
+    queryKey: ["admin-user-reports"],
+    queryFn: () => getReports(),
+  });
+
+  const changeReportStatus = async (reportId: string, status: "reviewing" | "actioned" | "dismissed") => {
+    setUpdatingReportId(reportId);
+    try {
+      await updateReportStatus({ data: { reportId, status } });
+      toast.success("Report status updated.");
+      await queryClient.invalidateQueries({ queryKey: ["admin-user-reports"] });
+    } catch (error) {
+      notifyUserError(error, "Couldn’t update this report. Please try again.");
+    } finally {
+      setUpdatingReportId(null);
+    }
+  };
 
   const toggleSuspend = async (id: string, suspended: boolean) => {
     setUpdatingUserId(id);
@@ -230,6 +253,55 @@ function AdminPage() {
           <div><Button variant="outline" size="sm" onClick={() => setMemberPage((page) => Math.max(0, page - 1))} disabled={memberPage === 0 || usersQ.isFetching}><ChevronLeft size={16} /> Previous</Button><Button variant="outline" size="sm" onClick={() => setMemberPage((page) => page + 1)} disabled={memberPage + 1 >= Math.ceil(usersQ.data.total / usersQ.data.pageSize) || usersQ.isFetching}>Next <ChevronRight size={16} /></Button></div>
         </div>
         }
+      </section>
+
+      <section id="safety-reports" className="admin-members-panel admin-reports-panel">
+        <div className="admin-section-heading">
+          <div>
+            <span className="admin-eyebrow">Trust & safety</span>
+            <h2>Profile reports</h2>
+            <p>Private reports submitted by members. Review each concern and record an outcome.</p>
+          </div>
+          <span className="admin-member-count">
+            {reportsQ.data ? `${reportsQ.data.filter((report) => report.status === "pending").length} pending` : "…"}
+          </span>
+        </div>
+        {reportsQ.isError ? (
+          <p className="admin-table-message" role="alert">Safety reports couldn’t load. <button type="button" onClick={() => void reportsQ.refetch()}>Try again</button></p>
+        ) : reportsQ.isLoading ? (
+          <div className="admin-member-skeletons" aria-label="Loading reports">{Array.from({ length: 3 }, (_, index) => <div key={index} />)}</div>
+        ) : !reportsQ.data?.length ? (
+          <p className="admin-table-message">No profile reports have been submitted.</p>
+        ) : (
+          <div className="admin-report-list">
+            {reportsQ.data.map((report) => (
+              <article className="admin-report-card" key={report.id}>
+                <div className="admin-report-main">
+                  <div className="admin-report-title">
+                    <Flag size={15} aria-hidden="true" />
+                    <strong>{report.reported_name}</strong>
+                    <span className={`admin-report-status is-${report.status}`}>{report.status}</span>
+                  </div>
+                  <p className="admin-report-byline">Reported by {report.reporter_name} · {report.reporter_email || "Email unavailable"}</p>
+                  <p className="admin-report-reason">{report.reason.replaceAll("_", " ")}</p>
+                  {report.details && <p className="admin-report-details">{report.details}</p>}
+                  <time dateTime={report.created_at}>{new Date(report.created_at).toLocaleString()}</time>
+                </div>
+                <div className="admin-report-actions">
+                  {report.status === "pending" && (
+                    <Button variant="outline" size="sm" disabled={updatingReportId === report.id} onClick={() => void changeReportStatus(report.id, "reviewing")}>Reviewing</Button>
+                  )}
+                  {report.status !== "actioned" && (
+                    <Button variant="outline" size="sm" disabled={updatingReportId === report.id} onClick={() => void changeReportStatus(report.id, "actioned")}>Actioned</Button>
+                  )}
+                  {report.status !== "dismissed" && (
+                    <Button variant="ghost" size="sm" disabled={updatingReportId === report.id} onClick={() => void changeReportStatus(report.id, "dismissed")}>Dismiss</Button>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

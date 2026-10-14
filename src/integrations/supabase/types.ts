@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      user_reports: {
+        Row: {
+          created_at: string
+          details: string
+          id: string
+          reason: string
+          reported_user_id: string
+          reporter_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string
+          id?: string
+          reason: string
+          reported_user_id: string
+          reporter_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string
+          id?: string
+          reason?: string
+          reported_user_id?: string
+          reporter_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       likes: {
         Row: {
           created_at: string

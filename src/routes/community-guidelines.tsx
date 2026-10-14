@@ -51,10 +51,10 @@ export const Route = createFileRoute("/community-guidelines")({
       <section>
         <h2>Report and enforcement</h2>
         <p>
-          Dedicated in-app reporting and blocking tools are not yet available. If someone threatens
-          or harms you, stop responding and use the support contact supplied by the service operator
-          when it becomes available. Accounts may be restricted for serious misuse, but there is not
-          yet a self-service appeal workflow.
+          You can report a profile from its card in Discover. Reports are private and reviewed by
+          the safety team. Choose the closest reason and include only relevant details. If someone
+          threatens or harms you, stop responding and contact local emergency services or someone
+          you trust when needed. Reporting does not replace immediate help.
         </p>
       </section>
     </PublicInfoPage>

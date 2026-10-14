@@ -532,6 +532,45 @@
   .admin-pagination button svg { width: 17px; height: 17px; }
 }
 
+.profile-report-trigger { display: inline-flex; min-height: 36px; align-items: center; gap: 6px; border: 0; border-radius: 8px; padding: 6px 9px; background: transparent; color: #66756b; font-size: 11px; cursor: pointer; }
+.profile-report-trigger:hover { background: #f5f1e9; color: #9b4d37; }
+.profile-report-trigger:focus-visible { outline: 2px solid #145b43; outline-offset: 2px; }
+.messages-chat-header .profile-report-trigger { flex: 0 0 auto; margin-left: auto; }
+.report-dialog { width: min(100% - 28px, 480px); max-height: calc(100dvh - 28px); overflow-y: auto; border-color: #e5e9e1; border-radius: 18px; padding: 24px; }
+.report-dialog h2 { color: #193f32; }
+.report-dialog p { line-height: 1.55; }
+.report-field { display: grid; gap: 7px; color: #30443a; font-size: 13px; font-weight: 600; }
+.report-field > span small, .report-field > small { color: #7b877f; font-size: 11px; font-weight: 400; }
+.report-field select { width: 100%; min-height: 42px; border: 1px solid #dfe6df; border-radius: 9px; padding: 0 11px; background: #fff; color: #28382f; font: inherit; }
+.report-field textarea { min-height: 96px; resize: vertical; border-color: #dfe6df; border-radius: 9px; font-size: 13px; }
+.report-dialog [data-slot="dialog-footer"] { gap: 8px; }
+.admin-reports-panel { margin-top: 22px; }
+.admin-report-list { display: grid; border-top: 1px solid #eef0ee; }
+.admin-report-card { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; border-bottom: 1px solid #eef0ee; padding: 16px 20px; }
+.admin-report-card:last-child { border-bottom: 0; }
+.admin-report-main { min-width: 0; }
+.admin-report-title { display: flex; align-items: center; gap: 8px; color: #25372d; font-size: 13px; }
+.admin-report-title > svg { color: #9a6b37; }
+.admin-report-status { border-radius: 999px; padding: 4px 8px; background: #fff5df; color: #88631d; font-size: 9px; font-weight: 650; text-transform: capitalize; }
+.admin-report-status.is-reviewing { background: #eaf2ff; color: #365e93; }
+.admin-report-status.is-actioned { background: #e7f4ec; color: #246142; }
+.admin-report-status.is-dismissed { background: #f0f1ef; color: #69736d; }
+.admin-report-byline, .admin-report-reason { margin: 6px 0 0; color: #718077; font-size: 11px; }
+.admin-report-reason { color: #475b4e; font-weight: 650; text-transform: capitalize; }
+.admin-report-details { margin: 7px 0 0; color: #39483f; font-size: 12px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; }
+.admin-report-main time { display: block; margin-top: 7px; color: #919a94; font-size: 10px; }
+.admin-report-actions { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.admin-report-actions button { height: 32px; border-radius: 8px; font-size: 10px; }
+@media (max-width: 620px) {
+  .admin-report-card { flex-direction: column; gap: 12px; padding: 15px; }
+  .admin-report-actions { justify-content: flex-start; }
+  .report-dialog { padding: 20px; }
+}
+@media (max-width: 390px) {
+  .messages-chat-header .profile-report-trigger { min-width: 36px; justify-content: center; padding-inline: 8px; }
+  .messages-chat-header .profile-report-trigger > span { display: none; }
+}
+
 /* Auth page */
 .auth-page {
   --auth-ink: #fff8ff;

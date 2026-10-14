@@ -10,6 +10,7 @@ import { MessagesInbox } from "@/components/MessagesInbox";
 import { deleteMessage } from "@/lib/messaging.functions";
 import { formatLastSeen, type ProfileActivity } from "@/hooks/use-message-activity";
 import { notifyUserError } from "@/lib/user-facing-errors";
+import { ReportProfileDialog } from "@/components/ReportProfileDialog";
 
 export const Route = createFileRoute("/_authenticated/chat/$matchId")({
   head: () => ({
@@ -295,6 +296,7 @@ function ChatPage() {
                   {otherActivity.online ? "Online" : formatLastSeen(otherActivity.lastSeenAt)}
                 </p>
               </div>
+              <ReportProfileDialog profileId={other.id} profileName={other.full_name} />
             </>
           ) : (
             <div className="messages-header-skeleton" />

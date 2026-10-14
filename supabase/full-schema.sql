@@ -228,9 +228,32 @@ create table if not exists public.user_consents (
   consented_at timestamptz not null default now(),
   unique (user_id, consent_type, consent_version)
 );
+
+create table if not exists public.user_reports (
+  id uuid primary key default gen_random_uuid(),
+  reporter_id uuid not null references public.profiles(id) on delete cascade,
+  reported_user_id uuid not null references public.profiles(id) on delete cascade,
+  reason text not null check (reason in (
+    'harassment', 'inappropriate_content', 'scam', 'fake_profile', 'underage', 'other'
+  )),
+  details text not null default '' check (char_length(details) <= 1000),
+  status text not null default 'pending' check (status in ('pending', 'reviewing', 'actioned', 'dismissed')),
+  created_at timestamptz not null default now(),
+  reviewed_at timestamptz,
+  reviewed_by uuid references auth.users(id) on delete set null,
+  constraint user_reports_no_self_report check (reporter_id <> reported_user_id)
+);
+create index if not exists user_reports_status_created_idx on public.user_reports(status, created_at desc);
+create index if not exists user_reports_reported_user_idx on public.user_reports(reported_user_id, created_at desc);
+create unique index if not exists user_reports_one_open_per_pair_idx
+  on public.user_reports(reporter_id, reported_user_id)
+  where status in ('pending', 'reviewing');
 alter table public.user_consents enable row level security;
 revoke all on public.user_consents from public, anon, authenticated;
 grant all on public.user_consents to service_role;
+alter table public.user_reports enable row level security;
+revoke all on public.user_reports from public, anon, authenticated;
+grant all on public.user_reports to service_role;
 
 -- ============================================================
 -- Application functions and triggers
@@ -510,6 +533,7 @@ alter table public.subscriptions enable row level security;
 alter table public.number_reveals enable row level security;
 alter table public.payments enable row level security;
 alter table public.payment_settings enable row level security;
+alter table public.user_reports enable row level security;
 
 grant select (id, full_name, gender, dob, location, bio, avatar_url, interests,
   occupation, relationship_goal, deactivated_at, last_seen_at, created_at, updated_at)

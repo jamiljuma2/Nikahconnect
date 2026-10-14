@@ -80,6 +80,59 @@ export const listUsersForAdmin = createServerFn({ method: "GET" })
     return { users, total: Number(rows?.[0]?.total_count ?? 0), page: data.page, pageSize: data.pageSize };
   });
 
+export const listUserReportsForAdmin = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: reports, error } = await supabaseAdmin
+      .from("user_reports")
+      .select("id, reporter_id, reported_user_id, reason, details, status, created_at")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error("Safety reports couldn’t be loaded. Please try again.");
+    if (!reports?.length) return [];
+
+    const ids = [...new Set(reports.flatMap((report) => [report.reporter_id, report.reported_user_id]))];
+    const [{ data: profiles, error: profilesError }, { data: contacts, error: contactsError }] = await Promise.all([
+      supabaseAdmin.from("profiles").select("id, full_name").in("id", ids),
+      supabaseAdmin.from("user_contacts").select("user_id, email").in("user_id", ids),
+    ]);
+    if (profilesError || contactsError) throw new Error("Safety report details couldn’t be loaded.");
+    const profileById = new Map((profiles ?? []).map((profile) => [profile.id, profile.full_name]));
+    const emailById = new Map((contacts ?? []).map((contact) => [contact.user_id, contact.email]));
+    return reports.map((report) => ({
+      ...report,
+      reporter_name: profileById.get(report.reporter_id) ?? "Former member",
+      reporter_email: emailById.get(report.reporter_id) ?? "",
+      reported_name: profileById.get(report.reported_user_id) ?? "Former member",
+      reported_email: emailById.get(report.reported_user_id) ?? "",
+    }));
+  });
+
+const reportStatusInput = z.object({
+  reportId: z.string().uuid(),
+  status: z.enum(["reviewing", "actioned", "dismissed"]),
+});
+
+export const setUserReportStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((data) => reportStatusInput.parse(data))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("user_reports")
+      .update({
+        status: data.status,
+        reviewed_at: new Date().toISOString(),
+        reviewed_by: context.userId,
+      })
+      .eq("id", data.reportId);
+    if (error) throw new Error("Couldn’t update this report. Please try again.");
+    return { ok: true as const };
+  });
+
 const suspendInput = z.object({
   userId: z.string().uuid(),
   suspended: z.boolean(),

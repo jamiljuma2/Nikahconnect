@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   Heart,
+  Check,
+  Copy,
   Loader2,
   MapPin,
   MessageCircle,
@@ -337,6 +339,7 @@ function DiscoverRevealButton({
   const reveal = useServerFn(revealPhone);
   const [phone, setPhone] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [idempotencyKey] = useState(() => crypto.randomUUID());
 
   const handleReveal = async () => {
@@ -356,21 +359,45 @@ function DiscoverRevealButton({
     }
   };
 
+  const copyContact = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    if (!phone) return;
+    try {
+      await navigator.clipboard.writeText(phone);
+      setCopied(true);
+      toast.success("Contact copied");
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      toast.error("Couldn’t copy the contact. Please copy it manually.");
+    }
+  };
+
   if (phone) {
     const whatsappPhone = phone.replace(/\D/g, "");
     return (
-      <a
-        className="discover-reveal-indicator"
-        href={`https://wa.me/${whatsappPhone}`}
-        target="_blank"
-        rel="noreferrer"
-        aria-label={`Open WhatsApp chat with ${phone}`}
-        title={`Open WhatsApp: ${phone}`}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <WhatsAppMark />
-        <span>{phone}</span>
-      </a>
+      <div className="discover-reveal-actions">
+        <a
+          className="discover-reveal-indicator"
+          href={`https://wa.me/${whatsappPhone}`}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={`Open WhatsApp chat with ${phone}`}
+          title={`Open WhatsApp: ${phone}`}
+          onClick={(event) => event.stopPropagation()}
+        >
+          <WhatsAppMark />
+          <span>{phone}</span>
+        </a>
+        <button
+          type="button"
+          className="discover-copy-contact"
+          aria-label={copied ? "Contact copied" : "Copy revealed contact"}
+          title={copied ? "Copied" : "Copy contact"}
+          onClick={copyContact}
+        >
+          {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
+        </button>
+      </div>
     );
   }
 

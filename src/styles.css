@@ -947,7 +947,10 @@
 .landing-verse blockquote { margin: 0; }
 .landing-verse-arabic { margin: 0; color: #145c48; font-family: "Noto Naskh Arabic", "Amiri", "Scheherazade New", serif; font-size: clamp(28px, 5vw, 42px); line-height: 1.8; }
 .landing-verse-translation { margin: 10px 0; color: #314a3d; font-family: var(--font-display); font-size: clamp(20px, 3vw, 27px); line-height: 1.4; }
-.landing-verse blockquote footer a { color: #68766b; font-size: 12px; text-underline-offset: 3px; }
+.landing-reference-link { display: inline-flex; min-height: 38px; align-items: center; gap: 7px; margin-top: 5px; border: 1px solid #b9cbbb; border-radius: 999px; padding: 0 14px; background: #fffefa; color: #145c48; font-size: 12px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease; }
+.landing-reference-honorific { font-family: "Noto Naskh Arabic", "Amiri", "Scheherazade New", serif; font-size: 14px; text-decoration: none; }
+.landing-reference-link:hover { border-color: #145c48; background: #145c48; color: #fff; }
+.landing-reference-link:focus-visible { outline: 3px solid #a5813d; outline-offset: 3px; }
 .landing-arabic-values { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 24px; }
 .landing-arabic-values > span { display: flex; align-items: center; gap: 9px; border: 1px solid #e0e8dc; border-radius: 999px; padding: 8px 13px; background: rgb(255 255 255 / 70%); }
 .landing-arabic-values b { color: #145c48; font-family: "Noto Naskh Arabic", "Amiri", "Scheherazade New", serif; font-size: 16px; font-weight: 600; }
@@ -955,7 +958,6 @@
 .landing-hadith { margin: 28px 0 0; border-top: 1px solid #e1e7dc; padding: 22px 8px 0; }
 .landing-hadith-arabic { margin: 0; color: #145c48; font-family: "Noto Naskh Arabic", "Amiri", "Scheherazade New", serif; font-size: clamp(20px, 3.8vw, 30px); line-height: 1.8; }
 .landing-hadith > p:not(.landing-hadith-arabic) { margin: 7px 0 10px; color: #425b4c; font-size: 13px; line-height: 1.6; }
-.landing-hadith footer a { color: #68766b; font-size: 11px; text-underline-offset: 3px; }
 .landing-section { width: min(1080px, 100%); margin: 0 auto; padding: 84px clamp(20px, 5vw, 68px); }
 .landing-section-heading { max-width: 640px; margin: 0 auto 35px; text-align: center; }
 .landing-section-kicker { margin: 0 0 12px; font-size: 10px; }

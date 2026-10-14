@@ -165,7 +165,12 @@ function Landing() {
               “And He placed between you affection and mercy.”
             </p>
             <footer>
-              <a href="https://quran.com/30/21" target="_blank" rel="noreferrer">
+              <a
+                className="landing-reference-link"
+                href="https://quran.com/30/21"
+                target="_blank"
+                rel="noreferrer"
+              >
                 Qur’an · Ar-Rum 30:21 <span aria-hidden="true">↗</span>
               </a>
             </footer>
@@ -199,8 +204,20 @@ function Landing() {
             </p>
             <p>“O young people, whoever among you is able to marry should marry.”</p>
             <footer>
-              <a href="https://sunnah.com/bukhari:5066" target="_blank" rel="noreferrer">
-                Prophet Muhammad ﷺ · Sahih al-Bukhari 5066 <span aria-hidden="true">↗</span>
+              <a
+                className="landing-reference-link"
+                href="https://sunnah.com/bukhari:5066"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span>
+                  Prophet Muhammad{" "}
+                  <span className="landing-reference-honorific" lang="ar" dir="rtl">
+                    صلى الله عليه وسلم
+                  </span>{" "}
+                  · Sahih al-Bukhari 5066
+                </span>
+                <span aria-hidden="true">↗</span>
               </a>
             </footer>
           </blockquote>

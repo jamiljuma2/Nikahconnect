@@ -623,11 +623,6 @@ function RegisterForm({ onDone }: { onDone: () => void }) {
           </p>
         </div>
       </div>
-      <p className="register-privacy-note register-field-wide">
-        Your birth date is used to confirm adult eligibility and calculate your displayed age; it is
-        not shown as your birthday. Your phone number is stored separately and shared only if you
-        choose a paid contact reveal.
-      </p>
       <Field label="Password" className="register-field">
         <div onFocus={() => setPwFocused(true)}>
           <PasswordInput

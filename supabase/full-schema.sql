@@ -480,8 +480,15 @@ create policy "Admins delete profiles"
 -- Contacts and photos
 create policy "Owners view own contact info"
   on public.user_contacts for select to authenticated using (user_id = auth.uid());
-create policy "Photos viewable by authenticated"
-  on public.profile_photos for select to authenticated using (true);
+create policy "Members view member profile photos"
+  on public.profile_photos for select to authenticated
+  using (
+    user_id = auth.uid()
+    or exists (
+      select 1 from private.get_public_profiles() member
+      where member.id = profile_photos.user_id
+    )
+  );
 create policy "Users manage own profile photos insert"
   on public.profile_photos for insert to authenticated with check (user_id = auth.uid());
 create policy "Users manage own profile photos update"
@@ -504,17 +511,57 @@ create policy "Only admins delete roles"
   on public.user_roles for delete to authenticated
   using (private.has_role(auth.uid(), 'admin'));
 
+create or replace function public.can_view_incoming_likes()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.subscriptions s
+    join public.payments p on p.id = s.payment_id
+    where s.user_id = auth.uid()
+      and (s.expiry_date is null or s.expiry_date > now())
+      and p.user_id = auth.uid()
+      and p.status = 'success'
+  );
+$$;
+revoke all on function public.can_view_incoming_likes() from public;
+grant execute on function public.can_view_incoming_likes() to authenticated;
+
 -- Social features
-create policy "Users view likes they sent or received"
+create policy "Users view likes between member accounts"
   on public.likes for select to authenticated
-  using (sender_id = auth.uid() or receiver_id = auth.uid());
-create policy "Users create their own likes"
-  on public.likes for insert to authenticated with check (sender_id = auth.uid());
+  using (
+    (sender_id = auth.uid() and not private.has_role(receiver_id, 'admin'::public.app_role))
+    or (
+      receiver_id = auth.uid()
+      and public.can_view_incoming_likes()
+      and not private.has_role(sender_id, 'admin'::public.app_role)
+    )
+  );
+create policy "Users like member profiles"
+  on public.likes for insert to authenticated
+  with check (
+    sender_id = auth.uid()
+    and not private.has_role(receiver_id, 'admin'::public.app_role)
+  );
 create policy "Users remove their own likes"
   on public.likes for delete to authenticated using (sender_id = auth.uid());
-create policy "Users view their matches"
+create policy "Users view member matches"
   on public.matches for select to authenticated
-  using (user_one = auth.uid() or user_two = auth.uid());
+  using (
+    (user_one = auth.uid() or user_two = auth.uid())
+    and (
+      private.has_role(auth.uid(), 'admin'::public.app_role)
+      or (
+        not private.has_role(user_one, 'admin'::public.app_role)
+        and not private.has_role(user_two, 'admin'::public.app_role)
+      )
+    )
+  );
 create policy "Participants or admins delete matches"
   on public.matches for delete to authenticated
   using (user_one = auth.uid() or user_two = auth.uid() or private.has_role(auth.uid(), 'admin'));
@@ -577,9 +624,18 @@ insert into storage.buckets (id, name, public)
 values ('profile-photos', 'profile-photos', true)
 on conflict (id) do nothing;
 
-create policy "Authenticated can view profile photos"
+create policy "Authenticated can view member profile photos"
   on storage.objects for select to authenticated
-  using (bucket_id = 'profile-photos');
+  using (
+    bucket_id = 'profile-photos'
+    and (
+      (storage.foldername(name))[1] = auth.uid()::text
+      or exists (
+        select 1 from private.get_public_profiles() member
+        where member.id::text = (storage.foldername(name))[1]
+      )
+    )
+  );
 create policy "Users upload their own profile photos"
   on storage.objects for insert to authenticated
   with check (bucket_id = 'profile-photos' and (storage.foldername(name))[1] = auth.uid()::text);

@@ -1,13 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
-  BookHeart,
   CircleCheck,
   HeartHandshake,
   LockKeyhole,
-  MessageCircleHeart,
   ShieldCheck,
-  Sparkles,
   UsersRound,
 } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
@@ -221,19 +218,16 @@ function Landing() {
           <div className="landing-steps">
             <Step
               number="01"
-              icon={<BookHeart />}
               title="Share your story"
               detail="Add a profile photo, general location, interests, work, and the relationship intention you choose to share."
             />
             <Step
               number="02"
-              icon={<Sparkles />}
               title="Explore with care"
               detail="Browse member profiles and decide for yourself when you would like to express interest."
             />
             <Step
               number="03"
-              icon={<MessageCircleHeart />}
               title="Talk with intention"
               detail="A mutual interest opens a private conversation. Take time to discuss what matters."
             />
@@ -406,12 +400,10 @@ function LandingValue({
 
 function Step({
   number,
-  icon,
   title,
   detail,
 }: {
   number: string;
-  icon: React.ReactNode;
   title: string;
   detail: string;
 }) {
@@ -419,7 +411,6 @@ function Step({
     <article className="landing-step">
       <div className="landing-step-top">
         <span>{number}</span>
-        {icon}
       </div>
       <h3>{title}</h3>
       <p>{detail}</p>

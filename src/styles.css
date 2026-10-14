@@ -964,15 +964,14 @@
 .landing-section-kicker { margin: 0 0 12px; font-size: 10px; }
 .landing-section-heading h2, .landing-trust h2, .landing-family h2, .landing-final-cta h2 { margin: 0; color: #183d32; font-family: var(--font-display); font-size: clamp(31px, 3.4vw, 45px); font-weight: 600; letter-spacing: -.03em; line-height: 1.1; }
 .landing-section-heading > p:last-child, .landing-trust > div > p:not(.landing-section-kicker), .landing-family-copy > p:not(.landing-section-kicker):not(.landing-feature-status) { color: #68766b; font-size: 14px; line-height: 1.8; }
-.landing-how { max-width: none; background: #fff; }
+.landing-how { max-width: none; background: #f7f7f1; }
 .landing-how > .landing-section-heading, .landing-how > .landing-steps { width: min(944px, 100%); }
 .landing-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 0 auto; }
-.landing-step { padding: 22px; border: 1px solid #e8eadf; border-radius: 18px; background: #fdfcf8; }
-.landing-step-top { display: flex; align-items: center; justify-content: space-between; color: #a58548; }
-.landing-step-top > span { font-size: 11px; font-weight: 700; letter-spacing: .12em; }
-.landing-step-top svg { width: 22px; height: 22px; color: #39725a; stroke-width: 1.6; }
-.landing-step h3 { margin: 24px 0 8px; color: #204334; font-family: var(--font-display); font-size: 24px; font-weight: 600; }
-.landing-step p { margin: 0; color: #6b786e; font-size: 12px; line-height: 1.7; }
+.landing-step { min-height: 190px; padding: 24px; border: 1px solid #dfe5d9; border-radius: 16px; background: #fffefa; box-shadow: 0 8px 24px rgb(28 67 48 / 5%); }
+.landing-step-top { display: flex; align-items: center; color: #765e30; }
+.landing-step-top > span { display: inline-flex; min-width: 34px; height: 27px; align-items: center; justify-content: center; border-radius: 8px; background: #f1ecdd; font-size: 10px; font-weight: 700; letter-spacing: .1em; }
+.landing-step h3 { margin: 20px 0 9px; color: #204334; font-family: var(--font-display); font-size: 23px; font-weight: 600; }
+.landing-step p { margin: 0; color: #586c60; font-size: 13px; line-height: 1.65; }
 .landing-trust { display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: start; gap: 22px; max-width: 920px; }
 .landing-trust-mark { display: grid; width: 58px; height: 58px; place-items: center; border: 1px solid #d9e4d7; border-radius: 18px; background: #edf3ea; color: #145c48; }
 .landing-trust h2 { font-size: clamp(30px, 3vw, 39px); }

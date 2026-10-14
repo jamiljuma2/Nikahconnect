@@ -306,7 +306,6 @@ function ChatPage() {
             <div className="messages-first-note">
               <span aria-hidden="true">✦</span>
               <p>Start by learning what matters to one another.</p>
-              <small>For privacy, messages currently do not allow number characters.</small>
               <div className="messages-starter-list" aria-label="Conversation starter ideas">
                 {[
                   "What are you hoping to build in marriage?",
@@ -438,7 +437,7 @@ function ChatPage() {
             <Send className="size-4" />
           </button>
         </form>
-        <p className="messages-composer-hint">Press Enter to send · No numbers in chat</p>
+        <p className="messages-composer-hint">Press Enter to send · No numbers allowed</p>
       </div>
     </section>
   );

@@ -112,7 +112,6 @@ export function MessagesInbox({ selectedMatchId, onProfileActivity }: {
     <aside className="messages-inbox">
       <div className="messages-inbox-heading">
         <div>
-          <p className="messages-eyebrow">MUTUAL INTEREST</p>
           <h1>Messages</h1>
         </div>
         <span className="messages-total">{inboxQ.data?.length ?? 0}</span>

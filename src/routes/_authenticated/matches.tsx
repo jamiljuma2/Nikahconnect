@@ -20,9 +20,7 @@ function MessagesPage() {
       <MessagesInbox />
       <div className="messages-welcome">
         <div className="messages-welcome-art"><MessageCircleHeart className="size-8" strokeWidth={1.5} /></div>
-        <p className="messages-eyebrow">CONVERSATIONS WITH INTENTION</p>
-        <h2>Get to know one another</h2>
-        <p>Choose a conversation to pick up where you left off, or meet someone new.</p>
+        <h2>Select a conversation</h2>
       </div>
     </section>
   );

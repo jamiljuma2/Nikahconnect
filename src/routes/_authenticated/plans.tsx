@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Check, Infinity as InfIcon, Loader2, ShieldCheck, Smartphone } from "lucide-react";
+import { Check, Loader2, ShieldCheck, Smartphone } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
@@ -82,7 +82,7 @@ function PlansPage() {
           NikahConnect membership
         </span>
         <h1>Choose Premium, on your terms</h1>
-        <p>Choose a 30-day plan from KES 299. Renew manually whenever you choose; payments do not automatically repeat.</p>
+        <p>Choose a 30-day plan from KES 299. Renew only when you choose.</p>
       </motion.div>
 
       <AnimatePresence>
@@ -147,16 +147,6 @@ function PlanCard({ plan }: { plan: (typeof AVAILABLE_PLANS)[number] }) {
           <span>KES</span>
           <strong>{plan.price.toLocaleString("en-KE")}</strong>
         </div>
-        <p className="plans-duration">KES {plan.price} · 30 days · manual renewal</p>
-        <p className="plans-condition">
-          {plan.unlimited ? (
-            <>
-              <InfIcon className="size-4" /> No reveal limit
-            </>
-          ) : (
-            <><Check className="size-4" /> {plan.reveals} contact reveals included</>
-          )}
-        </p>
       </div>
       <ul className="plans-features relative flex-1">
         {plan.features.map((f, i) => (

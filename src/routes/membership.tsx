@@ -19,13 +19,6 @@ export const Route = createFileRoute("/membership")({
       title="Start free. Upgrade when it suits you."
       intro="Creating a profile, browsing, expressing interest, and messaging after a mutual match are free. Premium adds access to incoming interests and contact reveals."
     >
-      <section>
-        <h2>Free profile — KES 0</h2>
-        <p>
-          Create and edit your profile, browse members, express interest, and message after mutual
-          interest.
-        </p>
-      </section>
       <section className="public-info-plan-grid" aria-label="Premium membership plans">
         {AVAILABLE_PLANS.map((plan) => (
           <article className="public-info-plan" key={plan.id}>

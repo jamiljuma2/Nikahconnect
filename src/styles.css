@@ -425,8 +425,6 @@
 .likes-heading { display: flex; align-items: center; gap: 14px; margin: 8px 0 24px; }
 .likes-heading-mark { display: grid; width: 48px; height: 48px; flex: 0 0 auto; place-items: center; border-radius: 16px; background: color-mix(in oklab, var(--color-primary) 13%, white); color: var(--color-primary); }
 .likes-heading h1 { margin: 2px 0 0; color: var(--color-foreground); font-family: var(--font-sans); font-size: 26px; font-weight: 700; letter-spacing: -.04em; }
-.likes-kicker { margin: 0; color: var(--color-primary); font-size: 9px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
-.likes-description { margin: 4px 0 0; color: var(--color-muted-foreground); font-size: 12px; }
 .likes-total { display: grid; min-width: 32px; height: 32px; place-items: center; margin-left: auto; border-radius: 999px; padding: 0 9px; background: var(--color-primary); color: var(--color-primary-foreground); font-size: 12px; font-weight: 700; }
 .likes-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .likes-card { overflow: hidden; border: 1px solid color-mix(in oklab, var(--color-border) 75%, white); border-radius: 20px; background: var(--color-card); box-shadow: 0 12px 28px rgb(61 34 44 / 6%); transition: transform 180ms ease, box-shadow 180ms ease; }
@@ -459,7 +457,6 @@
   .likes-heading { gap: 10px; margin-bottom: 16px; }
   .likes-heading-mark { width: 40px; height: 40px; border-radius: 13px; }
   .likes-heading h1 { font-size: 23px; }
-  .likes-description { max-width: 260px; font-size: 10px; }
   .likes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .likes-card { border-radius: 15px; }
   .likes-card-photo { aspect-ratio: .9; }
@@ -1303,9 +1300,6 @@
 .plans-price { display: flex; align-items: baseline; gap: 7px; margin-top: 19px; }
 .plans-price span { color: #aeb2d5; font-size: 12px; font-weight: 700; letter-spacing: .1em; }
 .plans-price strong { color: white; font-size: 45px; font-weight: 800; letter-spacing: -.06em; line-height: 1; }
-.plans-duration { margin: 9px 0 0; color: #a7afd2; font-size: 11px; }
-.plans-condition { display: flex; align-items: center; gap: 7px; margin: 17px 0 0; color: #e4e5ff; font-size: 12px; font-weight: 600; }
-.plans-condition svg { color: #9b8dff; }
 
 .plans-features { margin: 27px 0 0; padding: 21px 0 0; border-top: 1px solid rgb(155 163 216 / 15%); }
 .plans-features li { margin-top: 13px; color: #c3c8e4; font-size: 12px; line-height: 1.4; }
@@ -1460,7 +1454,6 @@
 .messages-inbox { display: flex; min-width: 0; flex-direction: column; border-right: 1px solid #e7e9f1; background: #fbfbfe; }
 .messages-inbox-heading { display: flex; align-items: center; justify-content: space-between; padding: 25px 22px 18px; }
 .messages-inbox-heading h1 { margin: 3px 0 0; color: #292a40; font-family: var(--font-display); font-size: 29px; font-weight: 650; letter-spacing: -.035em; }
-.messages-eyebrow { margin: 0; color: #999bb0; font-size: 9px; font-weight: 750; letter-spacing: .14em; }
 .messages-total { display: grid; min-width: 28px; height: 28px; place-items: center; border-radius: 999px; background: #f0effa; color: #7a78a7; font-size: 11px; font-weight: 700; }
 .messages-search { display: flex; height: 42px; align-items: center; gap: 10px; margin: 0 18px 15px; padding: 0 13px; border: 1px solid #e9eaf1; border-radius: 13px; background: #f4f5fa; color: #a1a3b3; transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease; }
 .messages-search:focus-within { border-color: #b7b4df; background: white; box-shadow: 0 0 0 3px rgb(145 139 201 / 12%); }
@@ -1640,7 +1633,6 @@
 /* Account settings */
 .settings-page { max-width: 1180px; margin: 0 auto; padding: 28px 0 48px; }
 .settings-page-heading { margin-bottom: 22px; }
-.settings-page-heading .profile-kicker { margin: 0 0 7px; color: #b36b70; font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
 .settings-page-heading h1 { margin: 0; color: #20283a; font-family: var(--font-sans); font-size: clamp(25px, 3vw, 31px); font-weight: 700; letter-spacing: -.04em; line-height: 1.2; }
 .settings-page-heading > p:last-child { margin: 7px 0 0; color: #778095; font-size: 13px; }
 .settings-mobile-menu { display: none; }

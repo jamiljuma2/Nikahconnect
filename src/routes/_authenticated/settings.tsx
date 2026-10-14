@@ -310,13 +310,8 @@ function SettingsPage() {
   return (
     <div className={`settings-page ${isSetup ? "settings-page-setup" : ""}`}>
       <div className="settings-page-heading">
-        <p className="profile-kicker">{isSetup ? "Welcome to NikahConnect" : "Your account"}</p>
         <h1>{isSetup ? "Complete your profile" : "Edit profile"}</h1>
-        <p>
-          {isSetup
-            ? "Add a few details so people can get to know you."
-            : "Manage your profile details and account."}
-        </p>
+        {isSetup && <p>Add a few details so people can get to know you.</p>}
       </div>
 
       <div className="settings-mobile-menu">
@@ -391,7 +386,7 @@ function SettingsPage() {
                 <p className="profile-section-hint">
                   {isSetup
                     ? "Add a clear photo to finish setting up your profile. JPG, PNG, WebP, or AVIF · up to 5 MB."
-                    : "A warm first impression goes a long way. JPG, PNG, WebP, or AVIF · up to 5 MB."}
+                    : "JPG, PNG, WebP, or AVIF · up to 5 MB."}
                 </p>
               </div>
               <div className="profile-photo-upload-area">
@@ -464,7 +459,6 @@ function SettingsPage() {
                 <p id="basic-info-heading" className="profile-section-label">
                   Profile
                 </p>
-                <p className="profile-section-hint">The basics people notice first.</p>
               </div>
               <div className="profile-fields profile-fields-three">
                 <Field label="Full name" id="full-name">
@@ -503,7 +497,6 @@ function SettingsPage() {
                 <p id="about-heading" className="profile-section-label">
                   About you
                 </p>
-                <p className="profile-section-hint">Share the details that make you, you.</p>
               </div>
               <div className="profile-fields settings-about-fields">
                 <Field label="Marriage intention" id="relationship-goal">

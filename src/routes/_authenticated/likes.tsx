@@ -109,9 +109,7 @@ function LikesPage() {
       <header className="likes-heading">
         <div className="likes-heading-mark"><Heart size={21} fill="currentColor" /></div>
         <div>
-          <p className="likes-kicker">Your admirers</p>
           <h1>Likes you</h1>
-          <p className="likes-description">See who’s interested and make the first move when it feels right.</p>
         </div>
         {canSeeLikes && <span className="likes-total">{likesQ.data?.length ?? 0}</span>}
       </header>
@@ -140,8 +138,8 @@ function LikesPage() {
       ) : !likesQ.data?.length ? (
         <div className="likes-empty-state">
           <span><Sparkles size={22} /></span>
-          <h2>Your next connection could be around the corner.</h2>
-          <p>When someone likes your profile, you’ll see them here.</p>
+          <h2>No likes yet</h2>
+          <p>New likes will appear here.</p>
           <Link to="/discover">Explore profiles</Link>
         </div>
       ) : (

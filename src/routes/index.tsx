@@ -210,10 +210,6 @@ function Landing() {
           <div className="landing-section-heading">
             <p className="landing-section-kicker">A thoughtful way to meet</p>
             <h2>Begin with what matters to you.</h2>
-            <p>
-              Build a profile around your intentions, get to know members through mutual interest,
-              and decide together how to continue.
-            </p>
           </div>
           <div className="landing-steps">
             <Step
@@ -309,31 +305,10 @@ function Landing() {
               </p>
             </details>
             <details>
-              <summary>Is membership automatically renewed?</summary>
-              <p>
-                Premium lasts 30 days. You choose whether to pay again; payments do not
-                automatically renew or charge your M-Pesa account.
-              </p>
-            </details>
-            <details>
-              <summary>Are profiles or identities verified?</summary>
-              <p>
-                Identity and phone verification are not currently offered. We do not label members
-                as identity-verified.
-              </p>
-            </details>
-            <details>
               <summary>Does NikahConnect calculate a compatibility score?</summary>
               <p>
                 No compatibility score is currently calculated. Members review the profile details
                 shared on the platform and decide what feels compatible to them.
-              </p>
-            </details>
-            <details>
-              <summary>Can a wali join a conversation?</summary>
-              <p>
-                In-app wali or chaperone participation is not available yet. Members may involve
-                family outside the platform at their discretion.
               </p>
             </details>
             <details>

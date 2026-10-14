@@ -235,6 +235,68 @@ grant all on public.user_consents to service_role;
 -- ============================================================
 -- Application functions and triggers
 -- ============================================================
+create or replace function public.admin_search_members(
+  search_term text,
+  page_size integer,
+  page_offset integer
+)
+returns table (
+  id uuid,
+  full_name text,
+  avatar_url text,
+  location text,
+  suspended boolean,
+  deactivated_at timestamptz,
+  created_at timestamptz,
+  email text,
+  is_admin boolean,
+  total_count bigint
+)
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  with filtered as (
+    select
+      p.id,
+      p.full_name,
+      p.avatar_url,
+      p.location,
+      p.suspended,
+      p.deactivated_at,
+      p.created_at,
+      coalesce(c.email, '') as email,
+      exists (
+        select 1 from public.user_roles r
+        where r.user_id = p.id and r.role = 'admin'
+      ) as is_admin
+    from public.profiles p
+    left join public.user_contacts c on c.user_id = p.id
+    where search_term = ''
+      or p.full_name ilike '%' || search_term || '%'
+      or p.location ilike '%' || search_term || '%'
+      or c.email ilike '%' || search_term || '%'
+  )
+  select
+    f.id,
+    f.full_name,
+    f.avatar_url,
+    f.location,
+    f.suspended,
+    f.deactivated_at,
+    f.created_at,
+    f.email,
+    f.is_admin,
+    count(*) over () as total_count
+  from filtered f
+  order by f.created_at desc, f.id
+  limit least(greatest(page_size, 1), 50)
+  offset greatest(page_offset, 0);
+$$;
+revoke all on function public.admin_search_members(text, integer, integer) from public, anon, authenticated;
+grant execute on function public.admin_search_members(text, integer, integer) to service_role;
+
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql security definer set search_path = public

@@ -461,6 +461,7 @@ export type Database = {
       admin_search_members: {
         Args: { page_offset: number; page_size: number; search_term: string }
         Returns: {
+          avatar_url: string | null
           created_at: string
           deactivated_at: string | null
           email: string

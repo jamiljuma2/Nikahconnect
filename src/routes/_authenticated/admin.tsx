@@ -17,6 +17,7 @@ import { useAuth } from "@/lib/use-auth";
 import { isCurrentUserAdmin } from "@/lib/admin-route-guard";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { notifyUserError } from "@/lib/user-facing-errors";
 
 export const Route = createFileRoute("/_authenticated/admin")({
@@ -179,7 +180,10 @@ function AdminPage() {
         <div className="admin-member-list" aria-label="Members and roles">
           <div className="admin-member-list-head" aria-hidden="true"><span>Member</span><span>Role</span><span>Account</span><span /></div>
           {usersQ.isError ? (
-            <div className="admin-table-message" role="alert">Members couldn’t load. <button type="button" onClick={() => void usersQ.refetch()}>Try again</button></div>
+            <div className="admin-table-message" role="alert">
+              <span>Members couldn’t load. {usersQ.error instanceof Error ? usersQ.error.message : "Please try again."}</span>{" "}
+              <button type="button" onClick={() => void usersQ.refetch()}>Try again</button>
+            </div>
           ) : usersQ.isLoading ? (
             <div className="admin-member-skeletons" aria-label="Loading members">{Array.from({ length: 5 }, (_, index) => <div key={index} />)}</div>
           ) : !usersQ.data?.users.length ? (
@@ -189,7 +193,13 @@ function AdminPage() {
                 const isSelf = u.id === user?.id;
                 return (
                   <div className="admin-member-row" key={u.id}>
-                    <div className="admin-member-identity"><span className="admin-member-avatar">{u.full_name?.trim().charAt(0).toUpperCase() || "?"}</span><span><strong>{u.full_name || "Unnamed member"}</strong><small>{u.email || u.location || "No contact details"}</small></span></div>
+                    <div className="admin-member-identity">
+                      <Avatar className="admin-member-avatar">
+                        {u.avatar_url && <AvatarImage src={u.avatar_url} alt={`${u.full_name || "Member"} profile`} />}
+                        <AvatarFallback>{u.full_name?.trim().charAt(0).toUpperCase() || "?"}</AvatarFallback>
+                      </Avatar>
+                      <span><strong>{u.full_name || "Unnamed member"}</strong><small>{u.email || u.location || "No contact details"}</small></span>
+                    </div>
                     <div>
                       <span className={`admin-role-badge ${u.is_admin ? "is-admin" : ""}`}>
                         {u.is_admin ? "Admin" : "Member"}

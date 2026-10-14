@@ -70,7 +70,12 @@ export const listUsersForAdmin = createServerFn({ method: "GET" })
       page_size: data.pageSize,
       page_offset: data.page * data.pageSize,
     });
-    if (error) throw new Error(error.message);
+    if (error) {
+      if (error.code === "PGRST202" || error.code === "42883") {
+        throw new Error("Member search is missing from the database. Apply supabase/migrations/20261008130000_admin_member_search.sql, then reload this page.");
+      }
+      throw new Error(error.message);
+    }
     const users = (rows ?? []).map(({ total_count: _totalCount, ...user }) => user);
     return { users, total: Number(rows?.[0]?.total_count ?? 0), page: data.page, pageSize: data.pageSize };
   });
